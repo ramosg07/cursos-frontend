@@ -14,7 +14,6 @@ import { Moon, Sun, Laptop } from "lucide-react";
 export function ThemeSwitcher() {
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
-  console.warn("theme", theme);
 
   useEffect(() => {
     //eslint-disable-next-line react-hooks/set-state-in-effect
