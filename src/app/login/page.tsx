@@ -14,7 +14,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
 import * as z from "zod";
+import { print } from '@/lib/print'
+import { MessageInterpreter } from "@/lib/messageInterpreter";
+import { useAuth } from "@/contexts/AuthProvider";
 
 const formSchema = z.object({
   usuario: z.string().min(3, {
@@ -26,6 +30,7 @@ const formSchema = z.object({
 });
 
 export default function Login() {
+  const { login } = useAuth()
   const { theme } = useTheme();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
@@ -41,12 +46,12 @@ export default function Login() {
     setIsLoggingIn(true);
     console.warn({ values });
     try {
-      // await login(values.usuario, values.contrasena);
+      await login(values.usuario, values.contrasena);
     } catch (error) {
-      // print("Login error:", error);
-      // toast.error("Error de inicio de sesión", {
-      //   description: `${MessageInterpreter(error)}`,
-      // });
+      print("Login error:", error);
+      toast.error("Error de inicio de sesión", {
+        description: `${MessageInterpreter(error)}`,
+      });
     } finally {
       setIsLoggingIn(false);
     }
