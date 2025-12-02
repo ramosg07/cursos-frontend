@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Loader } from "lucide-react";
 import { Suspense } from "react";
+import ReactQueryProvider from "@/contexts/ReactQueryProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,24 +31,26 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Suspense
-            fallback={
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
-                <div className="animate-fade-in">
-                  <Loader className="h-10 w-10 animate-spin" />
-                </div>
-              </div>
-            }
+        <ReactQueryProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
           >
-            {children}
-          </Suspense>
-        </ThemeProvider>
+            <Suspense
+              fallback={
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
+                  <div className="animate-fade-in">
+                    <Loader className="h-10 w-10 animate-spin" />
+                  </div>
+                </div>
+              }
+            >
+              {children}
+            </Suspense>
+          </ThemeProvider>
+        </ReactQueryProvider>
       </body>
     </html>
   );
