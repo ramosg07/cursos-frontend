@@ -1,5 +1,6 @@
 import { Constants } from "@/config/Constants";
 import { IZXCVBNResult } from "zxcvbn-typescript";
+import packageJson from '../../package.json'
 
 export const siteName = () => {
   return Constants.siteName ?? "";
@@ -15,3 +16,17 @@ export const securityPassword = async (
   const zxcvbnLib = (await import("zxcvbn-typescript")).default;
   return zxcvbnLib(pass);
 };
+
+export const capitalizeFirstLetter = (string: string) =>
+  string
+    .split("")
+    .map((char, index) => (index === 0 ? char.toUpperCase() : char))
+    .join("");
+
+export const delay = (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+export const versionNumber = () => {
+  return packageJson.version
+}
