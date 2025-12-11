@@ -10,8 +10,8 @@ import {
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ScrollArea } from '@/components/ui/scroll-area'
-// import { cn } from '@/lib/utils'
-// import DynamicIcon from './Icon'
+import { cn } from '@/lib/utils'
+import DynamicIcon from './Icon'
 
 export function NavItem({
   data = [],
@@ -52,14 +52,14 @@ export function NavItem({
                       tooltip={item.name}
                     >
                       <Link id={item.href} href={item.href}>
-                        {/* <DynamicIcon
+                        <DynamicIcon
                           name={item.iconName}
                           size="20"
                           className={cn(
                             'mr-3',
                             isActive ? 'text-primary' : 'text-foreground'
                           )}
-                        /> */}
+                        />
                         <span className="text-base font-semibold">
                           {item.name}
                         </span>
