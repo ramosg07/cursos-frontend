@@ -6,6 +6,7 @@ import { Loader } from "lucide-react";
 import { Suspense } from "react";
 import ReactQueryProvider from "@/contexts/ReactQueryProvider";
 import { AuthProvider } from "@/contexts/AuthProvider";
+import { LoadingProvider } from "@/contexts/LoadingProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,19 +40,21 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <AuthProvider>
-              <Suspense
-                fallback={
-                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
-                    <div className="animate-fade-in">
-                      <Loader className="h-10 w-10 animate-spin" />
+            <LoadingProvider>
+              <AuthProvider>
+                <Suspense
+                  fallback={
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
+                      <div className="animate-fade-in">
+                        <Loader className="h-10 w-10 animate-spin" />
+                      </div>
                     </div>
-                  </div>
-                }
-              >
-                {children}
-              </Suspense>
-            </AuthProvider>
+                  }
+                >
+                  {children}
+                </Suspense>
+              </AuthProvider>
+            </LoadingProvider>
           </ThemeProvider>
         </ReactQueryProvider>
       </body>
