@@ -1,6 +1,6 @@
 import { Constants } from "@/config/Constants";
 import { IZXCVBNResult } from "zxcvbn-typescript";
-import packageJson from '../../package.json'
+import packageJson from "../../package.json";
 
 export const siteName = () => {
   return Constants.siteName ?? "";
@@ -28,5 +28,13 @@ export const delay = (ms: number) => {
 };
 
 export const versionNumber = () => {
-  return packageJson.version
-}
+  return packageJson.version;
+};
+
+export const nombrePropio = (text: string) =>
+  text
+    .toLowerCase()
+    .trim()
+    .split(/\s+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
