@@ -3,7 +3,16 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthProvider";
-import { Cake, Camera, Contact, Mail, Phone, Shield, User } from "lucide-react";
+import {
+  Cake,
+  Camera,
+  Contact,
+  Mail,
+  Phone,
+  Settings,
+  Shield,
+  User,
+} from "lucide-react";
 import dayjs from "dayjs";
 import { nombrePropio } from "@/lib/utilities";
 import { Badge } from "@/components/ui/badge";
@@ -13,11 +22,22 @@ import { Constants } from "@/config/Constants";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import ProfilePhoto from "./ProfilePhoto";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import EditProfile from "./EditProfile";
+import ChangePassword from "./ChangePassword";
 
 const Detail = () => {
   const { user } = useAuth();
   const [isPhotoDialogOpen, setIsPhotoDialogOpen] = useState(false);
   const [avatarKey, setAvatarKey] = useState(0);
+  const [editarPerfil, setEditarPerfil] = useState(false);
+  const [cambioPassword, setCambioPassword] = useState(false);
 
   useEffect(() => {
     // Forzar la actualización del avatar cuando cambie la URL de la foto
@@ -62,6 +82,27 @@ const Detail = () => {
         <div className="relative h-50 w-full">
           <div className="relative isolate h-full w-full object-cover overflow-hidden ">
             <div className="absolute inset-0 -z-10 bg-[radial-gradient(45rem_50rem_at_top,var(--color-indigo-500),transparent)] opacity-10" />
+            {/* Menu de opciones para edicion y cambio de contrasena */}
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  size="sm"
+                  className="absolute top-4 right-4 rounded-full"
+                >
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-40" align="end">
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onSelect={() => setEditarPerfil(true)}>
+                    Editar Perfil
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => setCambioPassword(true)}>
+                    Cambiar Contraseña
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           <div className="absolute -bottom-9 left-6 flex justify-between items-center gap-3">
             <div className="relative">
@@ -238,9 +279,20 @@ const Detail = () => {
           </div>
         </CardContent>
       </Card>
+      {/* Modal de actualización de foto de perfil */}
       <ProfilePhoto
         isOpen={isPhotoDialogOpen}
         onClose={() => setIsPhotoDialogOpen(false)}
+      />
+      {/* Modal de edición de perfil */}
+      <EditProfile
+        isOpen={editarPerfil}
+        onClose={() => setEditarPerfil(false)}
+      />
+      {/* Modal de edición de cambio password */}
+      <ChangePassword
+        isOpen={cambioPassword}
+        onClose={() => setCambioPassword(false)}
       />
     </div>
   );
