@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import ReactQueryProvider from "@/contexts/ReactQueryProvider";
 import { AuthProvider } from "@/contexts/AuthProvider";
 import { LoadingProvider } from "@/contexts/LoadingProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -55,6 +56,12 @@ export default function RootLayout({
                 </Suspense>
               </AuthProvider>
             </LoadingProvider>
+            <Toaster
+              position={"top-center"}
+              richColors
+              closeButton
+              toastOptions={{}}
+            />
           </ThemeProvider>
         </ReactQueryProvider>
       </body>
