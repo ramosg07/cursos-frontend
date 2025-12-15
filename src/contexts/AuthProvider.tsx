@@ -32,6 +32,7 @@ interface AuthContextType {
   updateProfile: () => Promise<void>;
   checkPermission: (obj: string, act: string) => Promise<boolean>;
   isAuthLoading: boolean;
+  sessionRequest: <T>(config: AxiosRequestConfig) => Promise<AxiosResponse<T> | undefined>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -321,6 +322,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         checkPermission,
         fetchUserProfile,
         updateProfile,
+        sessionRequest,
       }}
     >
       {children}

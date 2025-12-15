@@ -12,9 +12,11 @@ import Image from "next/image";
 import { Constants } from "@/config/Constants";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import ProfilePhoto from "./ProfilePhoto";
 
 const Detail = () => {
   const { user } = useAuth();
+  const [isPhotoDialogOpen, setIsPhotoDialogOpen] = useState(false);
   const [avatarKey, setAvatarKey] = useState(0);
 
   useEffect(() => {
@@ -56,13 +58,11 @@ const Detail = () => {
   return (
     <div className="container mx-auto py-6 xl:px-30 space-y-5">
       <h1 className="text-2xl font-bold">Perfil de usuario</h1>
-      {/* TODO: Mosrar ruta del perfil:  Dashboard > Perfil, para la navegación */}
       <Card className="p-0 overflow-hidden rounded-2xl gap-11 sm:gap-3">
         <div className="relative h-50 w-full">
-          <img
-            src="https://images.unsplash.com/photo-1522199710521-72d69614c702"
-            className="h-full w-full object-cover"
-          />
+          <div className="relative isolate h-full w-full object-cover overflow-hidden ">
+            <div className="absolute inset-0 -z-10 bg-[radial-gradient(45rem_50rem_at_top,var(--color-indigo-500),transparent)] opacity-10" />
+          </div>
           <div className="absolute -bottom-9 left-6 flex justify-between items-center gap-3">
             <div className="relative">
               <Avatar className="h-25 w-25 sm:h-30 sm:w-30">
@@ -85,13 +85,12 @@ const Detail = () => {
               <Button
                 size="sm"
                 className="absolute bottom-0 right-0 rounded-full"
-                // onClick={() => setIsPhotoDialogOpen(true)}
+                onClick={() => setIsPhotoDialogOpen(true)}
               >
                 <Camera className="h-4 w-4" />
               </Button>
             </div>
-
-            <div className="text-white">
+            <div>
               <h2 className="text-lg sm:text-2xl font-bold">
                 {nombrePropio(
                   `${user.persona?.nombres} ${user.persona?.primerApellido} ${
@@ -105,7 +104,7 @@ const Detail = () => {
         </div>
         <div className="px-6 pb-2">
           <nav className="flex justify-end gap-6 text-sm">
-            <button className="flex items-center gap-2 pb-2 border-b-2 border-white">
+            <button className="flex items-center gap-2 pb-2 border-b-2">
               <User size={16} /> Perfil
             </button>
             {/* <button className="flex items-center gap-2 pb-2 opacity-70 hover:opacity-100">
@@ -239,10 +238,12 @@ const Detail = () => {
           </div>
         </CardContent>
       </Card>
+      <ProfilePhoto
+        isOpen={isPhotoDialogOpen}
+        onClose={() => setIsPhotoDialogOpen(false)}
+      />
     </div>
   );
 };
 
 export default Detail;
-
-// mb-6 text-2xl font-bold
