@@ -33,6 +33,7 @@ interface AuthContextType {
   checkPermission: (obj: string, act: string) => Promise<boolean>;
   isAuthLoading: boolean;
   sessionRequest: <T>(config: AxiosRequestConfig) => Promise<AxiosResponse<T> | undefined>;
+  changeRole: (idRol: string) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -304,6 +305,35 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return await enforcer.enforce(selectedRole?.rol, obj, act);
   };
 
+  const changeRole = async (idRol: string) => {
+    setIsAuthLoading(true)
+    showLoading('Cambiando de rol...')
+    await delay(1000)
+    try {
+      const data = await sessionRequestRef.current<any>({
+        url: '/cambiarRol',
+        method: 'patch',
+        data: {
+          idRol,
+        },
+      })
+
+      const { access_token, roles, ...rest } = data?.data.datos
+      const userData: User = { token: access_token, roles, idRol, ...rest }
+
+      setUser(userData)
+      guardarCookie('auth', access_token, { path: '/' })
+      router.replace('/admin/home')
+    } catch (error) {
+      print('Error changing role:', error)
+      throw error
+    } finally {
+      setIsAuthLoading(false)
+      hideLoading()
+    }
+  }
+
+
   useEffect(() => {
     const token = leerCookie("auth");
     if (token && !isAuthLoading && !user) {
@@ -323,6 +353,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
         fetchUserProfile,
         updateProfile,
         sessionRequest,
+        changeRole,
       }}
     >
       {children}

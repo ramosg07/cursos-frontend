@@ -7,11 +7,12 @@ import UserMenu from "./HeaderAdmin/UserMenu";
 import { Tooltip, TooltipContent, TooltipProvider } from "./ui/tooltip";
 import { SidebarTrigger } from "./ui/sidebar";
 import { Separator } from "./ui/separator";
+import { print } from "@/lib/print";
 
 const HeaderAdmin = () => {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
-  const { logout, user } = useAuth();
+  const { logout, user, changeRole } = useAuth();
 
   const confirmLogout = async () => {
     setShowLogoutDialog(false);
@@ -39,6 +40,14 @@ const HeaderAdmin = () => {
     return "";
   };
 
+  const handleRoleChange = async (idRol: string) => {
+    try {
+      await changeRole(idRol);
+    } catch (error) {
+      print("Error changing role:", error);
+    }
+  };
+
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b bg-background/80 shadow-xs backdrop-blur-xs">
@@ -61,7 +70,7 @@ const HeaderAdmin = () => {
             <ThemeSwitcher />
             <UserMenu
               user={user}
-              // handleRoleChange={handleRoleChange}
+              handleRoleChange={handleRoleChange}
               handleLogout={handleLogout}
               getInitials={inicializaDatos}
             />

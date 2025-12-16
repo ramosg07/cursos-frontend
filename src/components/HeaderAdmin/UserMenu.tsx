@@ -24,13 +24,14 @@ interface UserMenuProps {
   user?: User | null;
   getInitials: () => string;
   handleLogout: () => void;
-
+  handleRoleChange: (idRol: string) => void
 }
 
 const UserMenu: React.FC<UserMenuProps> = ({
   user,
   getInitials,
   handleLogout,
+  handleRoleChange
 }) => {
   const { setTheme, theme } = useTheme();
   const router = useRouter();
@@ -121,7 +122,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
         <DropdownMenuLabel>Roles</DropdownMenuLabel>
         <DropdownMenuRadioGroup
           value={user?.idRol}
-          // onValueChange={handleRoleChange}
+          onValueChange={handleRoleChange}
         >
           {user?.roles?.map((role) => (
             <DropdownMenuRadioItem
