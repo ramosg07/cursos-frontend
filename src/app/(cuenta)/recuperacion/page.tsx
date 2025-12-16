@@ -4,13 +4,13 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { siteName } from "@/lib/utilities";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import EmailStep from "../components/EmailStep";
+import EmailStep from "./components/EmailStep";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/lib/useApi";
 import { toast } from "sonner";
 import { MessageInterpreter } from "@/lib/messageInterpreter";
-import PasswordStep from "../components/PasswordStep";
-import ResponseStep from "../components/ResponseStep";
+import PasswordStep from "./components/PasswordStep";
+import ResponseStep from "./components/ResponseStep";
 
 type Step = "email" | "password" | "response";
 
