@@ -20,7 +20,7 @@ export default function DesbloqueoPage() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
 
-  const [step, setStep] = useState<Step>("response");
+  const [step, setStep] = useState<Step>("email");
   const [code, setCode] = useState<string | null>(null);
 
   const codigoDesbloqueo = searchParams.get("q");
@@ -88,14 +88,9 @@ export default function DesbloqueoPage() {
     },
   });
 
-  const { data: responseData, isSuccess } = useQuery({
-    queryKey: ["recoveryResponse"],
-    queryFn: async () => {
-      // TODO: implementar
-      return { data: {} };
-    },
-    enabled: step === "response",
-  });
+  const responseData: any = queryClient.getQueryData(["recoveryResponse"]);
+  const isSuccess = !!responseData;
+
 
   const onSubmitEmail = (email: string) => {
     emailMutation.mutate(email);
@@ -144,7 +139,7 @@ export default function DesbloqueoPage() {
       case "response":
         return (
           <ResponseStep
-            message={MessageInterpreter(responseData)}
+            message={MessageInterpreter(responseData.data)}
             isSuccess={isSuccess}
             onRedirect={() => router.push("/login")}
           />
@@ -158,7 +153,7 @@ export default function DesbloqueoPage() {
       <div className="container flex min-h-screen min-w-screen items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
         <Card className="w-full max-w-md">
           <CardContent>{renderContent()}</CardContent>
-          <CardFooter>
+          <CardFooter className="px-12">
             <Button
               variant="outline"
               className="w-full"

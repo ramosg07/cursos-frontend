@@ -24,7 +24,7 @@ export default function ResponseStep({
           Información sobre tu solicitud.
         </CardDescription>
       </CardHeader>
-      <div className="text-center mt-4">
+      <div className="text-center mt-4 px-6">
         {isSuccess ? (
           <CheckCircle className="mx-auto h-12 w-12 text-green-500" />
         ) : (
