@@ -1,0 +1,21 @@
+import { ColumnDef, SortingState } from "@tanstack/react-table";
+import { FilterType } from "./filter";
+
+export interface ToolBarConfigType {
+  showSearch?: boolean;
+  showRefresh?: boolean;
+  showColumns?: boolean;
+  components?: React.ReactNode[];
+}
+
+export interface DataTableProps<TData, TValue> {
+  columns: ColumnDef<TData, TValue>[];
+  filters?: FilterType[];
+  apiUrl: string;
+  defaultSorting?: SortingState;
+  toolBarConfig?: ToolBarConfigType;
+
+  titulo: string;
+  update: boolean;
+  onResetUpdate: () => void;
+}
