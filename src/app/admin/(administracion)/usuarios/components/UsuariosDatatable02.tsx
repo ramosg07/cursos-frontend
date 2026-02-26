@@ -10,10 +10,12 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Constants } from "@/config/Constants";
 import { FilterType } from "@/components/data-table/types/filter";
-import { Edit, Plus } from "lucide-react";
+import { Edit, Plus, Power, PowerOff } from "lucide-react";
 import { AgregarEditarUsuarioModal } from "./AgregarEditarUsuarioModa";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthProvider";
+import { Switch } from "@/components/ui/switch";
+import { ActivarInactivarModal } from "./ActivarInactivarModal";
 
 export function UsuariosDatatable02() {
   const [updateTable, setUpdateTable] = useState(false);
@@ -22,11 +24,19 @@ export function UsuariosDatatable02() {
   const [agregarEditarModalOpen, setAgregarEditarModalOpen] =
     useState<boolean>(false);
 
+  const [activarInactivarModalOpen, setActivarInactivarModalOpen] =
+    useState<boolean>(false);
+
   const { sessionRequest } = useAuth();
 
   const handleAgregarEditarUsuario = (usuario: Usuario | null) => {
     setSelectUser(usuario);
     setAgregarEditarModalOpen(true);
+  };
+
+  const handleActivarInactivarUsuario = async (usuario: Usuario) => {
+    setSelectUser(usuario);
+    setActivarInactivarModalOpen(true);
   };
 
   const columns: ColumnDef<Usuario>[] = [
@@ -137,6 +147,13 @@ export function UsuariosDatatable02() {
             >
               <Edit className="h-4 w-4" />
             </Button>
+            <Switch
+              id="Activar"
+              defaultChecked={row.original?.estado === "ACTIVO"}
+              onCheckedChange={() => {
+                handleActivarInactivarUsuario(row.original);
+              }}
+            />
           </div>
         );
       },
@@ -186,7 +203,8 @@ export function UsuariosDatatable02() {
         toolBarConfig={{
           components: [
             <Button
-              title="Editar"
+              key={'Agregar'}
+              title="Agregar"
               variant="outline"
               size={"icon"}
               onClick={() => handleAgregarEditarUsuario(null)}
@@ -206,6 +224,14 @@ export function UsuariosDatatable02() {
           roles={rolesData ?? []}
           onSuccess={updateDataTable}
           onClose={() => setAgregarEditarModalOpen(false)}
+        />
+      )}
+      {activarInactivarModalOpen && (
+        <ActivarInactivarModal
+          isOpen={activarInactivarModalOpen}
+          onClose={() => setActivarInactivarModalOpen(false)}
+          onSuccess={updateDataTable}
+          usuario={selectUser}
         />
       )}
     </div>
