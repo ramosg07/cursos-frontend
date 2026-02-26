@@ -4,13 +4,16 @@ import { DataTable } from "@/components/data-table/data-table";
 import { SortableHeader } from "@/components/data-table/sortable-header";
 import { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
-import { Usuario } from "../types";
+import { RolResponse, Usuario } from "../types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Constants } from "@/config/Constants";
 import { FilterType } from "@/components/data-table/types/filter";
-import { Edit } from "lucide-react";
+import { Edit, Plus } from "lucide-react";
+import { AgregarEditarUsuarioModal } from "./AgregarEditarUsuarioModa";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthProvider";
 
 export function UsuariosDatatable02() {
   const [updateTable, setUpdateTable] = useState(false);
@@ -18,6 +21,8 @@ export function UsuariosDatatable02() {
   const [selectUser, setSelectUser] = useState<Usuario | null>(null);
   const [agregarEditarModalOpen, setAgregarEditarModalOpen] =
     useState<boolean>(false);
+
+  const { sessionRequest } = useAuth();
 
   const handleAgregarEditarUsuario = (usuario: Usuario | null) => {
     setSelectUser(usuario);
@@ -35,12 +40,17 @@ export function UsuariosDatatable02() {
           <div className="flex justify-center items-center">
             <Avatar className="h-10 w-10">
               <AvatarImage
-                src={`${Constants.baseUrl}${row.original.urlFoto}`}
-                alt={row.original.persona.nombres}
+                src={
+                  row.original.urlFoto
+                    ? `${Constants.baseUrl}${row.original.urlFoto}`
+                    : undefined
+                }
+                alt={row.original.persona?.nombres || "Avatar"}
               />
               <AvatarFallback>
-                {row.original.persona.nombres.substring(0, 1) +
-                  row.original.persona.primerApellido.substring(0, 1)}
+                {`${row.original.persona?.nombres?.[0] || ""}${
+                  row.original.persona?.primerApellido?.[0] || ""
+                }`}
               </AvatarFallback>
             </Avatar>
           </div>
@@ -152,6 +162,21 @@ export function UsuariosDatatable02() {
     // },
   ];
 
+  function updateDataTable() {
+    setUpdateTable(true);
+  }
+
+  const { data: rolesData } = useQuery({
+    queryKey: ["roles"],
+    queryFn: async () => {
+      const response = await sessionRequest<RolResponse>({
+        url: "/autorizacion/roles",
+        method: "get",
+      });
+      return response?.data.datos ?? [];
+    },
+  });
+
   return (
     <div>
       <DataTable
@@ -159,21 +184,30 @@ export function UsuariosDatatable02() {
         filters={filters}
         apiUrl={"/usuarios"}
         toolBarConfig={{
-          components: [],
+          components: [
+            <Button
+              title="Editar"
+              variant="outline"
+              size={"icon"}
+              onClick={() => handleAgregarEditarUsuario(null)}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>,
+          ],
         }}
         titulo={"Gestión de usuarios"}
         update={updateTable}
         onResetUpdate={() => setUpdateTable(false)}
       />
-      {/* {agregarEditarModalOpen && (
+      {agregarEditarModalOpen && (
         <AgregarEditarUsuarioModal
-        // usuario={selectUser}
-        // isOpen={agregarEditarModalOpen}
-        // roles={rolesData ?? []}
-        // onSuccess={reloadUsuarios}
-        // onClose={() => setAgregarEditarModalOpen(false)}
+          usuario={selectUser}
+          isOpen={agregarEditarModalOpen}
+          roles={rolesData ?? []}
+          onSuccess={updateDataTable}
+          onClose={() => setAgregarEditarModalOpen(false)}
         />
-      )} */}
+      )}
     </div>
   );
 }
