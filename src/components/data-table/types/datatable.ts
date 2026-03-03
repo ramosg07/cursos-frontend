@@ -18,4 +18,5 @@ export interface DataTableProps<TData, TValue> {
   titulo: string;
   update: boolean;
   onResetUpdate: () => void;
+  params?: Record<string, any>;
 }

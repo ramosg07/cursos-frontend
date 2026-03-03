@@ -8,12 +8,13 @@ import { Curso, UsuarioCoordinador } from "../types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FilterType } from "@/components/data-table/types/filter";
-import { Edit, Plus } from "lucide-react";
+import { Edit, Plus, Users } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthProvider";
 import { AgregarEditarCursoModal } from "./AgregarEditarCursoModal";
 import { ActivarInactivarCursoModal } from "./ActivarInactivarCursoModal";
+import Link from "next/link";
 
 export function CursosDatatable() {
   const [updateTable, setUpdateTable] = useState(false);
@@ -97,6 +98,11 @@ export function CursosDatatable() {
       header: "Acciones",
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
+          <Link href={`/admin/cursos/${row.original.id}/inscritos`}>
+            <Button title="Ver Inscritos" variant="outline" size={"icon"}>
+              <Users className="h-4 w-4" />
+            </Button>
+          </Link>
           {row.original.estado === "ACTIVO" && (
             <Button
               title="Editar"

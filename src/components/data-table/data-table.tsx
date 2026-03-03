@@ -66,6 +66,7 @@ export function DataTable<TData, TValue>({
   titulo,
   update,
   onResetUpdate,
+  params,
 }: DataTableProps<TData, TValue>) {
   const { sessionRequest } = useAuth();
   const queryClient = useQueryClient();
@@ -81,15 +82,13 @@ export function DataTable<TData, TValue>({
   const [appliedFilters, setAppliedFilters] = useState<any>({});
   const [showFilters, setShowFilters] = useState(false);
 
-  let localFilters: any = {};
-
   const toggleFilters = () => {
     setShowFilters((prev) => !prev);
   };
 
   const getActionsTable = (
     defaultActions: React.ReactNode[],
-    toolBarConfig: ToolBarConfigType
+    toolBarConfig: ToolBarConfigType,
   ) => {
     const result: React.ReactNode[] = [];
 
@@ -113,42 +112,44 @@ export function DataTable<TData, TValue>({
   };
 
   const fetchData = useCallback(async () => {
-    const params: Record<string, string> = {
+    const queryParams: Record<string, string> = {
       pagina: (pagination.pageIndex + 1).toString(),
       limite: pagination.pageSize.toString(),
+      ...(params || {}),
     };
 
     Object.keys(appliedFilters).forEach((key) => {
       if (appliedFilters[key] !== "" && appliedFilters[key] !== undefined) {
-        params[key] = appliedFilters[key];
+        queryParams[key] = appliedFilters[key];
       }
     });
 
     if (sorting.length > 0) {
       const [{ id, desc }] = sorting;
-      params.orden = `${desc ? "-" : ""}${id}`;
+      queryParams.orden = `${desc ? "-" : ""}${id}`;
     }
 
-    console.warn({ params });
+    console.warn({ queryParams });
 
     const response = await sessionRequest<any>({
       url: apiUrl,
       method: "GET",
-      params,
+      params: queryParams,
     });
 
     return response?.data;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination, appliedFilters, sorting, apiUrl, localFilters]);
+  }, [pagination, appliedFilters, sorting, apiUrl, params]);
 
   const { data, isLoading, isError, error, isFetching } = useQuery({
     queryKey: [
       "dataTable",
+      apiUrl,
       pagination.pageIndex,
       pagination.pageSize,
       sorting,
       appliedFilters,
-      localFilters,
+      params,
     ],
     queryFn: fetchData,
     placeholderData: keepPreviousData,
@@ -232,7 +233,7 @@ export function DataTable<TData, TValue>({
           .getAllColumns()
           .filter(
             (column) =>
-              typeof column.accessorFn !== "undefined" && column.getCanHide()
+              typeof column.accessorFn !== "undefined" && column.getCanHide(),
           )
           .map((column) => {
             console.warn({ column });
@@ -328,7 +329,7 @@ export function DataTable<TData, TValue>({
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
                 ))}
@@ -345,7 +346,7 @@ export function DataTable<TData, TValue>({
                       <TableCell key={`loading-cell-${cellIndex}`}>
                         <div className="h-4 w-full animate-pulse rounded bg-muted"></div>
                       </TableCell>
-                    )
+                    ),
                   )}
                 </TableRow>
               ))
@@ -358,7 +359,7 @@ export function DataTable<TData, TValue>({
                         <TableCell key={`cell-${cell.id}`}>
                           {flexRender(
                             cell.column.columnDef.cell,
-                            cell.getContext()
+                            cell.getContext(),
                           )}
                         </TableCell>
                       );

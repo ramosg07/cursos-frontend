@@ -92,12 +92,8 @@ export function AgregarEditarEstudianteModal({
       const url = isEditing ? `/estudiantes/${estudiante.id}` : "/estudiantes";
       const method = isEditing ? "PATCH" : "POST";
       const body = {
-        nroDocumento: values.nroDocumento,
-        nombres: values.nombres,
-        primerApellido: values.primerApellido,
-        segundoApellido: values.segundoApellido,
-        codigoPersonal: values.codigoPersonal,
-        correoElectronico: values.correoElectronico,
+        ...values,
+        fechaNacimiento: values.fechaNacimiento || null,
       };
       const resultado = await sessionRequest({
         url,
@@ -107,7 +103,7 @@ export function AgregarEditarEstudianteModal({
 
       toast.success(
         `Estudiante ${isEditing ? "actualizado" : "creado"} correctamente`,
-        { description: MessageInterpreter(resultado?.data) }
+        { description: MessageInterpreter(resultado?.data) },
       );
       onSuccess();
       onClose();
@@ -242,6 +238,25 @@ export function AgregarEditarEstudianteModal({
             )}
           />
 
+          <Controller
+            name="fechaNacimiento"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field aria-invalid={fieldState.invalid}>
+                <FieldLabel>Fecha de Nacimiento</FieldLabel>
+                <Input
+                  type="date"
+                  {...field}
+                  value={field.value || ""}
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
           <DialogFooter>
             <Button
               type="button"
@@ -255,8 +270,8 @@ export function AgregarEditarEstudianteModal({
               {isLoading
                 ? "Guardando..."
                 : isEditing
-                ? "Guardar Cambios"
-                : "Crear Estudiante"}
+                  ? "Guardar Cambios"
+                  : "Crear Estudiante"}
             </Button>
           </DialogFooter>
         </form>
