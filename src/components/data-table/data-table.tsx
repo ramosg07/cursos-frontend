@@ -119,7 +119,11 @@ export function DataTable<TData, TValue>({
     };
 
     Object.keys(appliedFilters).forEach((key) => {
-      if (appliedFilters[key] !== "" && appliedFilters[key] !== undefined) {
+      if (
+        appliedFilters[key] !== "" &&
+        appliedFilters[key] !== undefined &&
+        appliedFilters[key] !== "all"
+      ) {
         queryParams[key] = appliedFilters[key];
       }
     });

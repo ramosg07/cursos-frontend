@@ -53,6 +53,15 @@ export function InscritosDatatable({ curso }: Props) {
       meta: { mobileTitle: "Correo" },
     },
     {
+      accessorKey: "paralelo.nombre",
+      header: "Paralelo",
+      cell: ({ row }) => {
+        const p = row.original.paralelo;
+        return p ? `Paralelo ${p.nombre}` : "—";
+      },
+      meta: { mobileTitle: "Paralelo" },
+    },
+    {
       accessorKey: "fechaInscripcion",
       header: "Fecha Inscripción",
       cell: ({ row }) =>
@@ -82,6 +91,21 @@ export function InscritosDatatable({ curso }: Props) {
       value: "",
       list: [{ description: "Todos", code: "all" }],
       type: "text",
+    },
+    {
+      name: "idParalelo",
+      label: "Paralelo",
+      value: "all",
+      list: [
+        { description: "Todos", code: "all" },
+        ...(curso.paralelos || [])
+          .filter((p) => p.estado === "ACTIVO")
+          .map((p) => ({
+            description: `Paralelo ${p.nombre}`,
+            code: p.id,
+          })),
+      ],
+      type: "select",
     },
   ];
 
@@ -184,7 +208,7 @@ export function InscritosDatatable({ curso }: Props) {
 
       {agregarInscripcionModalOpen && (
         <AgregarInscripcionModal
-          idCurso={idCurso}
+          paralelos={curso.paralelos || []}
           isOpen={agregarInscripcionModalOpen}
           onSuccess={updateDataTable}
           onClose={() => setAgregarInscripcionModalOpen(false)}
@@ -192,7 +216,7 @@ export function InscritosDatatable({ curso }: Props) {
       )}
       {bulkInscripcionModalOpen && (
         <BulkInscripcionModal
-          idCurso={idCurso}
+          paralelos={curso.paralelos || []}
           isOpen={bulkInscripcionModalOpen}
           onSuccess={updateDataTable}
           onClose={() => setBulkInscripcionModalOpen(false)}

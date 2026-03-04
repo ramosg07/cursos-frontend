@@ -14,19 +14,27 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthProvider";
 import { EstudianteBusqueda } from "../types";
 import { toast } from "sonner";
-import { Search, UserPlus, UserCheck, X } from "lucide-react";
+import { Search, UserPlus, X } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { MessageInterpreter } from "@/lib/messageInterpreter";
+import { Paralelo } from "../../../types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Props {
-  idCurso: string;
+  paralelos: Paralelo[];
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
 
 export function AgregarInscripcionModal({
-  idCurso,
+  paralelos,
   isOpen,
   onClose,
   onSuccess,
@@ -36,6 +44,8 @@ export function AgregarInscripcionModal({
   const [estudiante, setEstudiante] = useState<EstudianteBusqueda | null>(null);
   const [loading, setLoading] = useState(false);
   const [enrolling, setEnrolling] = useState(false);
+  const [idParaleloSeleccionado, setIdParaleloSeleccionado] =
+    useState<string>("");
 
   const handleSearch = async () => {
     if (!nroDocumento.trim()) return;
@@ -68,14 +78,20 @@ export function AgregarInscripcionModal({
         method: "post",
         data: {
           idEstudiante: estudiante.id,
-          idCurso: idCurso,
+          idParalelo: idParaleloSeleccionado,
         },
       });
       toast.success("Estudiante inscrito correctamente");
       onSuccess();
       onClose();
     } catch (error: any) {
-      toast.error(error?.response?.data?.mensaje || "Error al inscribir");
+      console.log({ error });
+      const errorMessage = error?.message;
+      toast.error(
+        Array.isArray(errorMessage)
+          ? errorMessage[0]
+          : errorMessage || "Error al inscribir",
+      );
     } finally {
       setEnrolling(false);
     }
@@ -138,13 +154,47 @@ export function AgregarInscripcionModal({
               </Button>
             </div>
           )}
+
+          {estudiante && (
+            <div className="space-y-4 pt-2">
+              <Separator />
+              <Field>
+                <FieldLabel>Seleccionar Paralelo</FieldLabel>
+                <Select
+                  value={idParaleloSeleccionado}
+                  onValueChange={setIdParaleloSeleccionado}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccione un paralelo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {paralelos
+                      .filter((p) => p.estado === "ACTIVO")
+                      .map((p) => (
+                        <SelectItem key={p.id} value={p.id}>
+                          Paralelo {p.nombre} (Cupo: {p.cupo})
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                {paralelos.length === 0 && (
+                  <p className="text-xs text-destructive mt-1">
+                    Este curso no tiene paralelos activos configurados.
+                  </p>
+                )}
+              </Field>
+            </div>
+          )}
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={enrolling}>
             Cancelar
           </Button>
-          <Button onClick={handleEnrol} disabled={!estudiante || enrolling}>
+          <Button
+            onClick={handleEnrol}
+            disabled={!estudiante || !idParaleloSeleccionado || enrolling}
+          >
             {enrolling ? (
               "Inscribiendo..."
             ) : (

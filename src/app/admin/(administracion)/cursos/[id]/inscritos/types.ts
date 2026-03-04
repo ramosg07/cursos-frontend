@@ -2,8 +2,13 @@ export interface Inscripcion {
   id: string;
   idEstudiante: string;
   idCurso: string;
+  idParalelo: string;
   fechaInscripcion: string;
   estado: string;
+  paralelo: {
+    id: string;
+    nombre: string;
+  };
   estudiante: {
     id: string;
     codigoPersonal?: string | null;

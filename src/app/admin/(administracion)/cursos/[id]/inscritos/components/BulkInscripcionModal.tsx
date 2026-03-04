@@ -15,16 +15,25 @@ import { useAuth } from "@/contexts/AuthProvider";
 import { toast } from "sonner";
 import { AlertCircle, CheckCircle2, FileUp, Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Paralelo } from "../../../types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 interface Props {
-  idCurso: string;
+  paralelos: Paralelo[];
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
 
 export function BulkInscripcionModal({
-  idCurso,
+  paralelos,
   isOpen,
   onClose,
   onSuccess,
@@ -36,6 +45,8 @@ export function BulkInscripcionModal({
     fallidos: number;
     errores: string[];
   } | null>(null);
+  const [idParaleloSeleccionado, setIdParaleloSeleccionado] =
+    useState<string>("");
 
   const { sessionRequest } = useAuth();
 
@@ -55,7 +66,7 @@ export function BulkInscripcionModal({
     try {
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("idCurso", idCurso);
+      formData.append("idParalelo", idParaleloSeleccionado);
 
       const response = await sessionRequest<{
         finalizado: boolean;
@@ -77,8 +88,11 @@ export function BulkInscripcionModal({
         toast.success("Proceso de carga masiva de inscripciones finalizado");
       }
     } catch (error: any) {
+      const errorMessage = error?.message;
       toast.error(
-        error?.response?.data?.mensaje || "Error al subir el archivo",
+        Array.isArray(errorMessage)
+          ? errorMessage[0]
+          : errorMessage || "Error al subir el archivo",
       );
     } finally {
       setUploading(false);
@@ -91,10 +105,34 @@ export function BulkInscripcionModal({
         <DialogHeader>
           <DialogTitle>Carga Masiva de Inscripciones</DialogTitle>
           <DialogDescription>
-            Sube un archivo Excel (.xlsx) o CSV con la columna: nroDocumento.
-            Los estudiantes ya deben estar registrados en el sistema.
+            Selecciona un paralelo, sube un archivo Excel (.xlsx) o CSV con la
+            columna: <strong>nroDocumento</strong>. Los estudiantes ya deben
+            estar registrados en el sistema.
           </DialogDescription>
         </DialogHeader>
+
+        <div className="space-y-4 py-2">
+          <div className="space-y-2">
+            <Label>Seleccionar Paralelo de Destino</Label>
+            <Select
+              value={idParaleloSeleccionado}
+              onValueChange={setIdParaleloSeleccionado}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccione un paralelo" />
+              </SelectTrigger>
+              <SelectContent>
+                {paralelos
+                  .filter((p) => p.estado === "ACTIVO")
+                  .map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      Paralelo {p.nombre} (Cupo: {p.cupo})
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
         {!result ? (
           <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg gap-4 border-muted-foreground/25">
@@ -153,7 +191,10 @@ export function BulkInscripcionModal({
             {result ? "Cerrar" : "Cancelar"}
           </Button>
           {!result && (
-            <Button onClick={handleUpload} disabled={!file || uploading}>
+            <Button
+              onClick={handleUpload}
+              disabled={!file || !idParaleloSeleccionado || uploading}
+            >
               {uploading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

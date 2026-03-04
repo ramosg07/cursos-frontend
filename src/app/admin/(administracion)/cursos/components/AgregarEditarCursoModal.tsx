@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Curso, UsuarioCoordinador } from "../types";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
@@ -22,6 +22,7 @@ import { useAuth } from "@/contexts/AuthProvider";
 import { toast } from "sonner";
 import { MessageInterpreter } from "@/lib/messageInterpreter";
 import { print } from "@/lib/print";
+import { Plus, Trash2 } from "lucide-react";
 
 interface AgregarEditarCursoModalProps {
   curso: Curso | null;
@@ -39,7 +40,16 @@ const formSchema = z.object({
   fechaInicio: z.string().optional().nullable(),
   fechaFin: z.string().optional().nullable(),
   coordinadores: z.array(z.string()).optional(),
+  paralelos: z.array(
+    z.object({
+      id: z.string().optional(),
+      nombre: z.string().min(1, "El nombre es obligatorio"),
+      cupo: z.coerce.number().min(1, "El cupo debe ser al menos 1"),
+    }),
+  ),
 });
+
+type FormValues = z.infer<typeof formSchema>;
 
 export function AgregarEditarCursoModal({
   curso,
@@ -57,7 +67,7 @@ export function AgregarEditarCursoModal({
         .map((cc) => cc.idUsuario)
     : [];
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: curso
       ? {
@@ -66,6 +76,13 @@ export function AgregarEditarCursoModal({
           fechaInicio: curso.fechaInicio ?? "",
           fechaFin: curso.fechaFin ?? "",
           coordinadores: coordinadoresActivos,
+          paralelos: (curso.paralelos || [])
+            .filter((p) => p.estado === "ACTIVO")
+            .map((p) => ({
+              id: p.id,
+              nombre: p.nombre,
+              cupo: p.cupo,
+            })),
         }
       : {
           nombre: "",
@@ -73,7 +90,13 @@ export function AgregarEditarCursoModal({
           fechaInicio: "",
           fechaFin: "",
           coordinadores: [],
+          paralelos: [{ nombre: "A", cupo: 30 }],
         },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "paralelos",
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -90,6 +113,7 @@ export function AgregarEditarCursoModal({
           fechaInicio: values.fechaInicio || null,
           fechaFin: values.fechaFin || null,
           coordinadores: values.coordinadores ?? [],
+          paralelos: values.paralelos ?? [],
         },
       });
 
@@ -283,6 +307,92 @@ export function AgregarEditarCursoModal({
               )}
             />
           </div>
+          <Separator className="my-6" />
+
+          {/* Gestión de Paralelos */}
+          <div>
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="scroll-m-20 text-base font-semibold tracking-tight">
+                  Paralelos y Cupos
+                </h4>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Define las secciones (paralelos) y el cupo máximo para cada
+                  uno.
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => append({ nombre: "", cupo: 30 })}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Agregar Paralelo
+              </Button>
+            </div>
+
+            <div className="space-y-3 mt-4">
+              {fields.map((field, index) => (
+                <div
+                  key={field.id}
+                  className="flex gap-2 items-end border p-3 rounded-md bg-muted/20 relative group"
+                >
+                  <Controller
+                    name={`paralelos.${index}.nombre`}
+                    control={form.control}
+                    render={({ field: inputField, fieldState }) => (
+                      <Field className="flex-1">
+                        <FieldLabel className="text-xs">Nombre</FieldLabel>
+                        <Input
+                          placeholder="Ej: A, B..."
+                          {...inputField}
+                          className="h-9"
+                        />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name={`paralelos.${index}.cupo`}
+                    control={form.control}
+                    render={({ field: inputField, fieldState }) => (
+                      <Field className="w-24">
+                        <FieldLabel className="text-xs">Cupo</FieldLabel>
+                        <Input
+                          type="number"
+                          placeholder="Cupo"
+                          {...inputField}
+                          className="h-9"
+                        />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 text-destructive"
+                    onClick={() => remove(index)}
+                    disabled={fields.length === 1}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              {fields.length === 0 && (
+                <p className="text-sm text-center text-muted-foreground py-4 border-2 border-dashed rounded-md">
+                  Debes agregar al menos un paralelo.
+                </p>
+              )}
+            </div>
+          </div>
+
           <Separator className="my-6" />
           <div className="flex w-full justify-end gap-2">
             <Button
