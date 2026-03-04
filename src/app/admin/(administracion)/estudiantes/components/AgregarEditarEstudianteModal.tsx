@@ -18,6 +18,7 @@ import { Estudiante } from "../types";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { MessageInterpreter } from "@/lib/messageInterpreter";
+import dayjs from "dayjs";
 
 const studentSchema = z.object({
   nroDocumento: z.string().min(5, "Mínimo 5 caracteres"),
@@ -71,7 +72,11 @@ export function AgregarEditarEstudianteModal({
         segundoApellido: p.segundoApellido ?? "",
         correoElectronico: estudiante.usuario.correoElectronico,
         codigoPersonal: estudiante.codigoPersonal ?? "",
-        fechaNacimiento: "",
+        fechaNacimiento: estudiante.usuario.persona.fechaNacimiento
+          ? dayjs(estudiante.usuario.persona.fechaNacimiento).format(
+              "YYYY-MM-DD",
+            )
+          : "",
       });
     } else {
       form.reset({
@@ -92,8 +97,13 @@ export function AgregarEditarEstudianteModal({
       const url = isEditing ? `/estudiantes/${estudiante.id}` : "/estudiantes";
       const method = isEditing ? "PATCH" : "POST";
       const body = {
-        ...values,
+        codigoPersonal: values.codigoPersonal || null,
+        segundoApellido: values.segundoApellido || null,
+        correoElectronico: values.correoElectronico,
+        nombres: values.nombres,
+        primerApellido: values.primerApellido,
         fechaNacimiento: values.fechaNacimiento || null,
+        nroDocumento: !estudiante ? values.nroDocumento : undefined,
       };
       const resultado = await sessionRequest({
         url,

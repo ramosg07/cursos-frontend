@@ -13,8 +13,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthProvider";
 import { toast } from "sonner";
-import { AlertCircle, CheckCircle2, FileUp, Loader2 } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Download,
+  FileUp,
+  Loader2,
+} from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 
 interface Props {
   isOpen: boolean;
@@ -78,6 +85,36 @@ export function BulkUploadModal({ isOpen, onClose, onSuccess }: Props) {
     }
   };
 
+  const handleDescargarPlantilla = () => {
+    const headers = [
+      "nroDocumento",
+      "nombres",
+      "primerApellido",
+      "segundoApellido",
+      "correoElectronico",
+      "codigoPersonal",
+    ];
+
+    const ejemplo = [
+      "12345678",
+      "Juan",
+      "Pérez",
+      "Gómez",
+      "juan.perez@correo.com",
+      "EMP001",
+    ];
+
+    const csvContent = headers.join(",") + "\n" + ejemplo.join(",");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "plantilla_estudiantes.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px]">
@@ -85,8 +122,15 @@ export function BulkUploadModal({ isOpen, onClose, onSuccess }: Props) {
           <DialogTitle>Carga Masiva de Estudiantes</DialogTitle>
           <DialogDescription>
             Selecciona un archivo Excel (.xlsx) o CSV con las columnas:
-            nroDocumento, nombres, primerApellido, correoElectronico.
+            nroDocumento, nombres, primerApellido, segundoApellido,
+            correoElectronico y codigoPersonal.{" "}
           </DialogDescription>
+          <div className="mt-2 flex items-center gap-2 text-blue-600 cursor-pointer">
+            <span onClick={handleDescargarPlantilla} >
+              Descargar plantilla de ejemplo
+            </span>
+            <Download onClick={handleDescargarPlantilla} className="h-4 w-4" />
+          </div>
         </DialogHeader>
 
         {!result ? (

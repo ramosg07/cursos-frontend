@@ -21,6 +21,7 @@ import { useAuth } from "@/contexts/AuthProvider";
 import { toast } from "sonner";
 import { MessageInterpreter } from "@/lib/messageInterpreter";
 import { print } from "@/lib/print";
+import dayjs from "dayjs";
 
 interface AgregarEditarUsuarioModalProps {
   usuario: Usuario | null;
@@ -73,7 +74,7 @@ export function AgregarEditarUsuarioModal({
           primerApellido: usuario.persona.primerApellido,
           segundoApellido: usuario.persona.segundoApellido,
           nroDocumento: usuario.persona.nroDocumento,
-          fechaNacimiento: usuario.persona.fechaNacimiento,
+          fechaNacimiento: dayjs(usuario.persona.fechaNacimiento).format("YYYY-MM-DD") || "",
           correoElectronico: usuario.correoElectronico,
           roles: usuario.usuarioRol.map((rol) => rol.rol.id),
         }

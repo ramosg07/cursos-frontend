@@ -3,7 +3,7 @@
 import { DataTable } from "@/components/data-table/data-table";
 import { SortableHeader } from "@/components/data-table/sortable-header";
 import { ColumnDef } from "@tanstack/react-table";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Inscripcion } from "../types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { BulkInscripcionModal } from "./BulkInscripcionModal";
 import Link from "next/link";
 import dayjs from "dayjs";
 import { Curso } from "../../../types";
+import { useAuth } from "@/contexts/AuthProvider";
 
 interface Props {
   curso: Curso;
@@ -26,6 +27,28 @@ export function InscritosDatatable({ curso }: Props) {
     useState<boolean>(false);
   const [bulkInscripcionModalOpen, setBulkInscripcionModalOpen] =
     useState<boolean>(false);
+
+  const { checkPermission } = useAuth();
+
+  const [permissions, setPermissions] = useState({
+    create: false,
+    read: false,
+    update: false,
+    delete: false,
+  });
+
+  useEffect(() => {
+    const fetchPermissions = async () => {
+      setPermissions({
+        create: await checkPermission("/admin/cursos/*/inscritos", "create"),
+        read: await checkPermission("/admin/cursos/*/inscritos", "read"),
+        update: await checkPermission("/admin/cursos/*/inscritos", "update"),
+        delete: await checkPermission("/admin/cursos/*/inscritos", "delete"),
+      });
+    };
+
+    fetchPermissions().catch(print);
+  }, [checkPermission]);
 
   const columns: ColumnDef<Inscripcion>[] = [
     {
@@ -179,16 +202,18 @@ export function InscritosDatatable({ curso }: Props) {
         params={{ idCurso }}
         toolBarConfig={{
           components: [
-            <Button
-              key={"BulkUpload"}
-              title="Carga masiva"
-              variant="outline"
-              className="flex gap-2"
-              onClick={() => setBulkInscripcionModalOpen(true)}
-            >
-              <Upload className="h-4 w-4" />
-              <span>Carga Masiva</span>
-            </Button>,
+            permissions.update && (
+              <Button
+                key={"BulkUpload"}
+                title="Carga masiva"
+                variant="outline"
+                className="flex gap-2"
+                onClick={() => setBulkInscripcionModalOpen(true)}
+              >
+                <Upload className="h-4 w-4" />
+                <span>Carga Masiva</span>
+              </Button>
+            ),
             <Button
               key={"Agregar"}
               title="Inscribir estudiante"

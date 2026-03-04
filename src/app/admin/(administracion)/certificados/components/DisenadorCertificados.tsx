@@ -427,14 +427,14 @@ export function DisenadorCertificados({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Button
+            {/* <Button
               variant="outline"
               className="w-full justify-start"
               onClick={handleAgregarCampo}
             >
               <Plus className="h-4 w-4 mr-2" />
               Agregar Texto
-            </Button>
+            </Button> */}
             <Button
               variant={isPreview ? "default" : "outline"}
               className="w-full justify-start"

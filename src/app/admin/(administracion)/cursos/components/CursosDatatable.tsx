@@ -3,7 +3,7 @@
 import { DataTable } from "@/components/data-table/data-table";
 import { SortableHeader } from "@/components/data-table/sortable-header";
 import { ColumnDef } from "@tanstack/react-table";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Curso, UsuarioCoordinador } from "../types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,8 +24,10 @@ export function CursosDatatable() {
   const [activarInactivarModalOpen, setActivarInactivarModalOpen] =
     useState<boolean>(false);
 
-  const { sessionRequest } = useAuth();
+  const { sessionRequest, user, checkPermission } = useAuth();
 
+  const rolActivo = user?.roles.find((rol) => user.idRol === rol.idRol);
+  const coordinadorGeneral = rolActivo?.rol === "COORDINADOR GENERAL";
   const handleAgregarEditarCurso = (curso: Curso | null) => {
     setSelectCurso(curso);
     setAgregarEditarModalOpen(true);
@@ -35,6 +37,26 @@ export function CursosDatatable() {
     setSelectCurso(curso);
     setActivarInactivarModalOpen(true);
   };
+
+  const [permissions, setPermissions] = useState({
+    create: false,
+    read: false,
+    update: false,
+    delete: false,
+  });
+
+  useEffect(() => {
+    const fetchPermissions = async () => {
+      setPermissions({
+        create: await checkPermission("/admin/cursos", "create"),
+        read: await checkPermission("/admin/cursos", "read"),
+        update: await checkPermission("/admin/cursos", "update"),
+        delete: await checkPermission("/admin/cursos", "delete"),
+      });
+    };
+
+    fetchPermissions().catch(print);
+  }, [checkPermission]);
 
   const columns: ColumnDef<Curso>[] = [
     {
@@ -98,26 +120,28 @@ export function CursosDatatable() {
       header: "Acciones",
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
-          <Link href={`/admin/cursos/${row.original.id}/inscritos`}>
-            <Button title="Ver Inscritos" variant="outline" size={"icon"}>
-              <Users className="h-4 w-4" />
-            </Button>
-          </Link>
-          {row.original.estado === "ACTIVO" && (
-            <Button
-              title="Editar"
-              variant="outline"
-              size={"icon"}
-              onClick={() => handleAgregarEditarCurso(row.original)}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
+          {permissions.read && (
+            <Link href={`/admin/cursos/${row.original.id}/inscritos`}>
+              <Button title="Ver Inscritos" variant="outline" size={"icon"}>
+                <Users className="h-4 w-4" />
+              </Button>
+            </Link>
           )}
-          <Switch
-            id={"switch-curso-" + row.original.id}
-            defaultChecked={row.original.estado === "ACTIVO"}
-            onCheckedChange={() => handleActivarInactivarCurso(row.original)}
-          />
+          <Button
+            title="Editar"
+            variant="outline"
+            size={"icon"}
+            onClick={() => handleAgregarEditarCurso(row.original)}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          {row.original.estado === "ACTIVO" && coordinadorGeneral && (
+            <Switch
+              id={"switch-curso-" + row.original.id}
+              defaultChecked={row.original.estado === "ACTIVO"}
+              onCheckedChange={() => handleActivarInactivarCurso(row.original)}
+            />
+          )}
         </div>
       ),
       meta: { mobileTitle: "Acciones" },
@@ -160,15 +184,17 @@ export function CursosDatatable() {
         apiUrl={"/cursos"}
         toolBarConfig={{
           components: [
-            <Button
-              key={"Agregar"}
-              title="Agregar curso"
-              variant="outline"
-              size={"icon"}
-              onClick={() => handleAgregarEditarCurso(null)}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>,
+            permissions.create && (
+              <Button
+                key={"Agregar"}
+                title="Agregar curso"
+                variant="outline"
+                size={"icon"}
+                onClick={() => handleAgregarEditarCurso(null)}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            ),
           ],
         }}
         titulo={"Gestión de cursos"}

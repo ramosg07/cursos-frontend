@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Constants } from "@/config/Constants";
 import { FilterType } from "@/components/data-table/types/filter";
-import { Edit, Plus, Power, PowerOff } from "lucide-react";
+import { Edit, Plus } from "lucide-react";
 import { AgregarEditarUsuarioModal } from "./AgregarEditarUsuarioModa";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthProvider";
@@ -86,7 +86,7 @@ export function UsuariosDatatable02() {
         if (row.original?.persona) {
           const { nombres, primerApellido, segundoApellido } =
             row.original.persona;
-          resultado = `${nombres} ${primerApellido} ${segundoApellido}`;
+          resultado = `${nombres} ${primerApellido} ${segundoApellido || ""}`;
         }
         return resultado;
       },
@@ -122,8 +122,8 @@ export function UsuariosDatatable02() {
               row.original.estado === "ACTIVO"
                 ? "secondary"
                 : row.original.estado === "INACTIVO"
-                ? "destructive"
-                : "default"
+                  ? "destructive"
+                  : "default"
             }
           >
             {row.original.estado}
@@ -203,7 +203,7 @@ export function UsuariosDatatable02() {
         toolBarConfig={{
           components: [
             <Button
-              key={'Agregar'}
+              key={"Agregar"}
               title="Agregar"
               variant="outline"
               size={"icon"}

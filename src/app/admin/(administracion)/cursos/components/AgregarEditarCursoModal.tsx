@@ -58,7 +58,11 @@ export function AgregarEditarCursoModal({
   onClose,
   onSuccess,
 }: AgregarEditarCursoModalProps) {
-  const { sessionRequest } = useAuth();
+  const { sessionRequest, user } = useAuth();
+
+  const rolActivo = user?.roles.find((rol) => user.idRol === rol.idRol);
+  const coordinadorCurso = rolActivo?.rol === "COORDINADOR CURSO";
+
   const [isLoading, setIsLoading] = useState(false);
 
   const coordinadoresActivos = curso
@@ -76,13 +80,11 @@ export function AgregarEditarCursoModal({
           fechaInicio: curso.fechaInicio ?? "",
           fechaFin: curso.fechaFin ?? "",
           coordinadores: coordinadoresActivos,
-          paralelos: (curso.paralelos || [])
-            .filter((p) => p.estado === "ACTIVO")
-            .map((p) => ({
-              id: p.id,
-              nombre: p.nombre,
-              cupo: p.cupo,
-            })),
+          paralelos: (curso.paralelos || []).map((p) => ({
+            id: p.id,
+            nombre: p.nombre,
+            cupo: p.cupo,
+          })),
         }
       : {
           nombre: "",
@@ -165,6 +167,7 @@ export function AgregarEditarCursoModal({
                       placeholder="Ingrese el nombre del curso"
                       {...field}
                       aria-invalid={fieldState.invalid}
+                      disabled={coordinadorCurso}
                     />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -184,6 +187,7 @@ export function AgregarEditarCursoModal({
                       {...field}
                       value={field.value ?? ""}
                       aria-invalid={fieldState.invalid}
+                      disabled={coordinadorCurso}
                     />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -206,6 +210,7 @@ export function AgregarEditarCursoModal({
                       {...field}
                       value={field.value ?? ""}
                       aria-invalid={fieldState.invalid}
+                      disabled={coordinadorCurso}
                     />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -228,6 +233,7 @@ export function AgregarEditarCursoModal({
                       {...field}
                       value={field.value ?? ""}
                       aria-invalid={fieldState.invalid}
+                      disabled={coordinadorCurso}
                     />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
@@ -265,6 +271,7 @@ export function AgregarEditarCursoModal({
                         >
                           <Checkbox
                             id={`coord-${coordinador.id}`}
+                            disabled={coordinadorCurso}
                             checked={
                               form
                                 .watch("coordinadores")

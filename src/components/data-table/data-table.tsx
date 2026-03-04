@@ -133,8 +133,6 @@ export function DataTable<TData, TValue>({
       queryParams.orden = `${desc ? "-" : ""}${id}`;
     }
 
-    console.warn({ queryParams });
-
     const response = await sessionRequest<any>({
       url: apiUrl,
       method: "GET",
@@ -240,7 +238,6 @@ export function DataTable<TData, TValue>({
               typeof column.accessorFn !== "undefined" && column.getCanHide(),
           )
           .map((column) => {
-            console.warn({ column });
             return (
               <DropdownMenuCheckboxItem
                 key={column.id}

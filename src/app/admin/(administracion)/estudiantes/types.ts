@@ -12,6 +12,7 @@ export interface Estudiante {
       primerApellido: string;
       segundoApellido?: string | null;
       nroDocumento: string;
+      fechaNacimiento?: string | null;
     };
   };
 }
