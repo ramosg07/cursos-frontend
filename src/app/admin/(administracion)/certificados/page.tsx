@@ -74,7 +74,7 @@ export default function CertificadosPage() {
       setView("list");
     } catch (error: any) {
       toast.error(
-        error?.response?.data?.mensaje || "Error al guardar plantilla",
+        error?.response?.data?.mensaje || "Error al guardar plantilla"
       );
     }
   };
@@ -82,7 +82,7 @@ export default function CertificadosPage() {
   const handleUploadFondo = async (file: File) => {
     if (!selectedPlantilla) {
       toast.warning(
-        "Primero guarda la plantilla con un nombre para subir el fondo",
+        "Primero guarda la plantilla con un nombre para subir el fondo"
       );
       return;
     }

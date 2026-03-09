@@ -10,6 +10,7 @@ export interface PlantillaCertificado {
 export interface CertificadoConfig {
   canvasSize: { width: number; height: number };
   campos: CertificadoCampo[];
+  fondo: boolean;
 }
 
 export interface CertificadoCampo {

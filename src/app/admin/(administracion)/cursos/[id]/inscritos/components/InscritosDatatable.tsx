@@ -3,18 +3,20 @@
 import { DataTable } from "@/components/data-table/data-table";
 import { SortableHeader } from "@/components/data-table/sortable-header";
 import { ColumnDef } from "@tanstack/react-table";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Inscripcion } from "../types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FilterType } from "@/components/data-table/types/filter";
-import { Plus, Upload, ArrowLeft, Calendar, Info } from "lucide-react";
+import { Plus, Upload, ArrowLeft, Calendar, Info, Printer } from "lucide-react";
 import { AgregarInscripcionModal } from "./AgregarInscripcionModal";
 import { BulkInscripcionModal } from "./BulkInscripcionModal";
+import { PrintCertificatesModal } from "./PrintCertificatesModal";
 import Link from "next/link";
 import dayjs from "dayjs";
 import { Curso } from "../../../types";
 import { useAuth } from "@/contexts/AuthProvider";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Props {
   curso: Curso;
@@ -27,6 +29,24 @@ export function InscritosDatatable({ curso }: Props) {
     useState<boolean>(false);
   const [bulkInscripcionModalOpen, setBulkInscripcionModalOpen] =
     useState<boolean>(false);
+  const [printModalOpen, setPrintModalOpen] = useState<boolean>(false);
+  const [selectedInscripciones, setSelectedInscripciones] = useState<string[]>(
+    []
+  );
+
+  // Función para manejar el cambio de selección en el DataTable
+  const handleSelectedItemsChange = useCallback((items: Inscripcion[]) => {
+    const newIds = items.map((item) => item.id);
+    setSelectedInscripciones((prevIds) => {
+      if (
+        prevIds.length === newIds.length &&
+        prevIds.every((id, index) => id === newIds[index])
+      ) {
+        return prevIds;
+      }
+      return newIds;
+    });
+  }, []);
 
   const { checkPermission } = useAuth();
 
@@ -52,6 +72,25 @@ export function InscritosDatatable({ curso }: Props) {
 
   const columns: ColumnDef<Inscripcion>[] = [
     {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected()}
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Seleccionar todo"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Seleccionar fila"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
       accessorKey: "estudiante.usuario.persona.nroDocumento",
       header: ({ column }) => (
         <SortableHeader column={column} title="Documento" />
@@ -71,11 +110,6 @@ export function InscritosDatatable({ curso }: Props) {
       meta: { mobileTitle: "Estudiante" },
     },
     {
-      accessorKey: "estudiante.usuario.correoElectronico",
-      header: "Correo",
-      meta: { mobileTitle: "Correo" },
-    },
-    {
       accessorKey: "paralelo.nombre",
       header: "Paralelo",
       cell: ({ row }) => {
@@ -92,18 +126,18 @@ export function InscritosDatatable({ curso }: Props) {
       meta: { mobileTitle: "Fecha" },
     },
     {
-      accessorKey: "estado",
-      header: "Estado",
+      id: "acciones",
+      header: "Acciones",
       cell: ({ row }) => (
-        <Badge
-          variant={
-            row.original.estado === "ACTIVO" ? "secondary" : "destructive"
-          }
+        <Button
+          variant="ghost"
+          size="icon"
+          title="Imprimir certificado"
+          onClick={() => handleOpenPrintModal([row.original.id])}
         >
-          {row.original.estado}
-        </Badge>
+          <Printer className="h-4 w-4" />
+        </Button>
       ),
-      meta: { mobileTitle: "Estado" },
     },
   ];
 
@@ -135,6 +169,12 @@ export function InscritosDatatable({ curso }: Props) {
   function updateDataTable() {
     setUpdateTable(true);
   }
+
+  const handleOpenPrintModal = (inscripciones?: string[]) => {
+    // Si no se pasan inscripciones, se usan las seleccionadas en el datatable
+    setSelectedInscripciones(inscripciones || selectedInscripciones);
+    setPrintModalOpen(true);
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -200,6 +240,7 @@ export function InscritosDatatable({ curso }: Props) {
         filters={filters}
         apiUrl={"/inscripciones"}
         params={{ idCurso }}
+        onSelectedItemsChange={handleSelectedItemsChange}
         toolBarConfig={{
           components: [
             permissions.update && (
@@ -214,6 +255,19 @@ export function InscritosDatatable({ curso }: Props) {
                 <span>Carga Masiva</span>
               </Button>
             ),
+            <Button
+              key={"PrintBatch"}
+              title="Printear certificados"
+              variant="outline"
+              className="flex gap-2"
+              onClick={() => handleOpenPrintModal()}
+              disabled={selectedInscripciones.length === 0}
+            >
+              <Printer className="h-4 w-4" />
+              <span>
+                Imprimir Seleccionados ({selectedInscripciones.length})
+              </span>
+            </Button>,
             <Button
               key={"Agregar"}
               title="Inscribir estudiante"
@@ -245,6 +299,14 @@ export function InscritosDatatable({ curso }: Props) {
           isOpen={bulkInscripcionModalOpen}
           onSuccess={updateDataTable}
           onClose={() => setBulkInscripcionModalOpen(false)}
+        />
+      )}
+      {printModalOpen && (
+        <PrintCertificatesModal
+          idCurso={idCurso}
+          selectedInscripciones={selectedInscripciones}
+          isOpen={printModalOpen}
+          onClose={() => setPrintModalOpen(false)}
         />
       )}
     </div>

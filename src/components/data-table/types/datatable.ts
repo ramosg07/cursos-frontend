@@ -1,4 +1,8 @@
-import { ColumnDef, SortingState } from "@tanstack/react-table";
+import {
+  ColumnDef,
+  RowSelectionState,
+  SortingState,
+} from "@tanstack/react-table";
 import { FilterType } from "./filter";
 
 export interface ToolBarConfigType {
@@ -19,4 +23,6 @@ export interface DataTableProps<TData, TValue> {
   update: boolean;
   onResetUpdate: () => void;
   params?: Record<string, any>;
+  onRowSelectionChange?: (selection: RowSelectionState) => void;
+  onSelectedItemsChange?: (items: TData[]) => void;
 }

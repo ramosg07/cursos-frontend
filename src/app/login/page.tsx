@@ -12,11 +12,11 @@ import { Loader2, User, Lock } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
-import { print } from '@/lib/print'
+import { print } from "@/lib/print";
 import { MessageInterpreter } from "@/lib/messageInterpreter";
 import { useAuth } from "@/contexts/AuthProvider";
 
@@ -30,7 +30,7 @@ const formSchema = z.object({
 });
 
 export default function Login() {
-  const { login } = useAuth()
+  const { login } = useAuth();
   const { theme } = useTheme();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
@@ -56,6 +56,14 @@ export default function Login() {
       setIsLoggingIn(false);
     }
   };
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   return (
     <div className="overflow-hidden relative">

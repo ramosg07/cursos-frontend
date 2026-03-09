@@ -33,6 +33,7 @@ import { Constants } from "@/config/Constants";
 import { CertificadoCampo, CertificadoConfig } from "../types";
 import jsPDF from "jspdf";
 import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Props {
   initialConfig?: CertificadoConfig;
@@ -52,6 +53,8 @@ export function DisenadorCertificados({
   onSave,
   onUploadFondo,
 }: Props) {
+  console.warn({ initialConfig });
+
   const [config, setConfig] = useState<CertificadoConfig>(
     initialConfig || {
       canvasSize: LETTER_SIZE.HORIZONTAL,
@@ -59,7 +62,7 @@ export function DisenadorCertificados({
         {
           id: "nombre",
           tipo: "texto",
-          valor: "[NOMBRE DEL ESTUDIANTE]",
+          valor: "[ESTUDIANTE]",
           variable: "nombre",
           testValue: "JUAN PEREZ PEREZ",
           x: 200,
@@ -74,7 +77,7 @@ export function DisenadorCertificados({
         {
           id: "curso",
           tipo: "texto",
-          valor: "[NOMBRE DEL CURSO]",
+          valor: "[CURSO]",
           variable: "curso",
           testValue: "DESARROLLO WEB FULLSTACK",
           x: 200,
@@ -87,7 +90,8 @@ export function DisenadorCertificados({
           width: 656,
         },
       ],
-    },
+      fondo: false,
+    }
   );
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -149,7 +153,7 @@ export function DisenadorCertificados({
   const handleTextChange = (
     id: string,
     field: keyof CertificadoCampo,
-    value: any,
+    value: any
   ) => {
     const newCampos = config.campos.map((c) => {
       if (c.id === id) {
@@ -229,7 +233,7 @@ export function DisenadorCertificados({
         0,
         0,
         config.canvasSize.width,
-        config.canvasSize.height,
+        config.canvasSize.height
       );
       pdf.save("certificado-diseño.pdf");
       toast.success("PDF generado correctamente");
@@ -248,14 +252,14 @@ export function DisenadorCertificados({
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
       {/* Sidebar de herramientas */}
       <div className="lg:col-span-1 space-y-6">
-        <Card>
+        <Card className="gap-2">
           <CardHeader>
             <CardTitle className="text-sm font-medium">
               Lienzo y Fondo
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
+            <div className="space-y-2 w-full">
               <Label>Orientación</Label>
               <Select
                 value={
@@ -273,7 +277,7 @@ export function DisenadorCertificados({
                   })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -282,7 +286,7 @@ export function DisenadorCertificados({
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 w-full">
               <Label>Imagen de Fondo</Label>
               <div className="flex gap-2">
                 <Button
@@ -302,6 +306,19 @@ export function DisenadorCertificados({
                 />
               </div>
             </div>
+            <div className="flex gap-2">
+              <Checkbox
+                id={"fondo"}
+                checked={config.fondo}
+                onCheckedChange={(checked: boolean) => {
+                  setConfig({
+                    ...config,
+                    fondo: checked,
+                  });
+                }}
+              />
+              <Label>Fondo</Label>
+            </div>
           </CardContent>
         </Card>
 
@@ -311,19 +328,21 @@ export function DisenadorCertificados({
               <CardTitle className="text-sm font-medium text-primary">
                 Propiedades: {selectedCampo.id}
               </CardTitle>
-              <Button
+              {/* TODO: Borrar, Si los campos son dinamicos */}
+              {/* <Button
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                 onClick={() => handleEliminarCampo(selectedCampo.id)}
               >
                 <Trash2 className="h-4 w-4" />
-              </Button>
+              </Button> */}
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label>Identificador (Variable)</Label>
                 <Input
+                  disabled
                   value={selectedCampo.variable || ""}
                   placeholder="ej. firma_director"
                   onChange={(e) =>
@@ -341,7 +360,7 @@ export function DisenadorCertificados({
                   }
                 />
               </div>
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label>Texto de Etiqueta</Label>
                 <Input
                   value={selectedCampo.valor}
@@ -349,8 +368,8 @@ export function DisenadorCertificados({
                     handleTextChange(selectedId!, "valor", e.target.value)
                   }
                 />
-              </div>
-              <div className="space-y-2">
+              </div> */}
+              {/* <div className="space-y-2">
                 <Label>Tamaño de Fuente</Label>
                 <Input
                   type="number"
@@ -359,12 +378,12 @@ export function DisenadorCertificados({
                     handleTextChange(
                       selectedId!,
                       "fontSize",
-                      parseInt(e.target.value),
+                      parseInt(e.target.value)
                     )
                   }
                 />
-              </div>
-              <div className="space-y-2">
+              </div> */}
+              {/* <div className="space-y-2">
                 <Label>Color de Texto</Label>
                 <div className="flex gap-2">
                   <Input
@@ -383,8 +402,8 @@ export function DisenadorCertificados({
                     }
                   />
                 </div>
-              </div>
-              <div className="space-y-2">
+              </div> */}
+              <div className="space-y-2 w-full">
                 <Label>Alineación</Label>
                 <Select
                   value={selectedCampo.align}
@@ -392,7 +411,7 @@ export function DisenadorCertificados({
                     handleTextChange(selectedId!, "align", val)
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -411,7 +430,7 @@ export function DisenadorCertificados({
                     handleTextChange(
                       selectedId!,
                       "width",
-                      parseInt(e.target.value),
+                      parseInt(e.target.value)
                     )
                   }
                 />
@@ -420,7 +439,7 @@ export function DisenadorCertificados({
           </Card>
         )}
 
-        <Card>
+        <Card className="gap-2">
           <CardHeader>
             <CardTitle className="text-sm font-medium">
               Acciones Rápidas

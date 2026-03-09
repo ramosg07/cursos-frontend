@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { DataTableProps, ToolBarConfigType } from "./types/datatable";
 import { Button } from "../ui/button";
 import {
@@ -67,6 +67,8 @@ export function DataTable<TData, TValue>({
   update,
   onResetUpdate,
   params,
+  onRowSelectionChange,
+  onSelectedItemsChange,
 }: DataTableProps<TData, TValue>) {
   const { sessionRequest } = useAuth();
   const queryClient = useQueryClient();
@@ -75,6 +77,7 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -156,6 +159,25 @@ export function DataTable<TData, TValue>({
     queryFn: fetchData,
     placeholderData: keepPreviousData,
   });
+
+  const lastSelectionRef = useRef<string>("");
+
+  useEffect(() => {
+    const selectionString = JSON.stringify(rowSelection);
+    if (lastSelectionRef.current === selectionString) return;
+    lastSelectionRef.current = selectionString;
+
+    if (onRowSelectionChange) {
+      onRowSelectionChange(rowSelection);
+    }
+    if (onSelectedItemsChange && data?.datos?.filas) {
+      const selectedItems = Object.keys(rowSelection)
+        .filter((key) => rowSelection[key])
+        .map((key) => data.datos.filas[parseInt(key)])
+        .filter(Boolean);
+      onSelectedItemsChange(selectedItems);
+    }
+  }, [rowSelection, onRowSelectionChange, onSelectedItemsChange, data]);
 
   const table = useReactTable({
     data: data?.datos?.filas || [],

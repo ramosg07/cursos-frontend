@@ -94,7 +94,7 @@ export function AgregarEditarCursoModal({
           coordinadores: [],
           paralelos: [{ nombre: "A", cupo: 30 }],
         },
-  });
+  } as any);
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
