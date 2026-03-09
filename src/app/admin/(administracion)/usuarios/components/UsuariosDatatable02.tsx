@@ -136,7 +136,6 @@ export function UsuariosDatatable02() {
       id: "actions",
       header: "Acciones",
       cell: ({ row }) => {
-        console.warn({ row });
         return (
           <div className="flex items-center gap-2">
             <Button

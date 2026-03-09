@@ -102,6 +102,12 @@ export function CursosDatatable() {
       meta: { mobileTitle: "Coordinadores" },
     },
     {
+      accessorKey: "monto",
+      header: "Monto (Bs.)",
+      cell: ({ row }) => Number(row.original.monto).toFixed(2),
+      meta: { mobileTitle: "Monto" },
+    },
+    {
       accessorKey: "estado",
       header: "Estado",
       cell: ({ row }) => (

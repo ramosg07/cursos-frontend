@@ -39,6 +39,7 @@ const formSchema = z.object({
   descripcion: z.string().optional(),
   fechaInicio: z.string().optional().nullable(),
   fechaFin: z.string().optional().nullable(),
+  monto: z.coerce.number().min(0, "El monto debe ser al menos 0"),
   coordinadores: z.array(z.string()).optional(),
   paralelos: z.array(
     z.object({
@@ -67,33 +68,35 @@ export function AgregarEditarCursoModal({
 
   const coordinadoresActivos = curso
     ? curso.cursoCoordinador
-        .filter((cc) => cc.estado === "ACTIVO")
-        .map((cc) => cc.idUsuario)
+      .filter((cc) => cc.estado === "ACTIVO")
+      .map((cc) => cc.idUsuario)
     : [];
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: curso
       ? {
-          nombre: curso.nombre,
-          descripcion: curso.descripcion ?? "",
-          fechaInicio: curso.fechaInicio ?? "",
-          fechaFin: curso.fechaFin ?? "",
-          coordinadores: coordinadoresActivos,
-          paralelos: (curso.paralelos || []).map((p) => ({
-            id: p.id,
-            nombre: p.nombre,
-            cupo: p.cupo,
-          })),
-        }
+        nombre: curso.nombre,
+        descripcion: curso.descripcion ?? "",
+        fechaInicio: curso.fechaInicio ?? "",
+        fechaFin: curso.fechaFin ?? "",
+        monto: Number(curso.monto) || 0,
+        coordinadores: coordinadoresActivos,
+        paralelos: (curso.paralelos || []).map((p) => ({
+          id: p.id,
+          nombre: p.nombre,
+          cupo: p.cupo,
+        })),
+      }
       : {
-          nombre: "",
-          descripcion: "",
-          fechaInicio: "",
-          fechaFin: "",
-          coordinadores: [],
-          paralelos: [{ nombre: "A", cupo: 30 }],
-        },
+        nombre: "",
+        descripcion: "",
+        fechaInicio: "",
+        fechaFin: "",
+        monto: 0,
+        coordinadores: [],
+        paralelos: [{ nombre: "A", cupo: 30 }],
+      },
   } as any);
 
   const { fields, append, remove } = useFieldArray({
@@ -114,6 +117,7 @@ export function AgregarEditarCursoModal({
           descripcion: values.descripcion || null,
           fechaInicio: values.fechaInicio || null,
           fechaFin: values.fechaFin || null,
+          monto: values.monto,
           coordinadores: values.coordinadores ?? [],
           paralelos: values.paralelos ?? [],
         },
@@ -234,6 +238,25 @@ export function AgregarEditarCursoModal({
                       value={field.value ?? ""}
                       aria-invalid={fieldState.invalid}
                       disabled={coordinadorCurso}
+                    />
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+              <Controller
+                name="monto"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field aria-invalid={fieldState.invalid} className="w-full">
+                    <FieldLabel>Monto (Bs.)</FieldLabel>
+                    <Input
+                      id="monto"
+                      type="number"
+                      placeholder="Ingrese el monto del curso"
+                      {...field}
+                      aria-invalid={fieldState.invalid}
                     />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />
