@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { print } from "@/lib/print";
 
 interface Props {
   paralelos: Paralelo[];
@@ -46,6 +47,10 @@ export function AgregarInscripcionModal({
   const [enrolling, setEnrolling] = useState(false);
   const [idParaleloSeleccionado, setIdParaleloSeleccionado] =
     useState<string>("");
+  const [idInscripcionExitosa, setIdInscripcionExitosa] = useState<
+    string | null
+  >(null);
+  const [descargandoRecibo, setDescargandoRecibo] = useState(false);
 
   const handleSearch = async () => {
     if (!nroDocumento.trim()) return;
@@ -73,7 +78,7 @@ export function AgregarInscripcionModal({
     if (!estudiante) return;
     setEnrolling(true);
     try {
-      await sessionRequest({
+      const resultado = await sessionRequest<any>({
         url: "/inscripciones",
         method: "post",
         data: {
@@ -81,9 +86,12 @@ export function AgregarInscripcionModal({
           idParalelo: idParaleloSeleccionado,
         },
       });
-      toast.success("Estudiante inscrito correctamente");
-      onSuccess();
-      onClose();
+
+      if (resultado && resultado.data?.datos?.id) {
+        setIdInscripcionExitosa(resultado.data.datos.id);
+        toast.success("Estudiante inscrito correctamente");
+        onSuccess();
+      }
     } catch (error: any) {
       console.log({ error });
       const errorMessage = error?.message;
@@ -97,113 +105,186 @@ export function AgregarInscripcionModal({
     }
   };
 
+  const handleDownloadReceipt = async () => {
+    if (!idInscripcionExitosa) return;
+    setDescargandoRecibo(true);
+    try {
+      const response: any = await sessionRequest({
+        url: `/inscripciones/${idInscripcionExitosa}/recibo`,
+        method: "get",
+        responseType: "blob",
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `recibo-${idInscripcionExitosa}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      print("Error downloading receipt", error);
+      toast.error("Error al descargar el recibo");
+    } finally {
+      setDescargandoRecibo(false);
+    }
+  };
+
+  const resetAndClose = () => {
+    setNroDocumento("");
+    setEstudiante(null);
+    setIdParaleloSeleccionado("");
+    setIdInscripcionExitosa(null);
+    onClose();
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Inscribir Estudiante</DialogTitle>
+          <DialogTitle>
+            {idInscripcionExitosa
+              ? "Inscripción Exitosa"
+              : "Inscribir Estudiante"}
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
-          <div className="flex items-end gap-2">
-            <Field className="flex-1">
-              <FieldLabel>Documento de Identidad (Buscador)</FieldLabel>
-              <Input
-                placeholder="Ingrese CI del estudiante"
-                value={nroDocumento}
-                onChange={(e) => setNroDocumento(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              />
-            </Field>
+        {idInscripcionExitosa ? (
+          <div className="py-10 flex flex-col items-center justify-center text-center space-y-4">
+            <div className="h-16 w-16 bg-green-100 rounded-full flex items-center justify-center">
+              <UserPlus className="h-8 w-8 text-green-600" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold">¡Estudiante Inscrito!</h3>
+              <p className="text-muted-foreground mt-2">
+                La inscripción se ha realizado correctamente. <br />
+                Puedes descargar el recibo ahora.
+              </p>
+            </div>
             <Button
-              onClick={handleSearch}
-              disabled={loading}
-              variant="secondary"
+              className="mt-4"
+              onClick={handleDownloadReceipt}
+              disabled={descargandoRecibo}
             >
-              <Search className="h-4 w-4 mr-2" />
-              Buscar
+              {descargandoRecibo ? "Generando..." : "Descargar Recibo PDF"}
             </Button>
           </div>
-
-          {estudiante && (
-            <div className="border rounded-lg p-4 bg-muted/30 flex items-start justify-between">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <p className="font-bold text-lg">
-                    {estudiante.usuario.persona.nombres}{" "}
-                    {estudiante.usuario.persona.primerApellido}{" "}
-                    {estudiante.usuario.persona.segundoApellido ?? ""}
-                  </p>
-                  <Badge variant="outline">{estudiante.usuario.usuario}</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {estudiante.usuario.correoElectronico}
-                </p>
-                {estudiante.codigoPersonal && (
-                  <p className="text-xs text-muted-foreground font-mono">
-                    Cód: {estudiante.codigoPersonal}
-                  </p>
-                )}
-              </div>
+        ) : (
+          <div className="space-y-6 py-4">
+            <div className="flex items-end gap-2">
+              <Field className="flex-1">
+                <FieldLabel>Documento de Identidad (Buscador)</FieldLabel>
+                <Input
+                  placeholder="Ingrese CI del estudiante"
+                  value={nroDocumento}
+                  onChange={(e) => setNroDocumento(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                />
+              </Field>
               <Button
-                onClick={() => setEstudiante(null)}
-                size="icon"
-                variant="ghost"
+                onClick={handleSearch}
+                disabled={loading}
+                variant="secondary"
               >
-                <X className="h-4 w-4" />
+                <Search className="h-4 w-4 mr-2" />
+                Buscar
               </Button>
             </div>
-          )}
 
-          {estudiante && (
-            <div className="space-y-4 pt-2">
-              <Separator />
-              <Field>
-                <FieldLabel>Seleccionar Paralelo</FieldLabel>
-                <Select
-                  value={idParaleloSeleccionado}
-                  onValueChange={setIdParaleloSeleccionado}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione un paralelo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {paralelos
-                      .filter((p) => p.estado === "ACTIVO")
-                      .map((p) => (
-                        <SelectItem key={p.id} value={p.id}>
-                          Paralelo {p.nombre} (Cupo: {p.cupo})
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-                {paralelos.length === 0 && (
-                  <p className="text-xs text-destructive mt-1">
-                    Este curso no tiene paralelos activos configurados.
+            {estudiante && (
+              <div className="border rounded-lg p-4 bg-muted/30 flex items-start justify-between">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <p className="font-bold text-lg">
+                      {estudiante.usuario.persona.nombres}{" "}
+                      {estudiante.usuario.persona.primerApellido}{" "}
+                      {estudiante.usuario.persona.segundoApellido ?? ""}
+                    </p>
+                    <Badge variant="outline">
+                      {estudiante.usuario.usuario}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {estudiante.usuario.correoElectronico}
                   </p>
-                )}
-              </Field>
-            </div>
-          )}
-        </div>
+                  {estudiante.codigoPersonal && (
+                    <p className="text-xs text-muted-foreground font-mono">
+                      Cód: {estudiante.codigoPersonal}
+                    </p>
+                  )}
+                </div>
+                <Button
+                  onClick={() => setEstudiante(null)}
+                  size="icon"
+                  variant="ghost"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+
+            {estudiante && (
+              <div className="space-y-4 pt-2">
+                <Separator />
+                <Field>
+                  <FieldLabel>Seleccionar Paralelo</FieldLabel>
+                  <Select
+                    value={idParaleloSeleccionado}
+                    onValueChange={setIdParaleloSeleccionado}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione un paralelo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {paralelos
+                        .filter((p) => p.estado === "ACTIVO")
+                        .map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            Paralelo {p.nombre} (Cupo: {p.cupo})
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                  {paralelos.length === 0 && (
+                    <p className="text-xs text-destructive mt-1">
+                      Este curso no tiene paralelos activos configurados.
+                    </p>
+                  )}
+                </Field>
+              </div>
+            )}
+          </div>
+        )}
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={enrolling}>
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleEnrol}
-            disabled={!estudiante || !idParaleloSeleccionado || enrolling}
-          >
-            {enrolling ? (
-              "Inscribiendo..."
-            ) : (
-              <>
-                <UserPlus className="h-4 w-4 mr-2" />
-                Inscribir Estudiante
-              </>
-            )}
-          </Button>
+          {idInscripcionExitosa ? (
+            <Button
+              variant="outline"
+              onClick={resetAndClose}
+              className="w-full"
+            >
+              Cerrar y Continuar
+            </Button>
+          ) : (
+            <>
+              <Button variant="outline" onClick={onClose} disabled={enrolling}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleEnrol}
+                disabled={!estudiante || !idParaleloSeleccionado || enrolling}
+              >
+                {enrolling ? (
+                  "Inscribiendo..."
+                ) : (
+                  <>
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Inscribir Estudiante
+                  </>
+                )}
+              </Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
