@@ -23,6 +23,9 @@ import { toast } from "sonner";
 import { MessageInterpreter } from "@/lib/messageInterpreter";
 import { print } from "@/lib/print";
 import { Plus, Trash2 } from "lucide-react";
+import { validateDateFormat } from "@/lib/dates";
+import dayjs from "dayjs";
+import { DatePickerSimple } from "@/components/DatePickerSimple";
 
 interface AgregarEditarCursoModalProps {
   curso: Curso | null;
@@ -37,8 +40,28 @@ const formSchema = z.object({
     message: "El nombre debe tener al menos 2 caracteres.",
   }),
   descripcion: z.string().optional(),
-  fechaInicio: z.string().optional().nullable(),
-  fechaFin: z.string().optional().nullable(),
+  fechaInicio: z
+    .string()
+    .optional()
+    .nullable()
+    .refine(
+      (date) => {
+        if (!date) return true; // permite null o undefined
+        return validateDateFormat(date, "YYYY-MM-DD");
+      },
+      { message: "Fecha de inicio inválida" },
+    ),
+  fechaFin: z
+    .string()
+    .optional()
+    .nullable()
+    .refine(
+      (date) => {
+        if (!date) return true; // permite null o undefined
+        return validateDateFormat(date, "YYYY-MM-DD");
+      },
+      { message: "Fecha de fin inválida" },
+    ),
   monto: z.coerce.number().min(0, "El monto debe ser al menos 0"),
   coordinadores: z.array(z.string()).optional(),
   paralelos: z.array(
@@ -68,35 +91,35 @@ export function AgregarEditarCursoModal({
 
   const coordinadoresActivos = curso
     ? curso.cursoCoordinador
-      .filter((cc) => cc.estado === "ACTIVO")
-      .map((cc) => cc.idUsuario)
+        .filter((cc) => cc.estado === "ACTIVO")
+        .map((cc) => cc.idUsuario)
     : [];
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: curso
       ? {
-        nombre: curso.nombre,
-        descripcion: curso.descripcion ?? "",
-        fechaInicio: curso.fechaInicio ?? "",
-        fechaFin: curso.fechaFin ?? "",
-        monto: Number(curso.monto) || 0,
-        coordinadores: coordinadoresActivos,
-        paralelos: (curso.paralelos || []).map((p) => ({
-          id: p.id,
-          nombre: p.nombre,
-          cupo: p.cupo,
-        })),
-      }
+          nombre: curso.nombre,
+          descripcion: curso.descripcion ?? "",
+          fechaInicio: dayjs.utc(curso.fechaInicio).format("YYYY-MM-DD") || "",
+          fechaFin: dayjs.utc(curso.fechaFin).format("YYYY-MM-DD") || "",
+          monto: Number(curso.monto) || 0,
+          coordinadores: coordinadoresActivos,
+          paralelos: (curso.paralelos || []).map((p) => ({
+            id: p.id,
+            nombre: p.nombre,
+            cupo: p.cupo,
+          })),
+        }
       : {
-        nombre: "",
-        descripcion: "",
-        fechaInicio: "",
-        fechaFin: "",
-        monto: 0,
-        coordinadores: [],
-        paralelos: [{ nombre: "A", cupo: 30 }],
-      },
+          nombre: "",
+          descripcion: "",
+          fechaInicio: "",
+          fechaFin: "",
+          monto: 0,
+          coordinadores: [],
+          paralelos: [{ nombre: "A", cupo: 30 }],
+        },
   } as any);
 
   const { fields, append, remove } = useFieldArray({
@@ -202,48 +225,46 @@ export function AgregarEditarCursoModal({
               <Controller
                 name="fechaInicio"
                 control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field
-                    aria-invalid={fieldState.invalid}
-                    className="w-full p-0 md:w-6/12 md:pr-2"
-                  >
-                    <FieldLabel>Fecha de Inicio</FieldLabel>
-                    <Input
-                      id="fechaInicio"
-                      type="date"
-                      {...field}
-                      value={field.value ?? ""}
+                render={({ field, fieldState }) => {
+                  return (
+                    <Field
                       aria-invalid={fieldState.invalid}
-                      disabled={coordinadorCurso}
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
+                      className="w-full p-0 md:w-6/12 md:pr-2"
+                    >
+                      <DatePickerSimple
+                        label="Fecha de Inicio"
+                        value={field.value || undefined}
+                        onChange={(date) => {
+                          field.onChange(date || "");
+                        }}
+                        invalid={fieldState.invalid}
+                        error={fieldState.error}
+                      />
+                    </Field>
+                  );
+                }}
               />
               <Controller
                 name="fechaFin"
                 control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field
-                    aria-invalid={fieldState.invalid}
-                    className="w-full p-0 md:w-6/12 md:pl-2"
-                  >
-                    <FieldLabel>Fecha de Fin</FieldLabel>
-                    <Input
-                      id="fechaFin"
-                      type="date"
-                      {...field}
-                      value={field.value ?? ""}
+                render={({ field, fieldState }) => {
+                  return (
+                    <Field
                       aria-invalid={fieldState.invalid}
-                      disabled={coordinadorCurso}
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
+                      className="w-full p-0 md:w-6/12 md:pl-2"
+                    >
+                      <DatePickerSimple
+                        label="Fecha de Fin"
+                        value={field.value || undefined}
+                        onChange={(date) => {
+                          field.onChange(date || "");
+                        }}
+                        invalid={fieldState.invalid}
+                        error={fieldState.error}
+                      />
+                    </Field>
+                  );
+                }}
               />
               <Controller
                 name="monto"

@@ -8,6 +8,7 @@ export interface Curso {
   estado: string;
   cursoCoordinador: CursoCoordinador[];
   paralelos: Paralelo[];
+  idPlantillaCertificado?: string | null;
 }
 
 export interface Paralelo {

@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { MessageInterpreter } from "@/lib/messageInterpreter";
 import { print } from "@/lib/print";
 import dayjs from "dayjs";
+import { DatePickerSimple } from "@/components/DatePickerSimple";
 
 interface AgregarEditarUsuarioModalProps {
   usuario: Usuario | null;
@@ -46,7 +47,7 @@ const formSchema = z.object({
     (date) => {
       return validateDateFormat(date, "YYYY-MM-DD");
     },
-    { message: "Fecha de nacimiento inválida" }
+    { message: "Fecha de nacimiento inválida" },
   ),
   correoElectronico: z
     .string()
@@ -74,7 +75,9 @@ export function AgregarEditarUsuarioModal({
           primerApellido: usuario.persona.primerApellido,
           segundoApellido: usuario.persona.segundoApellido,
           nroDocumento: usuario.persona.nroDocumento,
-          fechaNacimiento: dayjs(usuario.persona.fechaNacimiento).format("YYYY-MM-DD") || "",
+          fechaNacimiento:
+            dayjs.utc(usuario.persona.fechaNacimiento).format("YYYY-MM-DD") ||
+            "",
           correoElectronico: usuario.correoElectronico,
           roles: usuario.usuarioRol.map((rol) => rol.rol.id),
         }
@@ -99,8 +102,8 @@ export function AgregarEditarUsuarioModal({
         url,
         method,
         data: {
-					correoElectronico: values.correoElectronico,
-					roles: values.roles,
+          correoElectronico: values.correoElectronico,
+          roles: values.roles,
           persona: {
             nombres: values.nombres,
             primerApellido: values.primerApellido,
@@ -121,9 +124,7 @@ export function AgregarEditarUsuarioModal({
       print("Error al guardar usuario", error);
       toast.error(
         usuario ? "Error al actualizar usuario" : "Error al crear usuario",
-        {
-          description: MessageInterpreter(error),
-        }
+        { description: MessageInterpreter(error) },
       );
     } finally {
       setIsLoading(false);
@@ -227,17 +228,15 @@ export function AgregarEditarUsuarioModal({
                       aria-invalid={fieldState.invalid}
                       className="w-full p-0 md:w-6/12 md:pl-2"
                     >
-                      <FieldLabel>Fecha Nacimiento</FieldLabel>
-                      <Input
-                        id="fechaNacimiento"
-                        placeholder="Ingrese su fecha de nacimiento"
-                        type="date"
-                        {...field}
-                        aria-invalid={fieldState.invalid}
+                      <DatePickerSimple
+                        label="Fecha Nacimiento"
+                        value={field.value || undefined}
+                        onChange={(date) => {
+                          field.onChange(date || "");
+                        }}
+                        invalid={fieldState.invalid}
+                        error={fieldState.error}
                       />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
                     </Field>
                   );
                 }}
@@ -327,7 +326,7 @@ export function AgregarEditarUsuarioModal({
                                 } else {
                                   form.setValue(
                                     "roles",
-                                    currentRoles.filter((id) => id !== role.id)
+                                    currentRoles.filter((id) => id !== role.id),
                                   );
                                 }
                               }}

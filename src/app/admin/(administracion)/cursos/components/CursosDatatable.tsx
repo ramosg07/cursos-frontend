@@ -8,13 +8,14 @@ import { Curso, UsuarioCoordinador } from "../types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FilterType } from "@/components/data-table/types/filter";
-import { Edit, Plus, Users } from "lucide-react";
+import { Edit, FileBadge, Plus, Users } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthProvider";
 import { AgregarEditarCursoModal } from "./AgregarEditarCursoModal";
 import { ActivarInactivarCursoModal } from "./ActivarInactivarCursoModal";
 import Link from "next/link";
+import { ElegirPlantillaModal } from "./ElegirPlantillaModal";
 
 export function CursosDatatable() {
   const [updateTable, setUpdateTable] = useState(false);
@@ -22,6 +23,9 @@ export function CursosDatatable() {
   const [agregarEditarModalOpen, setAgregarEditarModalOpen] =
     useState<boolean>(false);
   const [activarInactivarModalOpen, setActivarInactivarModalOpen] =
+    useState<boolean>(false);
+
+  const [elegirPlantillaModalOpen, setElegirPlantillaModalOpen] =
     useState<boolean>(false);
 
   const { sessionRequest, user, checkPermission } = useAuth();
@@ -36,6 +40,11 @@ export function CursosDatatable() {
   const handleActivarInactivarCurso = (curso: Curso) => {
     setSelectCurso(curso);
     setActivarInactivarModalOpen(true);
+  };
+
+  const handleElegirPlantilla = (curso: Curso) => {
+    setSelectCurso(curso);
+    setElegirPlantillaModalOpen(true);
   };
 
   const [permissions, setPermissions] = useState({
@@ -148,6 +157,16 @@ export function CursosDatatable() {
               onCheckedChange={() => handleActivarInactivarCurso(row.original)}
             />
           )}
+          {row.original.estado === "ACTIVO" && coordinadorGeneral && (
+            <Button
+              title="Elegir Plantilla"
+              variant="outline"
+              size={"icon"}
+              onClick={() => handleElegirPlantilla(row.original)}
+            >
+              <FileBadge className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       ),
       meta: { mobileTitle: "Acciones" },
@@ -222,6 +241,14 @@ export function CursosDatatable() {
           isOpen={activarInactivarModalOpen}
           onSuccess={updateDataTable}
           onClose={() => setActivarInactivarModalOpen(false)}
+        />
+      )}
+      {elegirPlantillaModalOpen && (
+        <ElegirPlantillaModal
+          curso={selectCurso}
+          isOpen={elegirPlantillaModalOpen}
+          onSuccess={updateDataTable}
+          onClose={() => setElegirPlantillaModalOpen(false)}
         />
       )}
     </div>

@@ -24,6 +24,7 @@ interface Props {
 
 export function InscritosDatatable({ curso }: Props) {
   const idCurso = curso.id;
+  const idPlantillaCertificado = curso.idPlantillaCertificado;
   const [updateTable, setUpdateTable] = useState(false);
   const [agregarInscripcionModalOpen, setAgregarInscripcionModalOpen] =
     useState<boolean>(false);
@@ -31,7 +32,7 @@ export function InscritosDatatable({ curso }: Props) {
     useState<boolean>(false);
   const [printModalOpen, setPrintModalOpen] = useState<boolean>(false);
   const [selectedInscripciones, setSelectedInscripciones] = useState<string[]>(
-    []
+    [],
   );
 
   // Función para manejar el cambio de selección en el DataTable
@@ -71,25 +72,31 @@ export function InscritosDatatable({ curso }: Props) {
   }, [checkPermission]);
 
   const columns: ColumnDef<Inscripcion>[] = [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Seleccionar todo"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Seleccionar fila"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
+    ...(idPlantillaCertificado
+      ? [
+          {
+            id: "select",
+            header: ({ table }: any) => (
+              <Checkbox
+                checked={table.getIsAllPageRowsSelected()}
+                onCheckedChange={(value) =>
+                  table.toggleAllPageRowsSelected(!!value)
+                }
+                aria-label="Seleccionar todo"
+              />
+            ),
+            cell: ({ row }: any) => (
+              <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(value) => row.toggleSelected(!!value)}
+                aria-label="Seleccionar fila"
+              />
+            ),
+            enableSorting: false,
+            enableHiding: false,
+          },
+        ]
+      : []),
     {
       accessorKey: "estudiante.usuario.persona.nroDocumento",
       header: ({ column }) => (
@@ -255,19 +262,21 @@ export function InscritosDatatable({ curso }: Props) {
                 <span>Carga Masiva</span>
               </Button>
             ),
-            <Button
-              key={"PrintBatch"}
-              title="Printear certificados"
-              variant="outline"
-              className="flex gap-2"
-              onClick={() => handleOpenPrintModal()}
-              disabled={selectedInscripciones.length === 0}
-            >
-              <Printer className="h-4 w-4" />
-              <span>
-                Imprimir Seleccionados ({selectedInscripciones.length})
-              </span>
-            </Button>,
+            idPlantillaCertificado && (
+              <Button
+                key={"PrintBatch"}
+                title="Printear certificados"
+                variant="outline"
+                className="flex gap-2"
+                onClick={() => handleOpenPrintModal()}
+                disabled={selectedInscripciones.length === 0}
+              >
+                <Printer className="h-4 w-4" />
+                <span>
+                  Imprimir Seleccionados ({selectedInscripciones.length})
+                </span>
+              </Button>
+            ),
             <Button
               key={"Agregar"}
               title="Inscribir estudiante"

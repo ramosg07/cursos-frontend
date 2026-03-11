@@ -30,3 +30,9 @@ export interface CertificadoCampo {
   variable?: string;
   testValue?: string;
 }
+
+export interface PlantillaCertificadoResponse {
+  finalizado: boolean;
+  mensaje: string;
+  datos: PlantillaCertificado[];
+}

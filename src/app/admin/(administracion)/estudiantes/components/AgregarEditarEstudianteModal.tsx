@@ -19,6 +19,8 @@ import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { MessageInterpreter } from "@/lib/messageInterpreter";
 import dayjs from "dayjs";
+import { validateDateFormat } from "@/lib/dates";
+import { DatePickerSimple } from "@/components/DatePickerSimple";
 
 const studentSchema = z.object({
   nroDocumento: z.string().min(5, "Mínimo 5 caracteres"),
@@ -27,7 +29,12 @@ const studentSchema = z.object({
   segundoApellido: z.string().optional().nullable(),
   correoElectronico: z.string().email("Correo inválido"),
   codigoPersonal: z.string().optional().nullable(),
-  fechaNacimiento: z.string().optional().nullable(),
+  fechaNacimiento: z.string().refine(
+    (date) => {
+      return validateDateFormat(date, "YYYY-MM-DD");
+    },
+    { message: "Fecha de nacimiento inválida" },
+  ),
 });
 
 type StudentFormValues = z.infer<typeof studentSchema>;
@@ -72,11 +79,10 @@ export function AgregarEditarEstudianteModal({
         segundoApellido: p.segundoApellido ?? "",
         correoElectronico: estudiante.usuario.correoElectronico,
         codigoPersonal: estudiante.codigoPersonal ?? "",
-        fechaNacimiento: estudiante.usuario.persona.fechaNacimiento
-          ? dayjs(estudiante.usuario.persona.fechaNacimiento).format(
-              "YYYY-MM-DD",
-            )
-          : "",
+        fechaNacimiento:
+          dayjs
+            .utc(estudiante.usuario.persona.fechaNacimiento)
+            .format("YYYY-MM-DD") || "",
       });
     } else {
       form.reset({
@@ -251,20 +257,24 @@ export function AgregarEditarEstudianteModal({
           <Controller
             name="fechaNacimiento"
             control={form.control}
-            render={({ field, fieldState }) => (
-              <Field aria-invalid={fieldState.invalid}>
-                <FieldLabel>Fecha de Nacimiento</FieldLabel>
-                <Input
-                  type="date"
-                  {...field}
-                  value={field.value || ""}
+            render={({ field, fieldState }) => {
+              return (
+                <Field
                   aria-invalid={fieldState.invalid}
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
+                  className="w-full p-0 md:w-12/12"
+                >
+                  <DatePickerSimple
+                    label="Fecha Nacimiento"
+                    value={field.value || undefined}
+                    onChange={(date) => {
+                      field.onChange(date || "");
+                    }}
+                    invalid={fieldState.invalid}
+                    error={fieldState.error}
+                  />
+                </Field>
+              );
+            }}
           />
 
           <DialogFooter>

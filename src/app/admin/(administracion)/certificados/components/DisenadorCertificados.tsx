@@ -79,7 +79,7 @@ export function DisenadorCertificados({
           tipo: "texto",
           valor: "[CURSO]",
           variable: "curso",
-          testValue: "DESARROLLO WEB FULLSTACK",
+          testValue: "REACT JS",
           x: 200,
           y: 500,
           fontSize: 30,
@@ -91,7 +91,7 @@ export function DisenadorCertificados({
         },
       ],
       fondo: false,
-    }
+    },
   );
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -153,7 +153,7 @@ export function DisenadorCertificados({
   const handleTextChange = (
     id: string,
     field: keyof CertificadoCampo,
-    value: any
+    value: any,
   ) => {
     const newCampos = config.campos.map((c) => {
       if (c.id === id) {
@@ -233,7 +233,7 @@ export function DisenadorCertificados({
         0,
         0,
         config.canvasSize.width,
-        config.canvasSize.height
+        config.canvasSize.height,
       );
       pdf.save("certificado-diseño.pdf");
       toast.success("PDF generado correctamente");
@@ -430,7 +430,7 @@ export function DisenadorCertificados({
                     handleTextChange(
                       selectedId!,
                       "width",
-                      parseInt(e.target.value)
+                      parseInt(e.target.value),
                     )
                   }
                 />
@@ -456,7 +456,7 @@ export function DisenadorCertificados({
             </Button> */}
             <Button
               variant={isPreview ? "default" : "outline"}
-              className="w-full justify-start"
+              className="w-full justify-start overflow-hidden"
               onClick={() => setIsPreview(!isPreview)}
             >
               {isPreview ? (
@@ -464,7 +464,9 @@ export function DisenadorCertificados({
               ) : (
                 <Eye className="h-4 w-4 mr-2" />
               )}
-              {isPreview ? "Salir de Vista Previa" : "Ver con Datos Reales"}
+              <span className="truncate">
+                {isPreview ? "Salir de Vista Previa" : "Ver con Datos Reales"}
+              </span>
             </Button>
           </CardContent>
         </Card>
