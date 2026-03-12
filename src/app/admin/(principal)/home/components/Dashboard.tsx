@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { BarChart3, Users, DollarSign } from "lucide-react";
 import { toast } from "sonner";
@@ -17,6 +16,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UsuarioCoordinador } from "@/app/admin/(administracion)/cursos/types";
+import { DatePickerSimple } from "@/components/DatePickerSimple";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+dayjs.extend(utc);
 
 interface RecaudacionData {
   total: number;
@@ -29,8 +32,8 @@ export default function Dashboard() {
   const [data, setData] = useState<RecaudacionData | null>(null);
 
   const [filtros, setFiltros] = useState({
-    fechaInicio: new Date().toISOString().split("T")[0],
-    fechaFin: new Date().toISOString().split("T")[0],
+    fechaInicio: dayjs.utc().format("YYYY-MM-DD") || "",
+    fechaFin: dayjs.utc().format("YYYY-MM-DD") || "",
     idUsuario: "todos",
   });
 
@@ -87,6 +90,7 @@ export default function Dashboard() {
       fetchRecaudacion();
       fetchCoordinadores();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!esCoordinadorGeneral && !esAdministrador) {
@@ -106,23 +110,17 @@ export default function Dashboard() {
 
       <div className="flex flex-wrap items-end gap-4 bg-muted/20 p-4 rounded-lg border">
         <Field className="w-full md:w-48">
-          <FieldLabel>Fecha Inicio</FieldLabel>
-          <Input
-            type="date"
+          <DatePickerSimple
+            label="Fecha Inicio"
             value={filtros.fechaInicio}
-            onChange={(e) =>
-              setFiltros({ ...filtros, fechaInicio: e.target.value })
-            }
+            onChange={(e) => setFiltros({ ...filtros, fechaInicio: e ?? "" })}
           />
         </Field>
         <Field className="w-full md:w-48">
-          <FieldLabel>Fecha Fin</FieldLabel>
-          <Input
-            type="date"
+          <DatePickerSimple
+            label="Fecha Fin"
             value={filtros.fechaFin}
-            onChange={(e) =>
-              setFiltros({ ...filtros, fechaFin: e.target.value })
-            }
+            onChange={(e) => setFiltros({ ...filtros, fechaFin: e ?? "" })}
           />
         </Field>
         <Field className="w-full md:w-64">

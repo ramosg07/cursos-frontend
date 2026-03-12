@@ -278,6 +278,7 @@ export function AgregarEditarCursoModal({
                       placeholder="Ingrese el monto del curso"
                       {...field}
                       aria-invalid={fieldState.invalid}
+                      disabled={coordinadorCurso}
                     />
                     {fieldState.invalid && (
                       <FieldError errors={[fieldState.error]} />

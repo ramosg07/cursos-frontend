@@ -8,7 +8,15 @@ import { Inscripcion } from "../types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FilterType } from "@/components/data-table/types/filter";
-import { Plus, Upload, ArrowLeft, Calendar, Info, Printer } from "lucide-react";
+import {
+  Plus,
+  Upload,
+  ArrowLeft,
+  Calendar,
+  Info,
+  Printer,
+  BadgeDollarSign,
+} from "lucide-react";
 import { AgregarInscripcionModal } from "./AgregarInscripcionModal";
 import { BulkInscripcionModal } from "./BulkInscripcionModal";
 import { PrintCertificatesModal } from "./PrintCertificatesModal";
@@ -135,16 +143,17 @@ export function InscritosDatatable({ curso }: Props) {
     {
       id: "acciones",
       header: "Acciones",
-      cell: ({ row }) => (
-        <Button
-          variant="ghost"
-          size="icon"
-          title="Imprimir certificado"
-          onClick={() => handleOpenPrintModal([row.original.id])}
-        >
-          <Printer className="h-4 w-4" />
-        </Button>
-      ),
+      cell: ({ row }) =>
+        idPlantillaCertificado && (
+          <Button
+            variant="ghost"
+            size="icon"
+            title="Imprimir certificado"
+            onClick={() => handleOpenPrintModal([row.original.id])}
+          >
+            <Printer className="h-4 w-4" />
+          </Button>
+        ),
     },
   ];
 
@@ -206,7 +215,7 @@ export function InscritosDatatable({ curso }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="flex items-start gap-3 p-4 border rounded-lg bg-card shadow-sm">
           <div className="mt-1 bg-primary/10 p-2 rounded-full">
             <Info className="h-4 w-4 text-primary" />
@@ -240,6 +249,25 @@ export function InscritosDatatable({ curso }: Props) {
             <p className="text-sm">{curso.fechaFin || "—"}</p>
           </div>
         </div>
+        <div className="flex items-start gap-3 p-4 border rounded-lg bg-card shadow-sm">
+          <div className="mt-1 bg-primary/10 p-2 rounded-full">
+            <BadgeDollarSign className="h-4 w-4 text-primary" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              Monto
+            </p>
+            <p className="text-sm">{curso.monto || "—"}</p>
+          </div>
+        </div>
+      </div>
+      <div className="flex gap-2">
+        {curso.paralelos.length > 0 &&
+          curso.paralelos.map((p) => (
+            <Badge key={p.id} variant={"outline"}>
+              Paralelo {p.nombre}: {p.cupo} cupos
+            </Badge>
+          ))}
       </div>
 
       <DataTable
