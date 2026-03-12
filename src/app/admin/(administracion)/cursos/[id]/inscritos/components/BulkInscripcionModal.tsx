@@ -124,11 +124,21 @@ export function BulkInscripcionModal({
               <SelectContent>
                 {paralelos
                   .filter((p) => p.estado === "ACTIVO")
-                  .map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      Paralelo {p.nombre} (Cupo: {p.cupo})
-                    </SelectItem>
-                  ))}
+                  .map((p) => {
+                    const disponibles = p.cuposDisponibles ?? p.cupo;
+                    return (
+                      <SelectItem
+                        key={p.id}
+                        value={p.id}
+                        disabled={disponibles === 0}
+                      >
+                        Paralelo {p.nombre} —{" "}
+                        {disponibles === 0
+                          ? "Sin cupos"
+                          : `${disponibles} cupo${disponibles !== 1 ? "s" : ""} disponible${disponibles !== 1 ? "s" : ""}`}
+                      </SelectItem>
+                    );
+                  })}
               </SelectContent>
             </Select>
           </div>

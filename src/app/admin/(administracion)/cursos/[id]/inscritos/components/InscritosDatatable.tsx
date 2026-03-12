@@ -16,7 +16,20 @@ import {
   Info,
   Printer,
   BadgeDollarSign,
+  UserMinus,
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 import { AgregarInscripcionModal } from "./AgregarInscripcionModal";
 import { BulkInscripcionModal } from "./BulkInscripcionModal";
 import { PrintCertificatesModal } from "./PrintCertificatesModal";
@@ -57,7 +70,7 @@ export function InscritosDatatable({ curso }: Props) {
     });
   }, []);
 
-  const { checkPermission } = useAuth();
+  const { checkPermission, sessionRequest } = useAuth();
 
   const [permissions, setPermissions] = useState({
     create: false,
@@ -82,28 +95,28 @@ export function InscritosDatatable({ curso }: Props) {
   const columns: ColumnDef<Inscripcion>[] = [
     ...(idPlantillaCertificado
       ? [
-          {
-            id: "select",
-            header: ({ table }: any) => (
-              <Checkbox
-                checked={table.getIsAllPageRowsSelected()}
-                onCheckedChange={(value) =>
-                  table.toggleAllPageRowsSelected(!!value)
-                }
-                aria-label="Seleccionar todo"
-              />
-            ),
-            cell: ({ row }: any) => (
-              <Checkbox
-                checked={row.getIsSelected()}
-                onCheckedChange={(value) => row.toggleSelected(!!value)}
-                aria-label="Seleccionar fila"
-              />
-            ),
-            enableSorting: false,
-            enableHiding: false,
-          },
-        ]
+        {
+          id: "select",
+          header: ({ table }: any) => (
+            <Checkbox
+              checked={table.getIsAllPageRowsSelected()}
+              onCheckedChange={(value) =>
+                table.toggleAllPageRowsSelected(!!value)
+              }
+              aria-label="Seleccionar todo"
+            />
+          ),
+          cell: ({ row }: any) => (
+            <Checkbox
+              checked={row.getIsSelected()}
+              onCheckedChange={(value) => row.toggleSelected(!!value)}
+              aria-label="Seleccionar fila"
+            />
+          ),
+          enableSorting: false,
+          enableHiding: false,
+        },
+      ]
       : []),
     {
       accessorKey: "estudiante.usuario.persona.nroDocumento",
@@ -143,17 +156,53 @@ export function InscritosDatatable({ curso }: Props) {
     {
       id: "acciones",
       header: "Acciones",
-      cell: ({ row }) =>
-        idPlantillaCertificado && (
-          <Button
-            variant="ghost"
-            size="icon"
-            title="Imprimir certificado"
-            onClick={() => handleOpenPrintModal([row.original.id])}
-          >
-            <Printer className="h-4 w-4" />
-          </Button>
-        ),
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1">
+          {idPlantillaCertificado && (
+            <Button
+              variant="ghost"
+              size="icon"
+              title="Imprimir certificado"
+              onClick={() => handleOpenPrintModal([row.original.id])}
+            >
+              <Printer className="h-4 w-4" />
+            </Button>
+          )}
+
+          {permissions.delete && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="icon" title="Desinscribir">
+                  <UserMinus className="h-4 w-4 text-destructive" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>¿Está seguro?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta acción marcará la inscripción de{" "}
+                    <strong>
+                      {row.original.estudiante?.usuario?.persona?.nombres}{" "}
+                      {row.original.estudiante?.usuario?.persona?.primerApellido}
+                    </strong>{" "}
+                    como inactiva. Podrá volver a inscribirlo después si es
+                    necesario.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => handleDesinscribir(row.original.id)}
+                    className="bg-destructive hover:bg-destructive/90"
+                  >
+                    Confirmar Desinscripción
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </div>
+      ),
     },
   ];
 
@@ -185,6 +234,21 @@ export function InscritosDatatable({ curso }: Props) {
   function updateDataTable() {
     setUpdateTable(true);
   }
+
+  const handleDesinscribir = async (id: string) => {
+    try {
+      const response = await sessionRequest({
+        url: `/inscripciones/${id}/desinscribir`,
+        method: "post",
+      });
+      if (response && response.data) {
+        toast.success("Estudiante desinscrito correctamente");
+        updateDataTable();
+      }
+    } catch (error: any) {
+      toast.error(error?.mensaje || "Error al desinscribir");
+    }
+  };
 
   const handleOpenPrintModal = (inscripciones?: string[]) => {
     // Si no se pasan inscripciones, se usan las seleccionadas en el datatable
@@ -261,13 +325,41 @@ export function InscritosDatatable({ curso }: Props) {
           </div>
         </div>
       </div>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {curso.paralelos.length > 0 &&
-          curso.paralelos.map((p) => (
-            <Badge key={p.id} variant={"outline"}>
-              Paralelo {p.nombre}: {p.cupo} cupos
-            </Badge>
-          ))}
+          curso.paralelos.map((p) => {
+            const disponibles = p.cuposDisponibles ?? p.cupo;
+            const inscritos = p.inscritos ?? 0;
+            const porcentajeOcupado = p.cupo > 0 ? (inscritos / p.cupo) * 100 : 0;
+            const colorVar =
+              disponibles === 0
+                ? "text-destructive border-destructive/30 bg-destructive/5"
+                : disponibles <= 2
+                  ? "text-yellow-600 border-yellow-400/30 bg-yellow-50 dark:bg-yellow-900/10"
+                  : "text-green-700 border-green-400/30 bg-green-50 dark:bg-green-900/10";
+
+            return (
+              <div
+                key={p.id}
+                className={`flex flex-col px-3 py-2 rounded-lg border text-sm ${colorVar}`}
+              >
+                <span className="font-medium text-foreground">
+                  Paralelo {p.nombre} : {inscritos}/{p.cupo} inscritos
+                </span>
+                <span className="font-medium mt-0.5">
+                  {disponibles === 0
+                    ? "Sin cupos"
+                    : `${disponibles} cupo${disponibles !== 1 ? "s" : ""} restante${disponibles !== 1 ? "s" : ""}`}
+                </span>
+                <div className="mt-1 h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${disponibles === 0 ? "bg-destructive" : disponibles <= 2 ? "bg-yellow-500" : "bg-green-500"}`}
+                    style={{ width: `${Math.min(porcentajeOcupado, 100)}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
       </div>
 
       <DataTable

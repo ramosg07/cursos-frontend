@@ -51,8 +51,8 @@ export default function Dashboard() {
         url: "/dashboard/recaudacion",
         method: "get",
         params: {
-          fechaInicio: filtros.fechaInicio,
-          fechaFin: filtros.fechaFin,
+          fechaInicio: dayjs(filtros.fechaInicio).startOf("day").toISOString(),
+          fechaFin: dayjs(filtros.fechaFin).endOf("day").toISOString(),
           idUsuario:
             filtros.idUsuario === "todos" ? undefined : filtros.idUsuario,
         },
@@ -60,7 +60,7 @@ export default function Dashboard() {
       if (response) {
         setData(response.data);
       }
-    } catch (error) {
+    } catch (error: any) {
       print("Error fetching revenue", error);
       toast.error("Error al cargar los datos de recaudación");
     } finally {

@@ -16,6 +16,8 @@ export interface Paralelo {
   nombre: string;
   cupo: number;
   estado: string;
+  inscritos?: number;
+  cuposDisponibles?: number;
 }
 
 export interface CursoCoordinador {

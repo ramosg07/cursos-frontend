@@ -167,7 +167,7 @@ export function AgregarEditarCursoModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-h-screen overflow-y-auto">
+      <DialogContent className="sm:max-w-5xl max-h-screen overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{curso ? "Editar Curso" : "Agregar Curso"}</DialogTitle>
           <DialogDescription>
@@ -177,271 +177,274 @@ export function AgregarEditarCursoModal({
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          {/* Información del curso */}
-          <div>
-            <h4 className="scroll-m-20 text-base font-semibold tracking-tight">
-              Información del curso
-            </h4>
-            <div className="flex flex-wrap space-y-2 pt-4">
-              <Controller
-                name="nombre"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field aria-invalid={fieldState.invalid} className="w-full">
-                    <FieldLabel>Nombre</FieldLabel>
-                    <Input
-                      id="nombre"
-                      placeholder="Ingrese el nombre del curso"
-                      {...field}
-                      aria-invalid={fieldState.invalid}
-                      disabled={coordinadorCurso}
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-              <Controller
-                name="descripcion"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field aria-invalid={fieldState.invalid} className="w-full">
-                    <FieldLabel>Descripción</FieldLabel>
-                    <Input
-                      id="descripcion"
-                      placeholder="Ingrese una descripción (opcional)"
-                      {...field}
-                      value={field.value ?? ""}
-                      aria-invalid={fieldState.invalid}
-                      disabled={coordinadorCurso}
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-              <Controller
-                name="fechaInicio"
-                control={form.control}
-                render={({ field, fieldState }) => {
-                  return (
-                    <Field
-                      aria-invalid={fieldState.invalid}
-                      className="w-full p-0 md:w-6/12 md:pr-2"
-                    >
-                      <DatePickerSimple
-                        label="Fecha de Inicio"
-                        value={field.value || undefined}
-                        onChange={(date) => {
-                          field.onChange(date || "");
-                        }}
-                        invalid={fieldState.invalid}
-                        error={fieldState.error}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6  divide-x">
+            {/* Información del curso */}
+            <div className="pr-10">
+              <h4 className="scroll-m-20 text-base font-semibold tracking-tight">
+                Información del curso
+              </h4>
+              <div className="flex flex-wrap space-y-2 pt-4">
+                <Controller
+                  name="nombre"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field aria-invalid={fieldState.invalid} className="w-full">
+                      <FieldLabel>Nombre</FieldLabel>
+                      <Input
+                        id="nombre"
+                        placeholder="Ingrese el nombre del curso"
+                        {...field}
+                        aria-invalid={fieldState.invalid}
+                        disabled={coordinadorCurso}
                       />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
                     </Field>
-                  );
-                }}
-              />
-              <Controller
-                name="fechaFin"
-                control={form.control}
-                render={({ field, fieldState }) => {
-                  return (
-                    <Field
-                      aria-invalid={fieldState.invalid}
-                      className="w-full p-0 md:w-6/12 md:pl-2"
-                    >
-                      <DatePickerSimple
-                        label="Fecha de Fin"
-                        value={field.value || undefined}
-                        onChange={(date) => {
-                          field.onChange(date || "");
-                        }}
-                        invalid={fieldState.invalid}
-                        error={fieldState.error}
+                  )}
+                />
+                <Controller
+                  name="descripcion"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field aria-invalid={fieldState.invalid} className="w-full">
+                      <FieldLabel>Descripción</FieldLabel>
+                      <Input
+                        id="descripcion"
+                        placeholder="Ingrese una descripción (opcional)"
+                        {...field}
+                        value={field.value ?? ""}
+                        aria-invalid={fieldState.invalid}
+                        disabled={coordinadorCurso}
                       />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
                     </Field>
-                  );
-                }}
-              />
-              <Controller
-                name="monto"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field aria-invalid={fieldState.invalid} className="w-full">
-                    <FieldLabel>Monto (Bs.)</FieldLabel>
-                    <Input
-                      id="monto"
-                      type="number"
-                      placeholder="Ingrese el monto del curso"
-                      {...field}
-                      aria-invalid={fieldState.invalid}
-                      disabled={coordinadorCurso}
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
+                  )}
+                />
+                <Controller
+                  name="fechaInicio"
+                  control={form.control}
+                  render={({ field, fieldState }) => {
+                    return (
+                      <Field
+                        aria-invalid={fieldState.invalid}
+                        className="w-full p-0 md:w-6/12 md:pr-2"
+                      >
+                        <DatePickerSimple
+                          label="Fecha de Inicio"
+                          value={field.value || undefined}
+                          onChange={(date) => {
+                            field.onChange(date || "");
+                          }}
+                          invalid={fieldState.invalid}
+                          error={fieldState.error}
+                        />
+                      </Field>
+                    );
+                  }}
+                />
+                <Controller
+                  name="fechaFin"
+                  control={form.control}
+                  render={({ field, fieldState }) => {
+                    return (
+                      <Field
+                        aria-invalid={fieldState.invalid}
+                        className="w-full p-0 md:w-6/12 md:pl-2"
+                      >
+                        <DatePickerSimple
+                          label="Fecha de Fin"
+                          value={field.value || undefined}
+                          onChange={(date) => {
+                            field.onChange(date || "");
+                          }}
+                          invalid={fieldState.invalid}
+                          error={fieldState.error}
+                        />
+                      </Field>
+                    );
+                  }}
+                />
+                <Controller
+                  name="monto"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field aria-invalid={fieldState.invalid} className="w-full">
+                      <FieldLabel>Monto (Bs.)</FieldLabel>
+                      <Input
+                        id="monto"
+                        type="number"
+                        placeholder="Ingrese el monto del curso"
+                        {...field}
+                        aria-invalid={fieldState.invalid}
+                        disabled={coordinadorCurso}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              </div>
             </div>
-          </div>
-          <Separator className="my-6" />
-          {/* Coordinadores de curso */}
-          <div>
-            <h4 className="scroll-m-20 text-base font-semibold tracking-tight">
-              Coordinadores de Curso
-            </h4>
-            <p className="text-sm text-muted-foreground mt-1 mb-3">
-              Selecciona los usuarios con rol Coordinador de Curso que atenderán
-              este curso.
-            </p>
-            <Controller
-              name="coordinadores"
-              control={form.control}
-              render={({ fieldState }) => (
-                <Field aria-invalid={fieldState.invalid} className="w-full">
-                  {coordinadoresDisponibles.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">
-                      No hay coordinadores de curso disponibles.
-                    </p>
-                  ) : (
-                    <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-3">
-                      {coordinadoresDisponibles.map((coordinador) => (
-                        <div
-                          key={coordinador.id}
-                          className="flex items-center space-x-2"
-                        >
-                          <Checkbox
-                            id={`coord-${coordinador.id}`}
-                            disabled={coordinadorCurso}
-                            checked={
-                              form
-                                .watch("coordinadores")
-                                ?.includes(coordinador.id) ?? false
-                            }
-                            onCheckedChange={(checked) => {
-                              const currentCoords =
-                                form.watch("coordinadores") ?? [];
-                              if (checked) {
-                                form.setValue("coordinadores", [
-                                  ...currentCoords,
-                                  coordinador.id,
-                                ]);
-                              } else {
-                                form.setValue(
-                                  "coordinadores",
-                                  currentCoords.filter(
-                                    (id) => id !== coordinador.id,
-                                  ),
-                                );
-                              }
-                            }}
-                          />
-                          <Label htmlFor={`coord-${coordinador.id}`}>
-                            {coordinador.persona.nombres}{" "}
-                            {coordinador.persona.primerApellido}{" "}
-                            {coordinador.persona.segundoApellido ?? ""}
-                            <span className="text-muted-foreground ml-1 text-xs">
-                              ({coordinador.usuario})
-                            </span>
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-          </div>
-          <Separator className="my-6" />
-
-          {/* Gestión de Paralelos */}
-          <div>
-            <div className="flex items-center justify-between">
+            <div className="pl-4">
+              {/* Coordinadores de curso */}
               <div>
                 <h4 className="scroll-m-20 text-base font-semibold tracking-tight">
-                  Paralelos y Cupos
+                  Coordinadores de Curso
                 </h4>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Define las secciones (paralelos) y el cupo máximo para cada
-                  uno.
+                <p className="text-sm text-muted-foreground mt-1 mb-3">
+                  Selecciona los usuarios con rol Coordinador de Curso que
+                  atenderán este curso.
                 </p>
+                <Controller
+                  name="coordinadores"
+                  control={form.control}
+                  render={({ fieldState }) => (
+                    <Field aria-invalid={fieldState.invalid} className="w-full">
+                      {coordinadoresDisponibles.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                          No hay coordinadores de curso disponibles.
+                        </p>
+                      ) : (
+                        <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-3">
+                          {coordinadoresDisponibles.map((coordinador) => (
+                            <div
+                              key={coordinador.id}
+                              className="flex items-center space-x-2"
+                            >
+                              <Checkbox
+                                id={`coord-${coordinador.id}`}
+                                disabled={coordinadorCurso}
+                                checked={
+                                  form
+                                    .watch("coordinadores")
+                                    ?.includes(coordinador.id) ?? false
+                                }
+                                onCheckedChange={(checked) => {
+                                  const currentCoords =
+                                    form.watch("coordinadores") ?? [];
+                                  if (checked) {
+                                    form.setValue("coordinadores", [
+                                      ...currentCoords,
+                                      coordinador.id,
+                                    ]);
+                                  } else {
+                                    form.setValue(
+                                      "coordinadores",
+                                      currentCoords.filter(
+                                        (id) => id !== coordinador.id,
+                                      ),
+                                    );
+                                  }
+                                }}
+                              />
+                              <Label htmlFor={`coord-${coordinador.id}`}>
+                                {coordinador.persona.nombres}{" "}
+                                {coordinador.persona.primerApellido}{" "}
+                                {coordinador.persona.segundoApellido ?? ""}
+                                <span className="text-muted-foreground ml-1 text-xs">
+                                  ({coordinador.usuario})
+                                </span>
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => append({ nombre: "", cupo: 30 })}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Agregar Paralelo
-              </Button>
-            </div>
+              <Separator className="my-6" />
 
-            <div className="space-y-3 mt-4">
-              {fields.map((field, index) => (
-                <div
-                  key={field.id}
-                  className="flex gap-2 items-end border p-3 rounded-md bg-muted/20 relative group"
-                >
-                  <Controller
-                    name={`paralelos.${index}.nombre`}
-                    control={form.control}
-                    render={({ field: inputField, fieldState }) => (
-                      <Field className="flex-1">
-                        <FieldLabel className="text-xs">Nombre</FieldLabel>
-                        <Input
-                          placeholder="Ej: A, B..."
-                          {...inputField}
-                          className="h-9"
-                        />
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    )}
-                  />
-                  <Controller
-                    name={`paralelos.${index}.cupo`}
-                    control={form.control}
-                    render={({ field: inputField, fieldState }) => (
-                      <Field className="w-24">
-                        <FieldLabel className="text-xs">Cupo</FieldLabel>
-                        <Input
-                          type="number"
-                          placeholder="Cupo"
-                          {...inputField}
-                          className="h-9"
-                        />
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    )}
-                  />
+              {/* Gestión de Paralelos */}
+              <div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="scroll-m-20 text-base font-semibold tracking-tight">
+                      Paralelos y Cupos
+                    </h4>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Define las secciones (paralelos) y el cupo máximo para
+                      cada uno.
+                    </p>
+                  </div>
                   <Button
                     type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-9 w-9 text-destructive"
-                    onClick={() => remove(index)}
-                    disabled={fields.length === 1}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => append({ nombre: "", cupo: 30 })}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Plus className="h-4 w-4 mr-2" />
+                    Agregar Paralelo
                   </Button>
                 </div>
-              ))}
-              {fields.length === 0 && (
-                <p className="text-sm text-center text-muted-foreground py-4 border-2 border-dashed rounded-md">
-                  Debes agregar al menos un paralelo.
-                </p>
-              )}
+
+                <div className="space-y-3 mt-4">
+                  {fields.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="flex gap-2 items-end border p-3 rounded-md bg-muted/20 relative group"
+                    >
+                      <Controller
+                        name={`paralelos.${index}.nombre`}
+                        control={form.control}
+                        render={({ field: inputField, fieldState }) => (
+                          <Field className="flex-1">
+                            <FieldLabel className="text-xs">Nombre</FieldLabel>
+                            <Input
+                              placeholder="Ej: A, B..."
+                              {...inputField}
+                              className="h-9"
+                            />
+                            {fieldState.invalid && (
+                              <FieldError errors={[fieldState.error]} />
+                            )}
+                          </Field>
+                        )}
+                      />
+                      <Controller
+                        name={`paralelos.${index}.cupo`}
+                        control={form.control}
+                        render={({ field: inputField, fieldState }) => (
+                          <Field className="w-24">
+                            <FieldLabel className="text-xs">Cupo</FieldLabel>
+                            <Input
+                              type="number"
+                              placeholder="Cupo"
+                              {...inputField}
+                              className="h-9"
+                            />
+                            {fieldState.invalid && (
+                              <FieldError errors={[fieldState.error]} />
+                            )}
+                          </Field>
+                        )}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 text-destructive"
+                        onClick={() => remove(index)}
+                        disabled={fields.length === 1 || coordinadorCurso}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  {fields.length === 0 && (
+                    <p className="text-sm text-center text-muted-foreground py-4 border-2 border-dashed rounded-md">
+                      Debes agregar al menos un paralelo.
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
