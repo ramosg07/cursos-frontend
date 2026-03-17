@@ -45,23 +45,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }));
 
   return (
-    <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
+    <Sidebar collapsible="icon" {...props} className="border-r-0">
+      <SidebarHeader className="bg-sidebar/50 backdrop-blur-sm">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild className="my-3 py-3">
-              <Link href="/">
-                <FileSpreadsheet className="h-5 w-5" />
-                <span className="text-base font-semibold">APP CURSOS</span>
+            <SidebarMenuButton asChild className="my-4 py-6 hover:bg-transparent active:bg-transparent group">
+              <Link href="/" className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
+                  <FileSpreadsheet className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-black tracking-tight text-gradient leading-none">APP</span>
+                  <span className="text-lg font-black tracking-tighter leading-none">CURSOS</span>
+                </div>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="bg-sidebar/50 backdrop-blur-sm">
         <NavItem data={menuStructure} />
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="bg-sidebar/50 backdrop-blur-sm border-t border-sidebar-border/50">
         <VersionDisplay />
       </SidebarFooter>
       <SidebarRail />

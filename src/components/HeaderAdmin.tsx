@@ -50,24 +50,28 @@ const HeaderAdmin = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full border-b bg-background/80 shadow-xs backdrop-blur-xs">
-        <div className="flex h-16 items-center justify-between px-5">
+      <header className="sticky top-0 z-40 w-full glass border-b border-white/10 shadow-sm transition-all duration-300">
+        <div className="flex h-16 items-center justify-between px-6">
           <div className="flex items-center">
             <TooltipProvider>
               <Tooltip>
                 <div className="flex items-center gap-2">
-                  <SidebarTrigger className="-ml-1" />
+                  <SidebarTrigger className="-ml-1 h-9 w-9 rounded-lg hover:bg-accent transition-colors" />
                   <Separator
                     orientation="vertical"
-                    className="mx-2 data-[orientation=vertical]:h-4"
+                    className="mx-2 h-6 bg-border/50"
                   />
+                  <div className="hidden md:block">
+                    <p className="text-sm font-medium text-muted-foreground">Panel de Control</p>
+                  </div>
                 </div>
                 <TooltipContent>Toggle Sidebar</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             <ThemeSwitcher />
+            <Separator orientation="vertical" className="h-6 bg-border/50" />
             <UserMenu
               user={user}
               handleRoleChange={handleRoleChange}

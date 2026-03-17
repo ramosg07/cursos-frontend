@@ -66,122 +66,139 @@ export default function Login() {
   if (!mounted) return null;
 
   return (
-    <div className="overflow-hidden relative">
-      <div className="w-screen h-screen">
+    <div className="relative min-h-screen w-full overflow-hidden flex items-center justify-center p-4">
+      {/* Dynamic Background Elements */}
+      <div className="absolute inset-0 z-0">
         <Image
           src={theme === "light" ? "/login-light.jpg" : "/login-dark.jpg"}
-          alt="Login"
-          width={1920}
-          height={950}
-          className="w-full h-full opacity-50 object-cover"
+          alt="Login Background"
+          fill
+          className="object-cover opacity-40 mix-blend-overlay"
           priority
         />
+        <div className="absolute inset-0 bg-gradient-to-tr from-background via-background/80 to-primary/10" />
       </div>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="p-18 rounded-xl shadow-xl bg-indigo-200/40">
-          <div className="space-y-2 text-center mb-4">
-            <h1 className="text-4xl font-bold text-foreground dark:text-gray-100">
-              Inicio de sesión
+
+      {/* Decorative Blobs */}
+      <div className="absolute top-1/4 -left-12 w-64 h-64 bg-primary/20 rounded-full blur-3xl animate-float" />
+      <div className="absolute bottom-1/4 -right-12 w-64 h-64 bg-accent/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '-3s' }} />
+
+      <div className="relative z-10 w-full max-w-md">
+        <div className=" glass-card p-8 md:p-12 rounded-3xl border border-white/20 shadow-2xl overflow-hidden group">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-accent to-primary" />
+
+          <div className="space-y-3 text-center mb-10">
+            <h1 className="text-4xl font-extrabold tracking-tight text-gradient">
+              Bienvenido
             </h1>
-            <p className="text-balance pt-2 text-muted-foreground dark:text-gray-300">
-              Ingresa tus credenciales para iniciar sesión
+            <p className="text-balance text-muted-foreground/80 font-medium">
+              Ingresa tus credenciales para continuar
             </p>
           </div>
+
           <form
             id="login-form"
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4"
+            className="space-y-6"
           >
-            <FieldGroup className="gap-4">
+            <FieldGroup className="gap-5">
               <Controller
                 name="usuario"
                 control={form.control}
-                render={({ field, fieldState }) => {
-                  return (
-                    <Field className="grid gap-2">
-                      <FieldLabel htmlFor="form-usuario">Usuario</FieldLabel>
-                      <div className="relative">
-                        <User
-                          className="absolute left-3 top-1/2 -translate-y-1/2 transform text-gray-400"
-                          size={18}
-                        />
-                        <Input
-                          {...field}
-                          id="usuario"
-                          aria-invalid={fieldState.invalid}
-                          disabled={isLoggingIn}
-                          placeholder="Ingrese su usuario"
-                          className="pl-10 dark:bg-gray-900 dark:text-gray-100"
-                        />
+                render={({ field, fieldState }) => (
+                  <Field className="grid gap-2">
+                    <FieldLabel htmlFor="usuario" className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">
+                      Usuario
+                    </FieldLabel>
+                    <div className="relative group/field">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 transform text-muted-foreground/60 transition-colors group-focus-within/field:text-primary">
+                        <User size={18} />
                       </div>
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  );
-                }}
+                      <Input
+                        {...field}
+                        id="usuario"
+                        aria-invalid={fieldState.invalid}
+                        disabled={isLoggingIn}
+                        placeholder="Tu nombre de usuario"
+                        className="pl-12 h-12 bg-background/40 border-white/20 rounded-xl focus:ring-primary/20 focus:border-primary transition-all duration-300"
+                      />
+                    </div>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
               />
               <Controller
                 name="contrasena"
                 control={form.control}
-                render={({ field, fieldState }) => {
-                  return (
-                    <Field className="grid gap-2">
-                      <FieldLabel htmlFor="form-contrasena">
-                        Contraseña
-                      </FieldLabel>
-                      <div className="relative">
-                        <Lock
-                          className="absolute left-3 top-1/2 -translate-y-1/2 transform text-gray-400"
-                          size={18}
-                        />
-                        <Input
-                          {...field}
-                          id="contrasena"
-                          type="password"
-                          aria-invalid={fieldState.invalid}
-                          disabled={isLoggingIn}
-                          placeholder="Ingrese su contraseña"
-                          className="pl-10 dark:bg-gray-900 dark:text-gray-100"
-                        />
+                render={({ field, fieldState }) => (
+                  <Field className="grid gap-2">
+                    <FieldLabel htmlFor="contrasena" className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">
+                      Contraseña
+                    </FieldLabel>
+                    <div className="relative group/field">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 transform text-muted-foreground/60 transition-colors group-focus-within/field:text-primary">
+                        <Lock size={18} />
                       </div>
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  );
-                }}
+                      <Input
+                        {...field}
+                        id="contrasena"
+                        type="password"
+                        aria-invalid={fieldState.invalid}
+                        disabled={isLoggingIn}
+                        placeholder="••••••••"
+                        className="pl-12 h-12 bg-background/40 border-white/20 rounded-xl focus:ring-primary/20 focus:border-primary transition-all duration-300"
+                      />
+                    </div>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
               />
             </FieldGroup>
-            <Link
-              href="/recuperacion"
-              className={`inline-block text-sm underline hover:text-primary dark:text-gray-300 dark:hover:text-gray-100 ${
-                isLoggingIn ? "pointer-events-none opacity-50" : ""
-              }`}
+
+            <div className="flex items-center justify-between px-1">
+              <Link
+                href="/recuperacion"
+                className={`text-sm font-semibold text-muted-foreground hover:text-primary transition-colors ${isLoggingIn ? "pointer-events-none opacity-50" : ""
+                  }`}
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full h-12 text-base font-bold rounded-xl bg-primary hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-primary/20 group/btn"
+              disabled={isLoggingIn}
             >
-              ¿Olvidaste tu contraseña?
-            </Link>
-            <Button type="submit" className="w-full" disabled={isLoggingIn}>
               {isLoggingIn ? (
                 <span className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Ingresando...
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Cargando...
                 </span>
               ) : (
-                "Ingresar"
+                <span className="flex items-center gap-2">
+                  Ingresar
+                  <div className="group-hover/btn:translate-x-1 transition-transform">→</div>
+                </span>
               )}
             </Button>
           </form>
-          <div className="mt-4 text-center text-sm dark:text-gray-300">
-            No tienes una cuenta?{" "}
-            <Link
-              href="/registro"
-              className={`underline hover:text-primary dark:hover:text-gray-100 ${
-                isLoggingIn ? "pointer-events-none opacity-50" : ""
-              }`}
-            >
-              Regístrate
-            </Link>
+
+          <div className="mt-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              ¿No tienes una cuenta?{" "}
+              <Link
+                href="/registro"
+                className={`font-bold text-primary hover:text-primary/80 transition-colors underline decoration-2 underline-offset-4 ${isLoggingIn ? "pointer-events-none opacity-50" : ""
+                  }`}
+              >
+                Regístrate ahora
+              </Link>
+            </p>
           </div>
         </div>
       </div>

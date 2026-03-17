@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
-import { BarChart3, Users, DollarSign } from "lucide-react";
+import { BarChart3, Users, DollarSign, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { print } from "@/lib/print";
 import {
@@ -98,43 +98,43 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">
+    <div className="space-y-8 animate-fade-in">
+      <div className="flex flex-col gap-1">
+        <h2 className="text-4xl font-extrabold tracking-tight text-gradient">
           Dashboard de Recaudación
         </h2>
-        <p className="text-muted-foreground">
-          Visualiza el resumen de ingresos por inscripciones.
+        <p className="text-muted-foreground font-medium">
+          Visualiza el resumen de ingresos por inscripciones en tiempo real.
         </p>
       </div>
 
-      <div className="flex flex-wrap items-end gap-4 bg-muted/20 p-4 rounded-lg border">
-        <Field className="w-full md:w-48">
+      <div className="glass p-6 rounded-2xl border-white/10 shadow-lg flex flex-wrap items-end gap-6">
+        <Field className="w-full md:w-56">
           <DatePickerSimple
             label="Fecha Inicio"
             value={filtros.fechaInicio}
             onChange={(e) => setFiltros({ ...filtros, fechaInicio: e ?? "" })}
           />
         </Field>
-        <Field className="w-full md:w-48">
+        <Field className="w-full md:w-56">
           <DatePickerSimple
             label="Fecha Fin"
             value={filtros.fechaFin}
             onChange={(e) => setFiltros({ ...filtros, fechaFin: e ?? "" })}
           />
         </Field>
-        <Field className="w-full md:w-64">
-          <FieldLabel>Coordinador de Curso</FieldLabel>
+        <Field className="w-full md:w-72">
+          <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1 ml-1">Coordinador de Curso</FieldLabel>
           <Select
             value={filtros.idUsuario}
             onValueChange={(value) =>
               setFiltros({ ...filtros, idUsuario: value })
             }
           >
-            <SelectTrigger>
+            <SelectTrigger className="h-11 bg-background/50 rounded-xl border-white/10 focus:ring-primary/20 transition-all">
               <SelectValue placeholder="Seleccione un coordinador" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-xl border-white/10 shadow-xl">
               <SelectItem value="todos">Todos los coordinadores</SelectItem>
               {coordinadores.map((c) => (
                 <SelectItem key={c.id} value={c.id}>
@@ -145,56 +145,70 @@ export default function Dashboard() {
             </SelectContent>
           </Select>
         </Field>
-        <Button onClick={fetchRecaudacion} disabled={loading}>
+        <Button
+          onClick={fetchRecaudacion}
+          disabled={loading}
+          className="h-11 px-8 rounded-xl bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-95"
+        >
+          {loading ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : null}
           Actualizar Reporte
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
-        <Card>
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="relative overflow-hidden border-none glass-card group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-primary/20 transition-colors" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
               Total Recaudado
             </CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <div className="p-2 bg-primary/10 rounded-lg text-primary">
+              <DollarSign className="h-5 w-5" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-3xl font-black tracking-tight text-primary">
               {loading ? "..." : `${data?.total.toFixed(2) || "0.00"} Bs.`}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground mt-1 font-medium italic">
               Ingresos totales en el rango seleccionado
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="relative overflow-hidden border-none glass-card group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-accent/20 transition-colors" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Inscripciones Realizadas
+            <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+              Inscripciones
             </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <div className="p-2 bg-accent/10 rounded-lg text-accent-foreground">
+              <Users className="h-5 w-5" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-3xl font-black tracking-tight text-accent-foreground">
               {loading ? "..." : data?.cantidad || 0}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground mt-1 font-medium italic">
               Número total de estudiantes inscritos
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Placeholder for future charts */}
-      <Card className="col-span-4">
-        <CardHeader>
-          <CardTitle>Resumen Visual</CardTitle>
+      <Card className="border-none glass group overflow-hidden">
+        <CardHeader className="border-b border-white/5 bg-white/5">
+          <div className="flex items-center gap-2">
+            <BarChart3 className="h-5 w-5 text-primary" />
+            <CardTitle className="text-lg font-bold">Resumen Visual</CardTitle>
+          </div>
         </CardHeader>
-        <CardContent className="pl-2">
-          <div className="h-[200px] flex items-center justify-center border-2 border-dashed rounded-md bg-muted/10">
-            <div className="flex flex-col items-center text-muted-foreground">
-              <BarChart3 className="h-8 w-8 mb-2" />
-              <span>Próximamente: Gráficos detallados de ingresos</span>
+        <CardContent className="p-8">
+          <div className="h-[250px] flex items-center justify-center border-2 border-dashed border-white/10 rounded-2xl bg-white/5 group-hover:bg-white/10 transition-colors">
+            <div className="flex flex-col items-center text-muted-foreground/60">
+              <BarChart3 className="h-10 w-10 mb-3 animate-float" />
+              <span className="font-semibold tracking-wide uppercase text-xs">Próximamente</span>
+              <span className="text-sm mt-1">Gráficos detallados de ingresos</span>
             </div>
           </div>
         </CardContent>
