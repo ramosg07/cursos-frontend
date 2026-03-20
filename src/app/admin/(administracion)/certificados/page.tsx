@@ -3,7 +3,15 @@
 import { useAuth } from "@/contexts/AuthProvider";
 import { useState } from "react";
 import { CertificadosDatatable } from "./components/CertificadosDatatable";
-import { DisenadorCertificados } from "./components/DisenadorCertificados";
+import dynamic from "next/dynamic";
+const DisenadorCertificados = dynamic(
+  () =>
+    import("./components/DisenadorCertificados").then(
+      (mod) => mod.DisenadorCertificados,
+    ),
+  { ssr: false },
+);
+
 import { PlantillaCertificado, CertificadoConfig } from "./types";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -112,25 +120,22 @@ export default function CertificadosPage() {
   return (
     <div className="container py-8 space-y-6 ">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          {view === "editor" && (
+        {view === "editor" && (
+          <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={() => setView("list")}>
               <ArrowLeft className="h-4 w-4" />
             </Button>
-          )}
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              Diseño de Certificados
-            </h1>
-            <p className="text-muted-foreground">
-              {view === "list"
-                ? "Gestiona las plantillas de certificados"
-                : "Edita tu diseño personalizado"}
-            </p>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-gradient">
+                Diseño de Certificados
+              </h1>
+              <p className="text-muted-foreground">
+                Gestiona las plantillas de certificados
+              </p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
-
       {view === "list" ? (
         <CertificadosDatatable onEdit={handleEdit} onAdd={handleAdd} />
       ) : (
