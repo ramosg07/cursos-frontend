@@ -21,7 +21,7 @@ import Image from "next/image";
 import { Constants } from "@/config/Constants";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import ProfilePhoto from "./ProfilePhoto";
+// import ProfilePhoto from "./ProfilePhoto";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,7 +34,7 @@ import ChangePassword from "./ChangePassword";
 
 const Detail = () => {
   const { user } = useAuth();
-  const [isPhotoDialogOpen, setIsPhotoDialogOpen] = useState(false);
+  // const [isPhotoDialogOpen, setIsPhotoDialogOpen] = useState(false);
   const [avatarKey, setAvatarKey] = useState(0);
   const [editarPerfil, setEditarPerfil] = useState(false);
   const [cambioPassword, setCambioPassword] = useState(false);
@@ -123,13 +123,13 @@ const Detail = () => {
                   {getInitials()}
                 </AvatarFallback>
               </Avatar>
-              <Button
+              {/* <Button
                 size="sm"
                 className="absolute bottom-0 right-0 rounded-full"
                 onClick={() => setIsPhotoDialogOpen(true)}
               >
                 <Camera className="h-4 w-4" />
-              </Button>
+              </Button> */}
             </div>
             <div>
               <h2 className="text-lg sm:text-2xl font-bold">
@@ -280,10 +280,10 @@ const Detail = () => {
         </CardContent>
       </Card>
       {/* Modal de actualización de foto de perfil */}
-      <ProfilePhoto
+      {/* <ProfilePhoto
         isOpen={isPhotoDialogOpen}
         onClose={() => setIsPhotoDialogOpen(false)}
-      />
+      /> */}
       {/* Modal de edición de perfil */}
       <EditProfile
         isOpen={editarPerfil}

@@ -142,14 +142,16 @@ export function CursosDatatable() {
               </Button>
             </Link>
           )}
-          <Button
-            title="Editar"
-            variant="outline"
-            size={"icon"}
-            onClick={() => handleAgregarEditarCurso(row.original)}
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
+          {permissions.update && (
+            <Button
+              title="Editar"
+              variant="outline"
+              size={"icon"}
+              onClick={() => handleAgregarEditarCurso(row.original)}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          )}
           {row.original.estado === "ACTIVO" && coordinadorGeneral && (
             <Switch
               id={"switch-curso-" + row.original.id}

@@ -81,7 +81,10 @@ export default function Login() {
 
       {/* Decorative Blobs */}
       <div className="absolute top-1/4 -left-12 w-64 h-64 bg-primary/20 rounded-full blur-3xl animate-float" />
-      <div className="absolute bottom-1/4 -right-12 w-64 h-64 bg-accent/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '-3s' }} />
+      <div
+        className="absolute bottom-1/4 -right-12 w-64 h-64 bg-accent/20 rounded-full blur-3xl animate-float"
+        style={{ animationDelay: "-3s" }}
+      />
 
       <div className="relative z-10 w-full max-w-md">
         <div className=" glass-card p-8 md:p-12 rounded-3xl border border-white/20 shadow-2xl overflow-hidden group">
@@ -107,7 +110,10 @@ export default function Login() {
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field className="grid gap-2">
-                    <FieldLabel htmlFor="usuario" className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">
+                    <FieldLabel
+                      htmlFor="usuario"
+                      className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1"
+                    >
                       Usuario
                     </FieldLabel>
                     <div className="relative group/field">
@@ -120,6 +126,9 @@ export default function Login() {
                         aria-invalid={fieldState.invalid}
                         disabled={isLoggingIn}
                         placeholder="Tu nombre de usuario"
+                        onChange={(e) =>
+                          field.onChange(e.target.value.toUpperCase())
+                        }
                         className="pl-12 h-12 bg-background/40 border-white/20 rounded-xl focus:ring-primary/20 focus:border-primary transition-all duration-300"
                       />
                     </div>
@@ -134,7 +143,10 @@ export default function Login() {
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field className="grid gap-2">
-                    <FieldLabel htmlFor="contrasena" className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1">
+                    <FieldLabel
+                      htmlFor="contrasena"
+                      className="text-xs font-bold uppercase tracking-wider text-muted-foreground ml-1"
+                    >
                       Contraseña
                     </FieldLabel>
                     <div className="relative group/field">
@@ -162,18 +174,29 @@ export default function Login() {
             <div className="flex items-center justify-between px-1">
               <Link
                 href="/recuperacion"
-                className={`text-sm font-semibold text-muted-foreground hover:text-primary transition-colors ${isLoggingIn ? "pointer-events-none opacity-50" : ""
-                  }`}
+                className={`text-sm font-semibold text-muted-foreground hover:text-primary transition-colors ${
+                  isLoggingIn ? "pointer-events-none opacity-50" : ""
+                }`}
               >
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>
+
+            {/* <Link
+              href="/recuperacion"
+              className={`inline-block text-sm underline hover:text-primary dark:text-gray-300 dark:hover:text-gray-100 ${
+                isLoggingIn ? "pointer-events-none opacity-50" : ""
+              }`}
+            >
+              ¿Olvidaste tu contraseña?
+            </Link> */}
 
             <Button
               type="submit"
               className="w-full h-12 text-base font-bold rounded-xl bg-primary hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-primary/20 group/btn"
               disabled={isLoggingIn}
             >
+              {/* <Button type="submit" className="w-full" disabled={isLoggingIn}> */}
               {isLoggingIn ? (
                 <span className="flex items-center gap-2">
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -182,7 +205,9 @@ export default function Login() {
               ) : (
                 <span className="flex items-center gap-2">
                   Ingresar
-                  <div className="group-hover/btn:translate-x-1 transition-transform">→</div>
+                  <div className="group-hover/btn:translate-x-1 transition-transform">
+                    →
+                  </div>
                 </span>
               )}
             </Button>
@@ -193,13 +218,25 @@ export default function Login() {
               ¿No tienes una cuenta?{" "}
               <Link
                 href="/registro"
-                className={`font-bold text-primary hover:text-primary/80 transition-colors underline decoration-2 underline-offset-4 ${isLoggingIn ? "pointer-events-none opacity-50" : ""
-                  }`}
+                className={`font-bold text-primary hover:text-primary/80 transition-colors underline decoration-2 underline-offset-4 ${
+                  isLoggingIn ? "pointer-events-none opacity-50" : ""
+                }`}
               >
                 Regístrate ahora
               </Link>
             </p>
           </div>
+          {/* <div className="mt-4 text-center text-sm dark:text-gray-300">
+            No tienes una cuenta?{" "}
+            <Link
+              href="/registro"
+              className={`underline hover:text-primary dark:hover:text-gray-100 ${
+                isLoggingIn ? "pointer-events-none opacity-50" : ""
+              }`}
+            >
+              Regístrate
+            </Link>
+          </div> */}
         </div>
       </div>
     </div>
