@@ -47,7 +47,7 @@ const formSchema = z.object({
     (date) => {
       return validateDateFormat(date, "YYYY-MM-DD");
     },
-    { message: "Fecha de nacimiento inválida" },
+    { message: "Fecha de nacimiento inválida" }
   ),
   correoElectronico: z
     .string()
@@ -124,7 +124,7 @@ export function AgregarEditarUsuarioModal({
       print("Error al guardar usuario", error);
       toast.error(
         usuario ? "Error al actualizar usuario" : "Error al crear usuario",
-        { description: MessageInterpreter(error) },
+        { description: MessageInterpreter(error) }
       );
     } finally {
       setIsLoading(false);
@@ -164,6 +164,9 @@ export function AgregarEditarUsuarioModal({
                         id="nombres"
                         placeholder="Ingrese sus nombres"
                         {...field}
+                        onChange={(e) =>
+                          field.onChange(e.target.value.toUpperCase())
+                        }
                         aria-invalid={fieldState.invalid}
                       />
                       {fieldState.invalid && (
@@ -187,6 +190,9 @@ export function AgregarEditarUsuarioModal({
                         id="primerApellido"
                         placeholder="Ingrese su primer apellido"
                         {...field}
+                        onChange={(e) =>
+                          field.onChange(e.target.value.toUpperCase())
+                        }
                         aria-invalid={fieldState.invalid}
                       />
                       {fieldState.invalid && (
@@ -210,6 +216,9 @@ export function AgregarEditarUsuarioModal({
                         id="segundoApellido"
                         placeholder="Ingrese su segundo apellido"
                         {...field}
+                        onChange={(e) =>
+                          field.onChange(e.target.value.toUpperCase())
+                        }
                         aria-invalid={fieldState.invalid}
                       />
                       {fieldState.invalid && (
@@ -255,6 +264,9 @@ export function AgregarEditarUsuarioModal({
                         id="nroDocumento"
                         placeholder="Ingrese Cedula de Identidad"
                         {...field}
+                        onChange={(e) =>
+                          field.onChange(e.target.value.toUpperCase())
+                        }
                         aria-invalid={fieldState.invalid}
                       />
                       {fieldState.invalid && (
@@ -326,7 +338,7 @@ export function AgregarEditarUsuarioModal({
                                 } else {
                                   form.setValue(
                                     "roles",
-                                    currentRoles.filter((id) => id !== role.id),
+                                    currentRoles.filter((id) => id !== role.id)
                                   );
                                 }
                               }}

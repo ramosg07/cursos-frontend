@@ -112,6 +112,9 @@ export default function Login() {
                           disabled={isLoggingIn}
                           placeholder="Ingrese su usuario"
                           className="pl-10 dark:bg-gray-900 dark:text-gray-100"
+                          onChange={(e) =>
+                            field.onChange(e.target.value.toUpperCase())
+                          }
                         />
                       </div>
                       {fieldState.invalid && (
@@ -153,14 +156,14 @@ export default function Login() {
                 }}
               />
             </FieldGroup>
-            <Link
+            {/* <Link
               href="/recuperacion"
               className={`inline-block text-sm underline hover:text-primary dark:text-gray-300 dark:hover:text-gray-100 ${
                 isLoggingIn ? "pointer-events-none opacity-50" : ""
               }`}
             >
               ¿Olvidaste tu contraseña?
-            </Link>
+            </Link> */}
             <Button type="submit" className="w-full" disabled={isLoggingIn}>
               {isLoggingIn ? (
                 <span className="flex items-center gap-2">
@@ -172,7 +175,7 @@ export default function Login() {
               )}
             </Button>
           </form>
-          <div className="mt-4 text-center text-sm dark:text-gray-300">
+          {/* <div className="mt-4 text-center text-sm dark:text-gray-300">
             No tienes una cuenta?{" "}
             <Link
               href="/registro"
@@ -182,7 +185,7 @@ export default function Login() {
             >
               Regístrate
             </Link>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

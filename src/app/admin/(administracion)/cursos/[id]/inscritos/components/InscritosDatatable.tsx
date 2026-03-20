@@ -53,7 +53,7 @@ export function InscritosDatatable({ curso }: Props) {
     useState<boolean>(false);
   const [printModalOpen, setPrintModalOpen] = useState<boolean>(false);
   const [selectedInscripciones, setSelectedInscripciones] = useState<string[]>(
-    [],
+    []
   );
 
   // Función para manejar el cambio de selección en el DataTable
@@ -70,7 +70,7 @@ export function InscritosDatatable({ curso }: Props) {
     });
   }, []);
 
-  const { checkPermission, sessionRequest } = useAuth();
+  const { checkPermission, sessionRequest, user } = useAuth();
 
   const [permissions, setPermissions] = useState({
     create: false,
@@ -92,31 +92,35 @@ export function InscritosDatatable({ curso }: Props) {
     fetchPermissions().catch(print);
   }, [checkPermission]);
 
+  const rolActivo = user?.roles.find((rol) => user.idRol === rol.idRol);
+  const esCertificador = rolActivo?.rol === "CERTIFICADOR";
+  const esCoordinadorGeneral = rolActivo?.rol === "COORDINADOR GENERAL";
+
   const columns: ColumnDef<Inscripcion>[] = [
-    ...(idPlantillaCertificado
+    ...(idPlantillaCertificado && esCertificador
       ? [
-        {
-          id: "select",
-          header: ({ table }: any) => (
-            <Checkbox
-              checked={table.getIsAllPageRowsSelected()}
-              onCheckedChange={(value) =>
-                table.toggleAllPageRowsSelected(!!value)
-              }
-              aria-label="Seleccionar todo"
-            />
-          ),
-          cell: ({ row }: any) => (
-            <Checkbox
-              checked={row.getIsSelected()}
-              onCheckedChange={(value) => row.toggleSelected(!!value)}
-              aria-label="Seleccionar fila"
-            />
-          ),
-          enableSorting: false,
-          enableHiding: false,
-        },
-      ]
+          {
+            id: "select",
+            header: ({ table }: any) => (
+              <Checkbox
+                checked={table.getIsAllPageRowsSelected()}
+                onCheckedChange={(value) =>
+                  table.toggleAllPageRowsSelected(!!value)
+                }
+                aria-label="Seleccionar todo"
+              />
+            ),
+            cell: ({ row }: any) => (
+              <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(value) => row.toggleSelected(!!value)}
+                aria-label="Seleccionar fila"
+              />
+            ),
+            enableSorting: false,
+            enableHiding: false,
+          },
+        ]
       : []),
     {
       accessorKey: "estudiante.usuario.persona.nroDocumento",
@@ -158,7 +162,7 @@ export function InscritosDatatable({ curso }: Props) {
       header: "Acciones",
       cell: ({ row }) => (
         <div className="flex items-center gap-1">
-          {idPlantillaCertificado && (
+          {idPlantillaCertificado && esCertificador && (
             <Button
               variant="ghost"
               size="icon"
@@ -183,7 +187,10 @@ export function InscritosDatatable({ curso }: Props) {
                     Esta acción marcará la inscripción de{" "}
                     <strong>
                       {row.original.estudiante?.usuario?.persona?.nombres}{" "}
-                      {row.original.estudiante?.usuario?.persona?.primerApellido}
+                      {
+                        row.original.estudiante?.usuario?.persona
+                          ?.primerApellido
+                      }
                     </strong>{" "}
                     como inactiva. Podrá volver a inscribirlo después si es
                     necesario.
@@ -330,13 +337,14 @@ export function InscritosDatatable({ curso }: Props) {
           curso.paralelos.map((p) => {
             const disponibles = p.cuposDisponibles ?? p.cupo;
             const inscritos = p.inscritos ?? 0;
-            const porcentajeOcupado = p.cupo > 0 ? (inscritos / p.cupo) * 100 : 0;
+            const porcentajeOcupado =
+              p.cupo > 0 ? (inscritos / p.cupo) * 100 : 0;
             const colorVar =
               disponibles === 0
                 ? "text-destructive border-destructive/30 bg-destructive/5"
                 : disponibles <= 2
-                  ? "text-yellow-600 border-yellow-400/30 bg-yellow-50 dark:bg-yellow-900/10"
-                  : "text-green-700 border-green-400/30 bg-green-50 dark:bg-green-900/10";
+                ? "text-yellow-600 border-yellow-400/30 bg-yellow-50 dark:bg-yellow-900/10"
+                : "text-green-700 border-green-400/30 bg-green-50 dark:bg-green-900/10";
 
             return (
               <div
@@ -349,11 +357,19 @@ export function InscritosDatatable({ curso }: Props) {
                 <span className="font-medium mt-0.5">
                   {disponibles === 0
                     ? "Sin cupos"
-                    : `${disponibles} cupo${disponibles !== 1 ? "s" : ""} restante${disponibles !== 1 ? "s" : ""}`}
+                    : `${disponibles} cupo${
+                        disponibles !== 1 ? "s" : ""
+                      } restante${disponibles !== 1 ? "s" : ""}`}
                 </span>
                 <div className="mt-1 h-1.5 rounded-full bg-muted overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all ${disponibles === 0 ? "bg-destructive" : disponibles <= 2 ? "bg-yellow-500" : "bg-green-500"}`}
+                    className={`h-full rounded-full transition-all ${
+                      disponibles === 0
+                        ? "bg-destructive"
+                        : disponibles <= 2
+                        ? "bg-yellow-500"
+                        : "bg-green-500"
+                    }`}
                     style={{ width: `${Math.min(porcentajeOcupado, 100)}%` }}
                   />
                 </div>
@@ -370,7 +386,7 @@ export function InscritosDatatable({ curso }: Props) {
         onSelectedItemsChange={handleSelectedItemsChange}
         toolBarConfig={{
           components: [
-            permissions.update && (
+            permissions.update && esCoordinadorGeneral && (
               <Button
                 key={"BulkUpload"}
                 title="Carga masiva"
@@ -382,7 +398,7 @@ export function InscritosDatatable({ curso }: Props) {
                 <span>Carga Masiva</span>
               </Button>
             ),
-            idPlantillaCertificado && (
+            idPlantillaCertificado && esCertificador && (
               <Button
                 key={"PrintBatch"}
                 title="Printear certificados"
@@ -397,16 +413,18 @@ export function InscritosDatatable({ curso }: Props) {
                 </span>
               </Button>
             ),
-            <Button
-              key={"Agregar"}
-              title="Inscribir estudiante"
-              variant="default"
-              className="flex gap-2"
-              onClick={() => setAgregarInscripcionModalOpen(true)}
-            >
-              <Plus className="h-4 w-4" />
-              <span>Inscribir Estudiante</span>
-            </Button>,
+            permissions.create && (
+              <Button
+                key={"Agregar"}
+                title="Inscribir estudiante"
+                variant="default"
+                className="flex gap-2"
+                onClick={() => setAgregarInscripcionModalOpen(true)}
+              >
+                <Plus className="h-4 w-4" />
+                <span>Inscribir Estudiante</span>
+              </Button>
+            ),
           ],
         }}
         titulo={""}

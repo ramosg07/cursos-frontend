@@ -232,9 +232,12 @@ export default function RegistroPage() {
                           />
                           <Input
                             id="nombres"
-                            className="pl-10"
+                            className="pl-10 uppercase"
                             placeholder="Ingrese sus nombres"
                             {...field}
+                            onChange={(e) =>
+                              field.onChange(e.target.value.toUpperCase())
+                            }
                             aria-invalid={fieldState.invalid}
                           />
                         </div>

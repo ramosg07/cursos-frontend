@@ -153,6 +153,9 @@ export function AgregarEditarEstudianteModal({
                     {...field}
                     disabled={isEditing}
                     aria-invalid={fieldState.invalid}
+                    onChange={(e) =>
+                      field.onChange(e.target.value.toUpperCase())
+                    }
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
@@ -171,6 +174,9 @@ export function AgregarEditarEstudianteModal({
                     {...field}
                     value={field.value || ""}
                     aria-invalid={fieldState.invalid}
+                    onChange={(e) =>
+                      field.onChange(e.target.value.toUpperCase())
+                    }
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
@@ -190,6 +196,9 @@ export function AgregarEditarEstudianteModal({
                   placeholder="Juan"
                   {...field}
                   aria-invalid={fieldState.invalid}
+                  onChange={(e) =>
+                    field.onChange(e.target.value.toUpperCase())
+                  }
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
@@ -209,6 +218,9 @@ export function AgregarEditarEstudianteModal({
                     placeholder="Perez"
                     {...field}
                     aria-invalid={fieldState.invalid}
+                    onChange={(e) =>
+                      field.onChange(e.target.value.toUpperCase())
+                    }
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
@@ -227,6 +239,9 @@ export function AgregarEditarEstudianteModal({
                     {...field}
                     value={field.value || ""}
                     aria-invalid={fieldState.invalid}
+                    onChange={(e) =>
+                      field.onChange(e.target.value.toUpperCase())
+                    }
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
