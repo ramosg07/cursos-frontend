@@ -77,11 +77,13 @@ const Detail = () => {
 
   return (
     <div className="container mx-auto py-6 xl:px-30 space-y-5">
-      <h1 className="text-2xl font-bold">Perfil de usuario</h1>
+      <h1 className="text-2xl font-extrabold tracking-tight text-gradient">
+        Perfil de usuario
+      </h1>
       <Card className="p-0 overflow-hidden rounded-2xl gap-11 sm:gap-3">
         <div className="relative h-50 w-full">
           <div className="relative isolate h-full w-full object-cover overflow-hidden ">
-            <div className="absolute inset-0 -z-10 bg-[radial-gradient(45rem_50rem_at_top,var(--color-indigo-500),transparent)] opacity-10" />
+            <div className="absolute inset-0 -z-10 bg-[radial-gradient(45rem_50rem_at_top,var(--color-blue-500),transparent)] opacity-10" />
             {/* Menu de opciones para edicion y cambio de contrasena */}
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
@@ -119,7 +121,7 @@ const Detail = () => {
                     }}
                   />
                 )}
-                <AvatarFallback className="text-3xl">
+                <AvatarFallback className="text-3xl bg-blue-100">
                   {getInitials()}
                 </AvatarFallback>
               </Avatar>
@@ -136,7 +138,7 @@ const Detail = () => {
                 {nombrePropio(
                   `${user.persona?.nombres} ${user.persona?.primerApellido} ${
                     user.persona?.segundoApellido || ""
-                  }`
+                  }`,
                 )}
               </h2>
               <p className="text-sm font-semibold">{obtenerRolActual()}</p>

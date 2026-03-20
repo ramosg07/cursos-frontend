@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
-import { BarChart3, Users, DollarSign, Loader2 } from "lucide-react";
+import { Users, DollarSign, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { print } from "@/lib/print";
 import {
@@ -98,9 +98,9 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8 animate-fade-in pt-10">
       <div className="flex flex-col gap-1">
-        <h2 className="text-4xl font-extrabold tracking-tight text-gradient">
+        <h2 className="text-3xl font-extrabold tracking-tight text-gradient">
           Dashboard de Recaudación
         </h2>
         <p className="text-muted-foreground font-medium">
@@ -124,7 +124,9 @@ export default function Dashboard() {
           />
         </Field>
         <Field className="w-full md:w-72">
-          <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1 ml-1">Coordinador de Curso</FieldLabel>
+          <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1 ml-1">
+            Coordinador de Curso
+          </FieldLabel>
           <Select
             value={filtros.idUsuario}
             onValueChange={(value) =>
@@ -156,9 +158,9 @@ export default function Dashboard() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Card className="relative overflow-hidden border-none glass-card group">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-primary/20 transition-colors" />
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Card className="relative overflow-hidden border-none glass-card group p-4 pb-6">
+          <div className="absolute top-20 right-15 w-80 h-80 bg-primary/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-primary/20 transition-colors" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
             <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
               Total Recaudado
             </CardTitle>
@@ -175,13 +177,13 @@ export default function Dashboard() {
             </p>
           </CardContent>
         </Card>
-        <Card className="relative overflow-hidden border-none glass-card group">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-accent/20 transition-colors" />
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Card className="relative overflow-hidden border-none glass-card group p-4 pb-6">
+          <div className="absolute top-20 right-15 w-80 h-80 bg-primary/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-primary/20 transition-colors" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
               Inscripciones
             </CardTitle>
-            <div className="p-2 bg-accent/10 rounded-lg text-accent-foreground">
+            <div className="p-2 bg-primary/10 rounded-lg text-primary">
               <Users className="h-5 w-5" />
             </div>
           </CardHeader>
@@ -196,7 +198,7 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      <Card className="border-none glass group overflow-hidden">
+      {/* <Card className="border-none glass group overflow-hidden py-6">
         <CardHeader className="border-b border-white/5 bg-white/5">
           <div className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-primary" />
@@ -207,12 +209,16 @@ export default function Dashboard() {
           <div className="h-[250px] flex items-center justify-center border-2 border-dashed border-white/10 rounded-2xl bg-white/5 group-hover:bg-white/10 transition-colors">
             <div className="flex flex-col items-center text-muted-foreground/60">
               <BarChart3 className="h-10 w-10 mb-3 animate-float" />
-              <span className="font-semibold tracking-wide uppercase text-xs">Próximamente</span>
-              <span className="text-sm mt-1">Gráficos detallados de ingresos</span>
+              <span className="font-semibold tracking-wide uppercase text-xs">
+                Próximamente
+              </span>
+              <span className="text-sm mt-1">
+                Gráficos detallados de ingresos
+              </span>
             </div>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 }

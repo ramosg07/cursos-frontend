@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function UsuariosPage() {
   return (
-    <div className="container p-1">
+    <div className="container p-1 mt-8">
       <PermissionWrapper requiredPermission="/admin/usuarios" act={"read"}>
         <UsuariosDatatable02 />
       </PermissionWrapper>

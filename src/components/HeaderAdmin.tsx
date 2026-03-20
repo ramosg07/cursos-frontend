@@ -61,9 +61,6 @@ const HeaderAdmin = () => {
                     orientation="vertical"
                     className="mx-2 h-6 bg-border/50"
                   />
-                  <div className="hidden md:block">
-                    <p className="text-sm font-medium text-muted-foreground">Panel de Control</p>
-                  </div>
                 </div>
                 <TooltipContent>Toggle Sidebar</TooltipContent>
               </Tooltip>

@@ -252,7 +252,7 @@ export function DisenadorCertificados({
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
       {/* Sidebar de herramientas */}
       <div className="lg:col-span-1 space-y-6">
-        <Card className="gap-2">
+        <Card className="gap-2 py-6">
           <CardHeader>
             <CardTitle className="text-sm font-medium">
               Lienzo y Fondo
@@ -439,7 +439,7 @@ export function DisenadorCertificados({
           </Card>
         )}
 
-        <Card className="gap-2">
+        <Card className="gap-2 py-6">
           <CardHeader>
             <CardTitle className="text-sm font-medium">
               Acciones Rápidas
@@ -478,7 +478,7 @@ export function DisenadorCertificados({
           </Button>
           <Button
             onClick={handleExportPDF}
-            variant="secondary"
+            variant="outline"
             className="w-full"
           >
             <Download className="h-4 w-4 mr-2" />

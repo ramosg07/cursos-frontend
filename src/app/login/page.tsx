@@ -11,7 +11,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, User, Lock } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -117,8 +116,8 @@ export default function Login() {
                       Usuario
                     </FieldLabel>
                     <div className="relative group/field">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 transform text-muted-foreground/60 transition-colors group-focus-within/field:text-primary">
-                        <User size={18} />
+                      <div className="absolute z-10 left-4 top-1/2 -translate-y-1/2 transform text-muted-foreground/60 transition-colors group-focus-within/field:text-primary">
+                        <User size={20} />
                       </div>
                       <Input
                         {...field}
@@ -150,8 +149,8 @@ export default function Login() {
                       Contraseña
                     </FieldLabel>
                     <div className="relative group/field">
-                      <div className="absolute left-4 top-1/2 -translate-y-1/2 transform text-muted-foreground/60 transition-colors group-focus-within/field:text-primary">
-                        <Lock size={18} />
+                      <div className="absolute z-10 left-4 top-1/2 -translate-y-1/2 transform text-muted-foreground/60 transition-colors group-focus-within/field:text-primary">
+                        <Lock size={25} />
                       </div>
                       <Input
                         {...field}
@@ -170,8 +169,7 @@ export default function Login() {
                 )}
               />
             </FieldGroup>
-
-            <div className="flex items-center justify-between px-1">
+            {/* <div className="flex items-center justify-between px-1">
               <Link
                 href="/recuperacion"
                 className={`text-sm font-semibold text-muted-foreground hover:text-primary transition-colors ${
@@ -180,23 +178,12 @@ export default function Login() {
               >
                 ¿Olvidaste tu contraseña?
               </Link>
-            </div>
-
-            {/* <Link
-              href="/recuperacion"
-              className={`inline-block text-sm underline hover:text-primary dark:text-gray-300 dark:hover:text-gray-100 ${
-                isLoggingIn ? "pointer-events-none opacity-50" : ""
-              }`}
-            >
-              ¿Olvidaste tu contraseña?
-            </Link> */}
-
+            </div> */}
             <Button
               type="submit"
               className="w-full h-12 text-base font-bold rounded-xl bg-primary hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-primary/20 group/btn"
               disabled={isLoggingIn}
             >
-              {/* <Button type="submit" className="w-full" disabled={isLoggingIn}> */}
               {isLoggingIn ? (
                 <span className="flex items-center gap-2">
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -212,8 +199,7 @@ export default function Login() {
               )}
             </Button>
           </form>
-
-          <div className="mt-8 text-center">
+          {/* <div className="mt-8 text-center">
             <p className="text-sm text-muted-foreground">
               ¿No tienes una cuenta?{" "}
               <Link
@@ -225,17 +211,6 @@ export default function Login() {
                 Regístrate ahora
               </Link>
             </p>
-          </div>
-          {/* <div className="mt-4 text-center text-sm dark:text-gray-300">
-            No tienes una cuenta?{" "}
-            <Link
-              href="/registro"
-              className={`underline hover:text-primary dark:hover:text-gray-100 ${
-                isLoggingIn ? "pointer-events-none opacity-50" : ""
-              }`}
-            >
-              Regístrate
-            </Link>
           </div> */}
         </div>
       </div>

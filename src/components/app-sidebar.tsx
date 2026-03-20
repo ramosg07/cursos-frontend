@@ -55,7 +55,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <FileSpreadsheet className="h-6 w-6 text-white" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-sm font-black tracking-tight text-gradient leading-none">APP</span>
+                  <span className="text-sm font-black tracking-tight text-gradient leading-none">SISTEMA</span>
                   <span className="text-lg font-black tracking-tighter leading-none">CURSOS</span>
                 </div>
               </Link>
