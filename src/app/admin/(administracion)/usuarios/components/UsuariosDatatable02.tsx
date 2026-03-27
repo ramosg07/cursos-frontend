@@ -10,12 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Constants } from "@/config/Constants";
 import { FilterType } from "@/components/data-table/types/filter";
-import { Edit, Plus } from "lucide-react";
+import { Edit, Key, Plus } from "lucide-react";
 import { AgregarEditarUsuarioModal } from "./AgregarEditarUsuarioModa";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthProvider";
 import { Switch } from "@/components/ui/switch";
 import { ActivarInactivarModal } from "./ActivarInactivarModal";
+import { RestablecerContrasenaModal } from "./RestablecerContrasenaModal";
 
 export function UsuariosDatatable02() {
   const [updateTable, setUpdateTable] = useState(false);
@@ -23,7 +24,8 @@ export function UsuariosDatatable02() {
   const [selectUser, setSelectUser] = useState<Usuario | null>(null);
   const [agregarEditarModalOpen, setAgregarEditarModalOpen] =
     useState<boolean>(false);
-
+  const [alertaRestablecerContrasenaOpen, setAlertaRestablecerContrasenaOpen] =
+    useState(false);
   const [activarInactivarModalOpen, setActivarInactivarModalOpen] =
     useState<boolean>(false);
 
@@ -37,6 +39,11 @@ export function UsuariosDatatable02() {
   const handleActivarInactivarUsuario = async (usuario: Usuario) => {
     setSelectUser(usuario);
     setActivarInactivarModalOpen(true);
+  };
+
+  const handleAlertaRestablecerContrasena = async (usuario: Usuario) => {
+    setSelectUser(usuario);
+    setAlertaRestablecerContrasenaOpen(true);
   };
 
   const columns: ColumnDef<Usuario>[] = [
@@ -146,6 +153,13 @@ export function UsuariosDatatable02() {
             >
               <Edit className="h-4 w-4" />
             </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handleAlertaRestablecerContrasena(row.original)}
+            >
+              <Key className="h-4 w-4" />
+            </Button>
             <Switch
               id="Activar"
               defaultChecked={row.original?.estado === "ACTIVO"}
@@ -231,6 +245,14 @@ export function UsuariosDatatable02() {
           onClose={() => setActivarInactivarModalOpen(false)}
           onSuccess={updateDataTable}
           usuario={selectUser}
+        />
+      )}
+      {alertaRestablecerContrasenaOpen && (
+        <RestablecerContrasenaModal
+          usuario={selectUser}
+          isOpen={alertaRestablecerContrasenaOpen}
+          onClose={() => setAlertaRestablecerContrasenaOpen(false)}
+          onSuccess={updateDataTable}
         />
       )}
     </div>
