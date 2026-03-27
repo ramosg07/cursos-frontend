@@ -58,13 +58,11 @@ export const DataTableFilter = ({
         auxFilters[filter.name] = auxSelectValue.join();
       }
 
-      console.warn({ auxFilters });
     });
     onSearchField(auxFilters);
   }, 1000);
 
   const updateFilters = (filters: any) => {
-    console.warn({ filters });
     debounced(filters);
   };
 

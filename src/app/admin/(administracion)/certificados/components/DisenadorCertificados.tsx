@@ -53,7 +53,6 @@ export function DisenadorCertificados({
   onSave,
   onUploadFondo,
 }: Props) {
-  console.warn({ initialConfig });
 
   const [config, setConfig] = useState<CertificadoConfig>(
     initialConfig || {

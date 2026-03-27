@@ -27,7 +27,6 @@ export function ActivarInactivarModal({
   onClose,
   onSuccess,
 }: ActivarInactivarModalProps) {
-  console.log({ usuario });
 
   const { sessionRequest } = useAuth();
 

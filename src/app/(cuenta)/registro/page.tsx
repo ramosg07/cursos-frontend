@@ -107,7 +107,6 @@ export default function RegistroPage() {
   const { request } = useApi();
 
   const onSubmit = async (data: z.infer<typeof registroSchema>) => {
-    console.warn({ data });
     if (passwordStrength < 3) {
       form.setError("contrasenaNueva", {
         message: "La contraseña no es lo suficientemente segura.",

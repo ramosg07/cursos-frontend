@@ -93,7 +93,6 @@ export function AgregarEditarUsuarioModal({
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.warn({ values });
     setIsLoading(true);
     try {
       const url = usuario ? `/usuarios/${usuario.id}` : "/usuarios";

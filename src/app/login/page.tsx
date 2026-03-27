@@ -43,7 +43,6 @@ export default function Login() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoggingIn(true);
-    console.warn({ values });
     try {
       await login(values.usuario, values.contrasena);
     } catch (error) {

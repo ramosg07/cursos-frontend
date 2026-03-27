@@ -46,7 +46,6 @@ export function ElegirPlantillaModal({
   onClose,
   onSuccess,
 }: ElegirPlantillaModalProps) {
-  console.warn({ curso });
   const [isLoading, setIsLoading] = useState(false);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -58,7 +57,6 @@ export function ElegirPlantillaModal({
   const { sessionRequest } = useAuth();
 
   const onSubmit = async (values: FormValues) => {
-    console.warn({ values });
     try {
       setIsLoading(true);
       const response = await sessionRequest({

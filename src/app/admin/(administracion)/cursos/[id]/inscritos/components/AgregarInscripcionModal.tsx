@@ -93,7 +93,6 @@ export function AgregarInscripcionModal({
         onSuccess();
       }
     } catch (error: any) {
-      console.log({ error });
       const errorMessage = error?.message;
       toast.error(
         Array.isArray(errorMessage)

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthProvider";
 import { Loader2, Printer } from "lucide-react";
 import { toast } from "sonner";
+import { print } from "@/lib/print";
 
 interface Props {
   idCurso: string;
@@ -54,7 +55,7 @@ export function PrintCertificatesModal({
         onClose();
       }
     } catch (error) {
-      console.error(error);
+      print("Error al generar certificados", error);
       toast.error("Error al generar certificados");
     } finally {
       setIsPrinting(false);
