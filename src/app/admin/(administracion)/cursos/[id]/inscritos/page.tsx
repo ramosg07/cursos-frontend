@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { InscritosDatatable } from "./components/InscritosDatatable";
 import { Curso } from "../../types";
 import { Loader2 } from "lucide-react";
+import { PermissionWrapper } from "@/components/PermissionWrapper";
 
 export default function InscritosPage() {
   const params = useParams();
@@ -48,7 +49,9 @@ export default function InscritosPage() {
 
   return (
     <div className="container py-6">
-      <InscritosDatatable curso={curso} />
+      <PermissionWrapper requiredPermission="/admin/cursos/*/inscritos" act={"read"}>
+        <InscritosDatatable curso={curso} />
+      </PermissionWrapper>
     </div>
   );
 }

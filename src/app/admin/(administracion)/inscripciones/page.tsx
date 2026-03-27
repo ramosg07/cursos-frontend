@@ -302,7 +302,7 @@ export default function NuevaInscripcionPage() {
                     <CardTitle>Paso 2: Agregar Cursos</CardTitle>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-6"  >
+                <CardContent className="space-y-6">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">
                       Seleccionar Curso
