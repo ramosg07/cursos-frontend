@@ -196,7 +196,12 @@ export default function NuevaInscripcionPage() {
     );
   }
 
-  console.warn("cursos", { idCursoSeleccionado, cursos });
+  const reset = () => {
+    setEstudiante(null);
+    setCarrito([]);
+    setIdCursoSeleccionado("");
+    setIdParaleloSeleccionado("");
+  };
 
   return (
     <div className="space-y-8 container py-10 px-2">
@@ -227,7 +232,7 @@ export default function NuevaInscripcionPage() {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="pt-6">
+            <CardContent className="pt-2">
               <div className="flex items-end gap-4">
                 <div className="flex-1 max-w-sm space-y-2">
                   <Input
@@ -277,7 +282,7 @@ export default function NuevaInscripcionPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setEstudiante(null)}
+                    onClick={() => reset()}
                     className="text-destructive hover:bg-destructive/10"
                   >
                     Cambiar
@@ -297,7 +302,7 @@ export default function NuevaInscripcionPage() {
                     <CardTitle>Paso 2: Agregar Cursos</CardTitle>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6"  >
                   <div className="space-y-2">
                     <label className="text-sm font-medium">
                       Seleccionar Curso
@@ -306,7 +311,7 @@ export default function NuevaInscripcionPage() {
                       value={idCursoSeleccionado}
                       onValueChange={setIdCursoSeleccionado}
                     >
-                      <SelectTrigger className="h-11">
+                      <SelectTrigger className="h-11 w-full">
                         <SelectValue placeholder="Seleccione un curso..." />
                       </SelectTrigger>
                       <SelectContent>
@@ -328,7 +333,7 @@ export default function NuevaInscripcionPage() {
                         value={idParaleloSeleccionado}
                         onValueChange={setIdParaleloSeleccionado}
                       >
-                        <SelectTrigger className="h-11">
+                        <SelectTrigger className="h-11 w-full">
                           <SelectValue placeholder="Seleccione un paralelo..." />
                         </SelectTrigger>
                         <SelectContent>
@@ -338,10 +343,9 @@ export default function NuevaInscripcionPage() {
                               <SelectItem
                                 key={p.id}
                                 value={p.id}
-                                disabled={(p.cuposDisponibles ?? 0) === 0}
+                                disabled={(p.cupo ?? 0) === 0}
                               >
-                                {p.nombre} ({p.cuposDisponibles ?? 0} cupos
-                                disp.)
+                                {p.nombre} ({p.cupo ?? 0} cupos disp.)
                               </SelectItem>
                             ))}
                         </SelectContent>
