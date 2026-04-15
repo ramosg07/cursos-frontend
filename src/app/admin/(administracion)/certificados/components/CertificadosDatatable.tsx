@@ -27,19 +27,25 @@ export function CertificadosDatatable({ onEdit, onAdd }: Props) {
     },
     {
       accessorKey: "orientacion",
-      header: "Orientación",
+      header: () => (
+        <div className="text-center normal-case text-sm">Orientación</div>
+      ),
       meta: { mobileTitle: "Orientación" },
     },
     {
       accessorKey: "fechaCreacion",
-      header: "Fecha Creación",
+      header: () => (
+        <div className="text-center normal-case text-sm">Fecha Creación</div>
+      ),
       cell: ({ row }) =>
         dayjs((row.original as any).fechaCreacion).format("DD/MM/YYYY"),
       meta: { mobileTitle: "Fecha" },
     },
     {
       accessorKey: "estado",
-      header: "Estado",
+      header: () => (
+        <div className="text-center normal-case text-sm">Estado</div>
+      ),
       cell: ({ row }) => (
         <Badge
           variant={
@@ -53,7 +59,9 @@ export function CertificadosDatatable({ onEdit, onAdd }: Props) {
     },
     {
       id: "acciones",
-      header: "Acciones",
+      header: () => (
+        <div className="text-center normal-case text-sm">Acciones</div>
+      ),
       cell: ({ row }) => (
         <div className="flex gap-2">
           <Button

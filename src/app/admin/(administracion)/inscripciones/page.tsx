@@ -206,9 +206,7 @@ export default function NuevaInscripcionPage() {
   return (
     <div className="space-y-8 container py-10 px-2">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">
-          Nueva Inscripción General
-        </h1>
+        <h1 className="text-3xl font-black tracking-tight text-gradient">Nueva Inscripción Generalu</h1>
         <p className="text-muted-foreground">
           Inscribe a un estudiante en múltiples cursos simultáneamente.
         </p>

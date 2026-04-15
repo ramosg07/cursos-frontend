@@ -65,9 +65,8 @@ export function UsuariosDatatable02() {
                 alt={row.original.persona?.nombres || "Avatar"}
               />
               <AvatarFallback>
-                {`${row.original.persona?.nombres?.[0] || ""}${
-                  row.original.persona?.primerApellido?.[0] || ""
-                }`}
+                {`${row.original.persona?.nombres?.[0] || ""}${row.original.persona?.primerApellido?.[0] || ""
+                  }`}
               </AvatarFallback>
             </Avatar>
           </div>
@@ -108,7 +107,9 @@ export function UsuariosDatatable02() {
     },
     {
       accessorKey: "usuarioRol",
-      header: "Roles",
+      header: () => (
+        <div className="text-center normal-case text-sm">Roles</div>
+      ),
       cell: ({ row }) => {
         return (
           <div className="flex flex-wrap gap-1">

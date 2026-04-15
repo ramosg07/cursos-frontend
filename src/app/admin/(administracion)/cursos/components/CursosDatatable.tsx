@@ -75,25 +75,33 @@ export function CursosDatatable() {
     },
     {
       accessorKey: "descripcion",
-      header: "Descripción",
+      header: () => (
+        <div className="text-center normal-case text-sm">Descripción</div>
+      ),
       cell: ({ row }) => row.original.descripcion ?? "—",
       meta: { mobileTitle: "Descripción" },
     },
     {
       accessorKey: "fechaInicio",
-      header: "Fecha Inicio",
+      header: () => (
+        <div className="text-center normal-case text-sm">Fecha Inicio</div>
+      ),
       cell: ({ row }) => row.original.fechaInicio ?? "—",
       meta: { mobileTitle: "Fecha Inicio" },
     },
     {
       accessorKey: "fechaFin",
-      header: "Fecha Fin",
+      header: () => (
+        <div className="text-center normal-case text-sm">Fecha Fin</div>
+      ),
       cell: ({ row }) => row.original.fechaFin ?? "—",
       meta: { mobileTitle: "Fecha Fin" },
     },
     {
       accessorKey: "cursoCoordinador",
-      header: "Coordinadores",
+      header: () => (
+        <div className="text-center normal-case text-sm">Coordinadores</div>
+      ),
       cell: ({ row }) => {
         const coordinadores = row.original.cursoCoordinador ?? [];
         if (coordinadores.length === 0) return "—";
@@ -112,13 +120,17 @@ export function CursosDatatable() {
     },
     {
       accessorKey: "monto",
-      header: "Monto (Bs.)",
+      header: () => (
+        <div className="text-center normal-case text-sm">Monto (Bs.)</div>
+      ),
       cell: ({ row }) => Number(row.original.monto).toFixed(2),
       meta: { mobileTitle: "Monto" },
     },
     {
       accessorKey: "estado",
-      header: "Estado",
+      header: () => (
+        <div className="text-center normal-case text-sm">Estado</div>
+      ),
       cell: ({ row }) => (
         <Badge
           variant={
@@ -132,7 +144,9 @@ export function CursosDatatable() {
     },
     {
       id: "actions",
-      header: "Acciones",
+      header: () => (
+        <div className="text-center normal-case text-sm">Acciones</div>
+      ),
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           {permissions.read && (

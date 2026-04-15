@@ -124,7 +124,7 @@ export default function Dashboard() {
           />
         </Field>
         <Field className="w-full md:w-72">
-          <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1 ml-1">
+          <FieldLabel className="tracking-wider mb-1 ml-1">
             Coordinador de Curso
           </FieldLabel>
           <Select

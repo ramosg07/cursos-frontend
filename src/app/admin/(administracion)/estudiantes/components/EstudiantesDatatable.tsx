@@ -57,19 +57,18 @@ export function EstudiantesDatatable() {
       meta: { mobileTitle: "Nombre" },
     },
     {
-      accessorKey: "usuario.correoElectronico",
-      header: "Correo",
-      meta: { mobileTitle: "Correo" },
-    },
-    {
       accessorKey: "codigoPersonal",
-      header: "Código/Matrícula",
+      header: ({ column }) => (
+        <SortableHeader column={column} title="Matrícula" />
+      ),
       cell: ({ row }) => row.original.codigoPersonal ?? "—",
-      meta: { mobileTitle: "Código" },
+      meta: { mobileTitle: "Matrícula" },
     },
     {
       accessorKey: "estado",
-      header: "Estado",
+      header: ({ column }) => (
+        <SortableHeader column={column} title="Estado" />
+      ),
       cell: ({ row }) => (
         <Badge
           variant={
@@ -83,7 +82,9 @@ export function EstudiantesDatatable() {
     },
     {
       id: "actions",
-      header: "Acciones",
+      header: () => (
+        <div className="text-center normal-case text-sm">Acciones</div>
+      ),
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           {row.original.estado === "ACTIVO" && (

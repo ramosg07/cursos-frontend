@@ -27,14 +27,14 @@ const studentSchema = z.object({
   nombres: z.string().min(2, "Mínimo 2 caracteres"),
   primerApellido: z.string().min(2, "Mínimo 2 caracteres"),
   segundoApellido: z.string().optional().nullable(),
-  correoElectronico: z.string().email("Correo inválido"),
+  // correoElectronico: z.string().email("Correo inválido"),
   codigoPersonal: z.string().optional().nullable(),
-  fechaNacimiento: z.string().refine(
-    (date) => {
-      return validateDateFormat(date, "YYYY-MM-DD");
-    },
-    { message: "Fecha de nacimiento inválida" },
-  ),
+  // fechaNacimiento: z.string().refine(
+  //   (date) => {
+  //     return validateDateFormat(date, "YYYY-MM-DD");
+  //   },
+  //   { message: "Fecha de nacimiento inválida" },
+  // ),
 });
 
 type StudentFormValues = z.infer<typeof studentSchema>;
@@ -63,9 +63,9 @@ export function AgregarEditarEstudianteModal({
       nombres: "",
       primerApellido: "",
       segundoApellido: "",
-      correoElectronico: "",
+      // correoElectronico: "",
       codigoPersonal: "",
-      fechaNacimiento: "",
+      // fechaNacimiento: "",
     },
   });
 
@@ -77,12 +77,12 @@ export function AgregarEditarEstudianteModal({
         nombres: p.nombres,
         primerApellido: p.primerApellido,
         segundoApellido: p.segundoApellido ?? "",
-        correoElectronico: estudiante.usuario.correoElectronico,
+        // correoElectronico: estudiante.usuario?.correoElectronico,
         codigoPersonal: estudiante.codigoPersonal ?? "",
-        fechaNacimiento:
-          dayjs
-            .utc(estudiante.usuario.persona.fechaNacimiento)
-            .format("YYYY-MM-DD") || "",
+        // fechaNacimiento:
+        //   dayjs
+        //     .utc(estudiante.usuario.persona.fechaNacimiento)
+        //     .format("YYYY-MM-DD") || "",
       });
     } else {
       form.reset({
@@ -90,9 +90,9 @@ export function AgregarEditarEstudianteModal({
         nombres: "",
         primerApellido: "",
         segundoApellido: "",
-        correoElectronico: "",
+        // correoElectronico: "",
         codigoPersonal: "",
-        fechaNacimiento: "",
+        // fechaNacimiento: "",
       });
     }
   }, [estudiante, form]);
@@ -105,10 +105,10 @@ export function AgregarEditarEstudianteModal({
       const body = {
         codigoPersonal: values.codigoPersonal || null,
         segundoApellido: values.segundoApellido || null,
-        correoElectronico: values.correoElectronico,
+        // correoElectronico: values.correoElectronico,
         nombres: values.nombres,
         primerApellido: values.primerApellido,
-        fechaNacimiento: values.fechaNacimiento || null,
+        // fechaNacimiento: values.fechaNacimiento || null,
         nroDocumento: !estudiante ? values.nroDocumento : undefined,
       };
       const resultado = await sessionRequest({
@@ -170,7 +170,7 @@ export function AgregarEditarEstudianteModal({
                 <Field aria-invalid={fieldState.invalid}>
                   <FieldLabel>Código/Matrícula</FieldLabel>
                   <Input
-                    placeholder="EST-001"
+                    placeholder="20000154784"
                     {...field}
                     value={field.value || ""}
                     aria-invalid={fieldState.invalid}
@@ -251,7 +251,7 @@ export function AgregarEditarEstudianteModal({
             />
           </div>
 
-          <Controller
+          {/* <Controller
             name="correoElectronico"
             control={form.control}
             render={({ field, fieldState }) => (
@@ -290,7 +290,7 @@ export function AgregarEditarEstudianteModal({
                 </Field>
               );
             }}
-          />
+          /> */}
 
           <DialogFooter>
             <Button
