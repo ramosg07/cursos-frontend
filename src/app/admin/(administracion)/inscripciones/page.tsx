@@ -63,9 +63,9 @@ export default function NuevaInscripcionPage() {
     useState<string>("");
 
   // Bandeja de Inscripciones (Carrito)
-  const [carrito, setCarrito] = useState<{ curso: Curso; paralelo: Paralelo }[]>(
-    [],
-  );
+  const [carrito, setCarrito] = useState<
+    { curso: Curso; paralelo: Paralelo; error?: boolean; mensajeError?: string }[]
+  >([]);
 
   // Estado de Procesamiento
   const [procesando, setProcesando] = useState(false);
@@ -80,6 +80,10 @@ export default function NuevaInscripcionPage() {
   useEffect(() => {
     fetchCursos();
   }, []);
+
+  useEffect(() => {
+    validarCarrito();
+  }, [estudiante, carrito.length]);
 
   const fetchCursos = async () => {
     setLoadingCursos(true);
@@ -139,9 +143,43 @@ export default function NuevaInscripcionPage() {
       return;
     }
 
-    setCarrito([...carrito, { curso, paralelo }]);
+    // Limpiar errores previos al agregar (se re-validará en el useEffect)
+    setCarrito([...carrito, { curso, paralelo, error: false }]);
     setIdCursoSeleccionado("");
     setIdParaleloSeleccionado("");
+  };
+
+  const validarCarrito = async () => {
+    if (!estudiante || carrito.length === 0) return;
+
+    try {
+      const response = await sessionRequest<{ datos: { idParalelo: string; mensaje: string }[] }>({
+        url: "/inscripciones/multiple/validar",
+        method: "post",
+        data: {
+          idEstudiante: estudiante.id,
+          idsParalelo: carrito.map((item) => item.paralelo.id),
+        },
+      });
+
+      if (response && response.data) {
+        const errores = response.data.datos || [];
+        setCarrito((prev) =>
+          prev.map((item) => {
+            const errorEncontrado = errores.find(
+              (e) => e.idParalelo === item.paralelo.id,
+            );
+            return {
+              ...item,
+              error: !!errorEncontrado,
+              mensajeError: errorEncontrado?.mensaje,
+            };
+          }),
+        );
+      }
+    } catch (error) {
+      print("Error validando carrito", error);
+    }
   };
 
   const quitarDelCarrito = (index: number) => {
@@ -164,6 +202,9 @@ export default function NuevaInscripcionPage() {
 
     setProcesando(true);
     try {
+      // Limpiar errores previos antes de intentar procesar
+      setCarrito(prev => prev.map(item => ({ ...item, error: false })));
+
       const response = await sessionRequest<{ datos: any[] }>({
         url: "/inscripciones/multiple",
         method: "post",
@@ -181,9 +222,34 @@ export default function NuevaInscripcionPage() {
       toast.success("Inscrito correctamente en todos los cursos");
       setExito(true);
     } catch (error: any) {
-      toast.error(
-        error?.response?.data?.mensaje || "Error al procesar inscripciones",
-      );
+      const body = error?.response?.data || error;
+      const mensajeGeneral = body?.message || body?.mensaje || "Error al procesar inscripciones";
+      const erroresMasivos = body?.errores || []; // Lista de errores del backend
+
+      toast.error(mensajeGeneral);
+
+      if (erroresMasivos.length > 0) {
+        // Marcamos todos los cursos que fallaron usando la lista del backend
+        setCarrito(prev => prev.map(item => {
+          const conflict = erroresMasivos.find((e: any) => e.idParalelo === item.paralelo.id);
+          if (conflict) {
+            return { ...item, error: true, mensajeError: conflict.mensaje };
+          }
+          return { ...item, error: false, mensajeError: undefined };
+        }));
+      } else {
+        // Fallback para errores individuales o no estructurados
+        const idParaleloError = error?.idParalelo;
+        setCarrito(prev => prev.map(item => {
+          if (idParaleloError && item.paralelo.id === idParaleloError) {
+            return { ...item, error: true, mensajeError: mensajeGeneral };
+          }
+          if (!idParaleloError && typeof mensajeGeneral === 'string' && mensajeGeneral.includes(item.curso.nombre)) {
+            return { ...item, error: true, mensajeError: mensajeGeneral };
+          }
+          return item;
+        }));
+      }
     } finally {
       setProcesando(false);
     }
@@ -237,8 +303,8 @@ export default function NuevaInscripcionPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] text-center space-y-8 animate-in fade-in zoom-in duration-500 px-4">
         <div className="relative">
-          <div className="h-32 w-32 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center ring-8 ring-green-50 dark:ring-green-900/10">
-            <CheckCircle2 className="h-16 w-16 text-green-600 animate-pulse" />
+          <div className="h-25 w-25 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center ring-8 ring-green-50 dark:ring-green-900/10">
+            <CheckCircle2 className="h-12 w-12 text-green-600 animate-pulse" />
           </div>
           <div className="absolute -top-2 -right-2 h-10 w-10 bg-white dark:bg-slate-900 rounded-full shadow-lg flex items-center justify-center border-4 border-green-500">
             <CreditCard className="h-5 w-5 text-green-600" />
@@ -246,7 +312,7 @@ export default function NuevaInscripcionPage() {
         </div>
 
         <div className="space-y-3">
-          <h2 className="text-4xl font-black tracking-tight bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent pb-1">
+          <h2 className="text-3xl font-black tracking-tight bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent pb-1">
             ¡Inscripción Completada!
           </h2>
           <p className="text-muted-foreground max-w-md mx-auto text-lg">
@@ -258,7 +324,7 @@ export default function NuevaInscripcionPage() {
           <Button
             onClick={downloadReceipt}
             disabled={generandoRecibo}
-            className="flex-1 h-16 text-lg font-bold gap-3 shadow-2xl shadow-primary/20 hover:scale-[1.02] transition-transform"
+            className="flex-1 h-12 font-bold gap-3 shadow-2xl shadow-primary/20 hover:scale-[1.02] transition-transform"
             size="lg"
           >
             {generandoRecibo ? (
@@ -271,7 +337,7 @@ export default function NuevaInscripcionPage() {
           <Button
             onClick={reset}
             variant="outline"
-            className="flex-1 h-16 text-lg font-bold gap-3 border-2"
+            className="flex-1 h-12 font-bold gap-3 border-2"
             size="lg"
           >
             <UserPlus className="h-6 w-6" />
@@ -281,9 +347,9 @@ export default function NuevaInscripcionPage() {
 
         <Card className="w-full max-w-md border-primary/10 bg-card/50 backdrop-blur-sm">
           <CardContent className="p-6">
-            <div className="flex justify-between items-center text-sm mb-4 text-muted-foreground uppercase tracking-wider font-bold">
-              <span>Resumen de Pago</span>
-              <span>Confirmado</span>
+            <div className="flex justify-between items-center text-md mb-4 text-muted-foreground tracking-wider font-bold">
+              <span>Curso / Paralelo</span>
+              <span>Monto</span>
             </div>
             <Separator className="mb-4" />
             <div className="space-y-3">
@@ -319,9 +385,6 @@ export default function NuevaInscripcionPage() {
             Sistema de cobro y registro múltiple de estudiantes.
           </p>
         </div>
-        <Badge variant="outline" className="h-8 px-4 border-primary/30 bg-primary/5 text-primary text-xs font-bold tracking-widest uppercase">
-          Procesamiento Transaccional
-        </Badge>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -334,18 +397,18 @@ export default function NuevaInscripcionPage() {
                   <UserPlus className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl font-black tracking-tight">Paso 1: Estudiante</CardTitle>
+                  <CardTitle className="text-xl font-black">Paso 1: Estudiante</CardTitle>
                   <CardDescription className="text-base">
                     Verificación de identidad y estado académico
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-8">
+            <CardContent className="px-8 pt-2 pb-8">
               <div className="flex flex-col md:flex-row items-end gap-4">
                 <div className="flex-1 w-full space-y-3">
-                  <label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">Documento de Identidad (CI)</label>
-                  <div className="relative">
+                  <label className="text-sm font-black text-muted-foreground ml-1">Documento de Identidad (CI)</label>
+                  <div className="relative mt-2">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
                       placeholder="Ej. 8457214"
@@ -354,20 +417,20 @@ export default function NuevaInscripcionPage() {
                       onKeyDown={(e) =>
                         e.key === "Enter" && handleSearchEstudiante()
                       }
-                      className="h-14 pl-12 text-lg font-bold bg-muted/50 border-2 focus-visible:ring-primary/20"
+                      className="h-10 pl-12 text-lg font-bold bg-muted/50 border-2 focus-visible:ring-primary/20"
                     />
                   </div>
                 </div>
                 <Button
                   onClick={handleSearchEstudiante}
                   disabled={loadingEstudiante || !nroDocumento}
-                  className="h-14 px-10 text-lg font-black shadow-lg shadow-primary/20 active:scale-95 transition-all"
+                  className="h-10 px-10 text-lg font-black shadow-lg shadow-primary/20 active:scale-95 transition-all"
                   size="lg"
                 >
                   {loadingEstudiante ? (
                     <Loader2 className="h-6 w-6 animate-spin" />
                   ) : (
-                    "BUSCAR ESTUDIANTE"
+                    <div className="flex items-center gap-2">Buscar Estudiante <Search className="h-5 w-5" /></div>
                   )}
                 </Button>
               </div>
@@ -375,17 +438,16 @@ export default function NuevaInscripcionPage() {
               {estudiante && (
                 <div className="mt-8 p-6 rounded-3xl border-2 border-primary/20 bg-primary/5 flex flex-col md:flex-row items-center justify-between gap-6 animate-in slide-in-from-bottom-4 duration-500">
                   <div className="flex items-center gap-6">
-                    <div className="h-20 w-20 rounded-2xl bg-primary flex items-center justify-center text-white font-black text-3xl shadow-xl shadow-primary/20">
+                    <div className="h-13 w-13 rounded-2xl bg-primary flex items-center justify-center text-white font-black text-3xl shadow-xl shadow-primary/20">
                       {estudiante.usuario.persona.nombres[0]}
                     </div>
                     <div>
-                      <p className="font-black text-2xl tracking-tighter">
+                      <p className="font-black text-xl">
                         {estudiante.usuario.persona.nombres}{" "}
                         {estudiante.usuario.persona.primerApellido}{" "}
                         {estudiante.usuario.persona.segundoApellido}
                       </p>
                       <div className="flex flex-wrap gap-3 mt-2">
-                        <Badge variant="secondary" className="font-bold">{estudiante.usuario.correoElectronico}</Badge>
                         <Badge variant="outline" className="font-bold border-primary/30">CI: {estudiante.usuario.persona.nroDocumento}</Badge>
                         {estudiante.codigoPersonal && (
                           <Badge variant="default" className="bg-primary hover:bg-primary font-bold">Matrícula: {estudiante.codigoPersonal}</Badge>
@@ -409,18 +471,18 @@ export default function NuevaInscripcionPage() {
           {/* SECCIÓN 2: CURSOS */}
           {estudiante && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in duration-700">
-              <Card className="h-fit border-2 border-primary/5 shadow-xl shadow-primary/5 flex flex-col overflow-hidden">
-                <CardHeader className="bg-card px-8 pt-8 pb-4">
+              <Card className="h-fit border-2 border-primary/5 shadow-xl shadow-primary/5 flex flex-col overflow-hidden gap-4">
+                <CardHeader className="bg-card px-8 pt-8">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                       <BookOpen className="h-5 w-5" />
                     </div>
-                    <CardTitle className="text-xl font-black">Paso 2: Selección</CardTitle>
+                    <CardTitle className="text-xl font-black">Paso 2: Selección de Cursos</CardTitle>
                   </div>
                 </CardHeader>
-                <CardContent className="px-8 pb-8 space-y-8">
+                <CardContent className="px-8 pb-8 space-y-6">
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">
+                    <label className="text-[14px] font-black text-muted-foreground ml-1">
                       Curso Académico
                     </label>
                     <Select
@@ -445,7 +507,7 @@ export default function NuevaInscripcionPage() {
 
                   {idCursoSeleccionado && (
                     <div className="space-y-3 animate-in fade-in slide-in-from-top-4 duration-300">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">
+                      <label className="text-[14px] font-black text-muted-foreground ml-1">
                         Paralelo / Turno
                       </label>
                       <Select
@@ -474,11 +536,11 @@ export default function NuevaInscripcionPage() {
                   )}
 
                   <Button
-                    className="w-full h-16 text-lg font-black shadow-lg shadow-primary/10 active:scale-95 transition-all"
+                    className="w-full h-14 text-lg font-black shadow-lg shadow-primary/10 active:scale-95 transition-all"
                     disabled={!idParaleloSeleccionado}
                     onClick={agregarAlCarrito}
                   >
-                    AGREGAR A LA BANDEJA <ArrowRight className="h-5 w-5 ml-2" />
+                    Agregar a la bandeja <ArrowRight className="h-5 w-5 ml-2" />
                   </Button>
                 </CardContent>
               </Card>
@@ -493,8 +555,8 @@ export default function NuevaInscripcionPage() {
                       </div>
                       <CardTitle className="text-xl font-black">Paso 3: Bandeja</CardTitle>
                     </div>
-                    <div className="h-8 px-3 rounded-lg bg-primary text-white text-[10px] font-black flex items-center gap-2">
-                      {carrito.length} ÍTEMS
+                    <div className="h-8 px-3 rounded-lg bg-primary text-white  text-[10px] font-black flex items-center gap-2">
+                      {carrito.length}{carrito.length === 1 ? 'ITEM' : 'ITEMS'}
                     </div>
                   </div>
                 </CardHeader>
@@ -503,8 +565,8 @@ export default function NuevaInscripcionPage() {
                     <Table>
                       <TableHeader className="bg-muted/50 sticky top-0 z-10">
                         <TableRow className="hover:bg-transparent border-0">
-                          <TableHead className="pl-8 text-[10px] font-black uppercase tracking-widest h-12">Detalle de Cobro</TableHead>
-                          <TableHead className="text-right text-[10px] font-black uppercase tracking-widest h-12">Importe</TableHead>
+                          <TableHead className="pl-8 text-[12px] font-black h-12 normal-case">Detalle de Cobro</TableHead>
+                          <TableHead className="text-right text-[12px] font-black h-12 normal-case">Importe</TableHead>
                           <TableHead className="w-[80px] h-12"></TableHead>
                         </TableRow>
                       </TableHeader>
@@ -523,14 +585,29 @@ export default function NuevaInscripcionPage() {
                           </TableRow>
                         ) : (
                           carrito.map((item, index) => (
-                            <TableRow key={index} className="hover:bg-primary/5 transition-colors border-primary/5 group">
+                            <TableRow
+                              key={index}
+                              className={`hover:bg-primary/5 transition-colors border-primary/5 group ${item.error ? "bg-destructive/10 border-destructive/50" : ""
+                                }`}
+                            >
                               <TableCell className="pl-8 py-5">
-                                <p className="font-black text-base text-foreground group-hover:text-primary transition-colors">
-                                  {item.curso.nombre}
-                                </p>
-                                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mt-1">
-                                  Paralelo: {item.paralelo.nombre}
-                                </p>
+                                <div className="flex items-center gap-2">
+                                  {item.error && (
+                                    <Badge variant="destructive" className="h-5 w-5 p-0 flex items-center justify-center rounded-full">
+                                      !
+                                    </Badge>
+                                  )}
+                                  <div>
+                                    <p className={`font-black text-base transition-colors ${item.error ? "text-destructive" : "text-foreground group-hover:text-primary"
+                                      }`}>
+                                      {item.curso.nombre}
+                                    </p>
+                                    <p className={`text-xs font-bold uppercase tracking-widest mt-1 break-words whitespace-normal ${item.error ? "text-destructive/80" : "text-muted-foreground"
+                                      }`}>
+                                      {item.error ? item.mensajeError : `Paralelo: ${item.paralelo.nombre}`}
+                                    </p>
+                                  </div>
+                                </div>
                               </TableCell>
                               <TableCell className="text-right font-mono font-black text-base py-5">
                                 Bs. {item.curso.monto}
@@ -555,7 +632,7 @@ export default function NuevaInscripcionPage() {
                   <div className="p-8 space-y-8 bg-card border-t border-primary/5 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
                     <div className="flex justify-between items-end">
                       <div className="flex flex-col gap-1">
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground ml-1">Total Liquidación</span>
+                        <span className="text-[14px] font-black text-muted-foreground">Total Liquidación</span>
                         <span className="text-lg font-black text-foreground">BOLIVIANOS</span>
                       </div>
                       <span className="text-5xl font-black text-primary tracking-tighter">
@@ -565,7 +642,7 @@ export default function NuevaInscripcionPage() {
 
                     <div className="space-y-3">
                       <Button
-                        className="w-full h-20 text-xl font-black shadow-2xl shadow-primary/30 hover:shadow-primary/40 active:scale-[0.98] transition-all gap-4"
+                        className="w-full h-14 text-xl font-black shadow-2xl shadow-primary/30 hover:shadow-primary/40 active:scale-[0.98] transition-all gap-4"
                         disabled={carrito.length === 0 || procesando}
                         onClick={handleFinalizarInscripcion}
                       >
@@ -574,13 +651,10 @@ export default function NuevaInscripcionPage() {
                         ) : (
                           <>
                             <FileText className="h-8 w-8" />
-                            FINALIZAR Y COBRAR
+                            Finalizar y cobrar
                           </>
                         )}
                       </Button>
-                      <p className="text-[10px] text-center text-muted-foreground/60 uppercase tracking-[0.25em] font-black leading-normal">
-                        Operación protegida por firma electrónica<br />y validación de identidad
-                      </p>
                     </div>
                   </div>
                 </CardContent>
