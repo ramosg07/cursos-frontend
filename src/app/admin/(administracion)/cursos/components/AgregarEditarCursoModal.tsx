@@ -46,10 +46,10 @@ const formSchema = z.object({
     .nullable()
     .refine(
       (date) => {
-        if (!date) return true; // permite null o undefined
-        return validateDateFormat(date, "YYYY-MM-DD");
+        if (!dayjs.utc(date).isValid) return true; // permite null o undefined
+        return validateDateFormat(dayjs.utc(date).toString(), "YYYY-MM-DD");
       },
-      { message: "Fecha de inicio inválida" },
+      { message: "Fecha inicio inválida" }
     ),
   fechaFin: z
     .string()
@@ -57,20 +57,40 @@ const formSchema = z.object({
     .nullable()
     .refine(
       (date) => {
-        if (!date) return true; // permite null o undefined
-        return validateDateFormat(date, "YYYY-MM-DD");
+        if (!dayjs.utc(date).isValid) return true; // permite null o undefined
+        return validateDateFormat(dayjs.utc(date).toString(), "YYYY-MM-DD");
       },
-      { message: "Fecha de fin inválida" },
+      { message: "Fecha fin inválida" }
     ),
-  monto: z.coerce.number().min(0, "El monto debe ser al menos 0"),
+  monto: z.coerce.number().min(1, "El monto debe ser mayor a 0"),
   coordinadores: z.array(z.string()).optional(),
-  paralelos: z.array(
-    z.object({
-      id: z.string().optional(),
-      nombre: z.string().min(1, "El nombre es obligatorio"),
-      cupo: z.coerce.number().min(1, "El cupo debe ser al menos 1"),
+  paralelos: z
+    .array(
+      z.object({
+        id: z.string().optional(),
+        nombre: z
+          .string({ message: "El nombre es obligatorio" })
+          .max(1, "El nombre debe tener solo 1 caracter"),
+        cupo: z.coerce.number().min(1, "El cupo debe ser al menos 1"),
+      })
+    )
+    .superRefine((paralelos, ctx) => {
+      const seen = new Set<string>();
+
+      paralelos.forEach((p, index) => {
+        const nombre = p.nombre.trim().toUpperCase();
+
+        if (seen.has(nombre)) {
+          ctx.addIssue({
+            code: "custom",
+            message: `El nombre '${nombre}' está repetido`,
+            path: [index, "nombre"],
+          });
+        } else {
+          seen.add(nombre);
+        }
+      });
     }),
-  ),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -158,7 +178,7 @@ export function AgregarEditarCursoModal({
         curso ? "Error al actualizar curso" : "Error al crear curso",
         {
           description: MessageInterpreter(error),
-        },
+        }
       );
     } finally {
       setIsLoading(false);
@@ -234,7 +254,11 @@ export function AgregarEditarCursoModal({
                       >
                         <DatePickerSimple
                           label="Fecha de Inicio"
-                          value={field.value || undefined}
+                          value={
+                            dayjs.utc(field.value).isValid()
+                              ? field.value ?? ""
+                              : undefined
+                          }
                           onChange={(date) => {
                             field.onChange(date || "");
                           }}
@@ -256,7 +280,11 @@ export function AgregarEditarCursoModal({
                       >
                         <DatePickerSimple
                           label="Fecha de Fin"
-                          value={field.value || undefined}
+                          value={
+                            dayjs.utc(field.value).isValid()
+                              ? field.value ?? ""
+                              : undefined
+                          }
                           onChange={(date) => {
                             field.onChange(date || "");
                           }}
@@ -335,8 +363,8 @@ export function AgregarEditarCursoModal({
                                     form.setValue(
                                       "coordinadores",
                                       currentCoords.filter(
-                                        (id) => id !== coordinador.id,
-                                      ),
+                                        (id) => id !== coordinador.id
+                                      )
                                     );
                                   }
                                 }}
@@ -400,6 +428,11 @@ export function AgregarEditarCursoModal({
                             <Input
                               placeholder="Ej: A, B..."
                               {...inputField}
+                              onChange={(e) =>
+                                inputField.onChange(
+                                  e.target.value.toUpperCase()
+                                )
+                              }
                               className="h-9"
                             />
                             {fieldState.invalid && (

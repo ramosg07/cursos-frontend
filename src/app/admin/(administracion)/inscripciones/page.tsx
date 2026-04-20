@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthProvider";
 import { toast } from "sonner";
 import {
@@ -45,7 +45,6 @@ import {
 import { print } from "@/lib/print";
 import { EstudianteBusqueda } from "../cursos/[id]/inscritos/types";
 import { Curso, Paralelo } from "../cursos/types";
-import { Constants } from "@/config/Constants";
 
 export default function NuevaInscripcionPage() {
   const { sessionRequest } = useAuth();
@@ -58,13 +57,23 @@ export default function NuevaInscripcionPage() {
   // Estado para Cursos y Selección
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [loadingCursos, setLoadingCursos] = useState(false);
+  const [busquedaCurso, setBusquedaCurso] = useState("");
+  const [mostrarDropdownCurso, setMostrarDropdownCurso] = useState(false);
+  const [cursoSeleccionado, setCursoSeleccionado] = useState<Curso | null>(
+    null
+  );
   const [idCursoSeleccionado, setIdCursoSeleccionado] = useState<string>("");
   const [idParaleloSeleccionado, setIdParaleloSeleccionado] =
     useState<string>("");
 
   // Bandeja de Inscripciones (Carrito)
   const [carrito, setCarrito] = useState<
-    { curso: Curso; paralelo: Paralelo; error?: boolean; mensajeError?: string }[]
+    {
+      curso: Curso;
+      paralelo: Paralelo;
+      error?: boolean;
+      mensajeError?: string;
+    }[]
   >([]);
 
   // Estado de Procesamiento
@@ -73,24 +82,32 @@ export default function NuevaInscripcionPage() {
 
   // IDs de inscripciones creadas (para el recibo)
   const [idsInscripcionCreadas, setIdsInscripcionCreadas] = useState<string[]>(
-    [],
+    []
   );
   const [generandoRecibo, setGenerandoRecibo] = useState(false);
 
-  useEffect(() => {
-    fetchCursos();
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleBusquedaCurso = useCallback((valor: string) => {
+    setBusquedaCurso(valor);
+    setMostrarDropdownCurso(true);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      fetchCursos(valor);
+    }, 350);
   }, []);
 
   useEffect(() => {
     validarCarrito();
   }, [estudiante, carrito.length]);
 
-  const fetchCursos = async () => {
+  const fetchCursos = async (filtro: string) => {
     setLoadingCursos(true);
     try {
       const response = await sessionRequest<any>({
         url: "/cursos",
         method: "get",
+        params: { filtro, limite: 20 },
       });
       if (response && response.data?.datos?.filas) {
         setCursos(response.data.datos.filas);
@@ -125,9 +142,14 @@ export default function NuevaInscripcionPage() {
   };
 
   const agregarAlCarrito = () => {
-    const curso = cursos.find((c) => c.id === idCursoSeleccionado);
+    if (carrito.length >= 10) {
+      toast.error("El carrito no puede tener más de 10 cursos");
+      return;
+    }
+
+    const curso = cursoSeleccionado;
     const paralelo = curso?.paralelos.find(
-      (p) => p.id === idParaleloSeleccionado,
+      (p) => p.id === idParaleloSeleccionado
     );
 
     if (!curso || !paralelo) {
@@ -138,7 +160,7 @@ export default function NuevaInscripcionPage() {
     // Evitar duplicados de curso
     if (carrito.find((item) => item.curso.id === curso.id)) {
       toast.error(
-        "El estudiante ya está siendo inscrito en este curso en esta sesión",
+        "El estudiante ya está siendo inscrito en este curso en esta sesión"
       );
       return;
     }
@@ -153,7 +175,9 @@ export default function NuevaInscripcionPage() {
     if (!estudiante || carrito.length === 0) return;
 
     try {
-      const response = await sessionRequest<{ datos: { idParalelo: string; mensaje: string }[] }>({
+      const response = await sessionRequest<{
+        datos: { idParalelo: string; mensaje: string }[];
+      }>({
         url: "/inscripciones/multiple/validar",
         method: "post",
         data: {
@@ -167,14 +191,14 @@ export default function NuevaInscripcionPage() {
         setCarrito((prev) =>
           prev.map((item) => {
             const errorEncontrado = errores.find(
-              (e) => e.idParalelo === item.paralelo.id,
+              (e) => e.idParalelo === item.paralelo.id
             );
             return {
               ...item,
               error: !!errorEncontrado,
               mensajeError: errorEncontrado?.mensaje,
             };
-          }),
+          })
         );
       }
     } catch (error) {
@@ -190,7 +214,7 @@ export default function NuevaInscripcionPage() {
 
   const totalMonto = carrito.reduce(
     (acc, item) => acc + Number(item.curso.monto),
-    0,
+    0
   );
 
   const handleFinalizarInscripcion = async () => {
@@ -203,7 +227,7 @@ export default function NuevaInscripcionPage() {
     setProcesando(true);
     try {
       // Limpiar errores previos antes de intentar procesar
-      setCarrito(prev => prev.map(item => ({ ...item, error: false })));
+      setCarrito((prev) => prev.map((item) => ({ ...item, error: false })));
 
       const response = await sessionRequest<{ datos: any[] }>({
         url: "/inscripciones/multiple",
@@ -223,32 +247,43 @@ export default function NuevaInscripcionPage() {
       setExito(true);
     } catch (error: any) {
       const body = error?.response?.data || error;
-      const mensajeGeneral = body?.message || body?.mensaje || "Error al procesar inscripciones";
+      const mensajeGeneral =
+        body?.message || body?.mensaje || "Error al procesar inscripciones";
       const erroresMasivos = body?.errores || []; // Lista de errores del backend
 
       toast.error(mensajeGeneral);
 
       if (erroresMasivos.length > 0) {
         // Marcamos todos los cursos que fallaron usando la lista del backend
-        setCarrito(prev => prev.map(item => {
-          const conflict = erroresMasivos.find((e: any) => e.idParalelo === item.paralelo.id);
-          if (conflict) {
-            return { ...item, error: true, mensajeError: conflict.mensaje };
-          }
-          return { ...item, error: false, mensajeError: undefined };
-        }));
+        setCarrito((prev) =>
+          prev.map((item) => {
+            const conflict = erroresMasivos.find(
+              (e: any) => e.idParalelo === item.paralelo.id
+            );
+            if (conflict) {
+              return { ...item, error: true, mensajeError: conflict.mensaje };
+            }
+            return { ...item, error: false, mensajeError: undefined };
+          })
+        );
       } else {
         // Fallback para errores individuales o no estructurados
         const idParaleloError = error?.idParalelo;
-        setCarrito(prev => prev.map(item => {
-          if (idParaleloError && item.paralelo.id === idParaleloError) {
-            return { ...item, error: true, mensajeError: mensajeGeneral };
-          }
-          if (!idParaleloError && typeof mensajeGeneral === 'string' && mensajeGeneral.includes(item.curso.nombre)) {
-            return { ...item, error: true, mensajeError: mensajeGeneral };
-          }
-          return item;
-        }));
+        setCarrito((prev) =>
+          prev.map((item) => {
+            if (idParaleloError && item.paralelo.id === idParaleloError) {
+              return { ...item, error: true, mensajeError: mensajeGeneral };
+            }
+            if (
+              !idParaleloError &&
+              typeof mensajeGeneral === "string" &&
+              mensajeGeneral.includes(item.curso.nombre)
+            ) {
+              return { ...item, error: true, mensajeError: mensajeGeneral };
+            }
+            return item;
+          })
+        );
       }
     } finally {
       setProcesando(false);
@@ -274,7 +309,7 @@ export default function NuevaInscripcionPage() {
         link.href = url;
         link.setAttribute(
           "download",
-          `recibo-inscripcion-${new Date().getTime()}.pdf`,
+          `recibo-inscripcion-${new Date().getTime()}.pdf`
         );
         document.body.appendChild(link);
         link.click();
@@ -293,6 +328,8 @@ export default function NuevaInscripcionPage() {
     setNroDocumento("");
     setEstudiante(null);
     setCarrito([]);
+    setCursoSeleccionado(null);
+    setBusquedaCurso("");
     setIdCursoSeleccionado("");
     setIdParaleloSeleccionado("");
     setExito(false);
@@ -316,7 +353,12 @@ export default function NuevaInscripcionPage() {
             ¡Inscripción Completada!
           </h2>
           <p className="text-muted-foreground max-w-md mx-auto text-lg">
-            El estudiante <span className="font-bold text-foreground text-primary">{estudiante?.usuario.persona.nombres} {estudiante?.usuario.persona.primerApellido}</span> ha sido inscrito correctamente en {carrito.length} cursos.
+            El estudiante{" "}
+            <span className="font-bold text-foreground text-primary">
+              {estudiante?.usuario.persona.nombres}{" "}
+              {estudiante?.usuario.persona.primerApellido}
+            </span>{" "}
+            ha sido inscrito correctamente en {carrito.length} cursos.
           </p>
         </div>
 
@@ -357,16 +399,22 @@ export default function NuevaInscripcionPage() {
                 <div key={idx} className="flex justify-between items-center">
                   <div className="text-left">
                     <p className="font-bold text-sm">{item.curso.nombre}</p>
-                    <p className="text-xs text-muted-foreground">{item.paralelo.nombre}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {item.paralelo.nombre}
+                    </p>
                   </div>
-                  <span className="font-mono font-bold">Bs. {item.curso.monto}</span>
+                  <span className="font-mono font-bold">
+                    Bs. {item.curso.monto}
+                  </span>
                 </div>
               ))}
             </div>
             <Separator className="my-4" />
             <div className="flex justify-between items-center">
               <span className="font-black text-lg">TOTAL PAGADO</span>
-              <span className="text-2xl font-black text-primary">Bs. {totalMonto.toFixed(2)}</span>
+              <span className="text-2xl font-black text-primary">
+                Bs. {totalMonto.toFixed(2)}
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -397,7 +445,9 @@ export default function NuevaInscripcionPage() {
                   <UserPlus className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-xl font-black">Paso 1: Estudiante</CardTitle>
+                  <CardTitle className="text-xl font-black">
+                    Paso 1: Estudiante
+                  </CardTitle>
                   <CardDescription className="text-base">
                     Verificación de identidad y estado académico
                   </CardDescription>
@@ -407,7 +457,9 @@ export default function NuevaInscripcionPage() {
             <CardContent className="px-8 pt-2 pb-8">
               <div className="flex flex-col md:flex-row items-end gap-4">
                 <div className="flex-1 w-full space-y-3">
-                  <label className="text-sm font-black text-muted-foreground ml-1">Documento de Identidad (CI)</label>
+                  <label className="text-sm font-black text-muted-foreground ml-1">
+                    Documento de Identidad (CI)
+                  </label>
                   <div className="relative mt-2">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
@@ -430,7 +482,9 @@ export default function NuevaInscripcionPage() {
                   {loadingEstudiante ? (
                     <Loader2 className="h-6 w-6 animate-spin" />
                   ) : (
-                    <div className="flex items-center gap-2">Buscar Estudiante <Search className="h-5 w-5" /></div>
+                    <div className="flex items-center gap-2">
+                      Buscar Estudiante <Search className="h-5 w-5" />
+                    </div>
                   )}
                 </Button>
               </div>
@@ -448,9 +502,19 @@ export default function NuevaInscripcionPage() {
                         {estudiante.usuario.persona.segundoApellido}
                       </p>
                       <div className="flex flex-wrap gap-3 mt-2">
-                        <Badge variant="outline" className="font-bold border-primary/30">CI: {estudiante.usuario.persona.nroDocumento}</Badge>
+                        <Badge
+                          variant="outline"
+                          className="font-bold border-primary/30"
+                        >
+                          CI: {estudiante.usuario.persona.nroDocumento}
+                        </Badge>
                         {estudiante.codigoPersonal && (
-                          <Badge variant="default" className="bg-primary hover:bg-primary font-bold">Matrícula: {estudiante.codigoPersonal}</Badge>
+                          <Badge
+                            variant="default"
+                            className="bg-primary hover:bg-primary font-bold"
+                          >
+                            Matrícula: {estudiante.codigoPersonal}
+                          </Badge>
                         )}
                       </div>
                     </div>
@@ -477,35 +541,104 @@ export default function NuevaInscripcionPage() {
                     <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                       <BookOpen className="h-5 w-5" />
                     </div>
-                    <CardTitle className="text-xl font-black">Paso 2: Selección de Cursos</CardTitle>
+                    <CardTitle className="text-xl font-black">
+                      Paso 2: Selección de Cursos
+                    </CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent className="px-8 pb-8 space-y-6">
-                  <div className="space-y-3">
+                  <div className="space-y-3 relative">
                     <label className="text-[14px] font-black text-muted-foreground ml-1">
                       Curso Académico
                     </label>
-                    <Select
-                      value={idCursoSeleccionado}
-                      onValueChange={(val) => {
-                        setIdCursoSeleccionado(val);
-                        setIdParaleloSeleccionado("");
-                      }}
-                    >
-                      <SelectTrigger className="h-14 w-full text-base font-bold bg-muted/30 border-2">
-                        <SelectValue placeholder="Seleccione un curso..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {cursos.map((c) => (
-                          <SelectItem key={c.id} value={c.id} className="font-bold">
-                            {c.nombre} <span className="text-primary ml-2">— Bs. {c.monto}</span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {cursoSeleccionado ? (
+                      <div className="flex items-center justify-between h-auto px-4 rounded-md border-2 bg-muted/30 font-bold text-base">
+                        <div>
+                          <span className="text-muted-foreground">
+                            {cursoSeleccionado.nombre}
+                          </span>
+                          <span className="text-primary ml-2">
+                            — Bs. {cursoSeleccionado.monto}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCursoSeleccionado(null);
+                            setBusquedaCurso("");
+                            setIdCursoSeleccionado("");
+                            setIdParaleloSeleccionado("");
+                          }}
+                          className="text-muted-foreground hover:text-destructive transition-colors ml-2"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="relative">
+                          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <input
+                            type="text"
+                            placeholder="Buscar curso por nombre..."
+                            value={busquedaCurso}
+                            onChange={(e) =>
+                              handleBusquedaCurso(e.target.value)
+                            }
+                            onFocus={() => {
+                              setMostrarDropdownCurso(true);
+                              if (!busquedaCurso) fetchCursos("");
+                            }}
+                            onBlur={() =>
+                              setTimeout(
+                                () => setMostrarDropdownCurso(false),
+                                200
+                              )
+                            }
+                            className="h-14 w-full pl-10 pr-4 rounded-md border-2 bg-muted/30 font-bold text-base focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          />
+                          {loadingCursos && (
+                            <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+                          )}
+                        </div>
+                        {mostrarDropdownCurso && cursos.length > 0 && (
+                          <div className="absolute z-50 w-full mt-1 bg-card border-2 rounded-lg shadow-xl max-h-64 overflow-y-auto">
+                            {cursos.map((c) => (
+                              <button
+                                key={c.id}
+                                type="button"
+                                className="w-full text-left px-4 py-3 hover:bg-primary/10 transition-colors flex justify-between items-center"
+                                onMouseDown={() => {
+                                  setCursoSeleccionado(c);
+                                  setIdCursoSeleccionado(c.id);
+                                  setBusquedaCurso(c.nombre);
+                                  setMostrarDropdownCurso(false);
+                                  setIdParaleloSeleccionado("");
+                                }}
+                              >
+                                <span className="font-bold text-sm">
+                                  {c.nombre}
+                                </span>
+                                <span className="text-primary text-sm font-bold ml-2">
+                                  Bs. {c.monto}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                        {mostrarDropdownCurso &&
+                          !loadingCursos &&
+                          cursos.length === 0 &&
+                          busquedaCurso && (
+                            <div className="absolute z-50 w-full mt-1 bg-card border-2 rounded-lg shadow-xl p-4 text-center text-muted-foreground text-sm">
+                              No se encontraron cursos con ese nombre
+                            </div>
+                          )}
+                      </>
+                    )}
                   </div>
 
-                  {idCursoSeleccionado && (
+                  {idCursoSeleccionado && cursoSeleccionado && (
                     <div className="space-y-3 animate-in fade-in slide-in-from-top-4 duration-300">
                       <label className="text-[14px] font-black text-muted-foreground ml-1">
                         Paralelo / Turno
@@ -553,10 +686,13 @@ export default function NuevaInscripcionPage() {
                       <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                         <CreditCard className="h-5 w-5" />
                       </div>
-                      <CardTitle className="text-xl font-black">Paso 3: Bandeja</CardTitle>
+                      <CardTitle className="text-xl font-black">
+                        Paso 3: Bandeja
+                      </CardTitle>
                     </div>
                     <div className="h-8 px-3 rounded-lg bg-primary text-white  text-[10px] font-black flex items-center gap-2">
-                      {carrito.length}{carrito.length === 1 ? 'ITEM' : 'ITEMS'}
+                      {carrito.length}
+                      {carrito.length === 1 ? "ITEM" : "ITEMS"}
                     </div>
                   </div>
                 </CardHeader>
@@ -565,21 +701,24 @@ export default function NuevaInscripcionPage() {
                     <Table>
                       <TableHeader className="bg-muted/50 sticky top-0 z-10">
                         <TableRow className="hover:bg-transparent border-0">
-                          <TableHead className="pl-8 text-[12px] font-black h-12 normal-case">Detalle de Cobro</TableHead>
-                          <TableHead className="text-right text-[12px] font-black h-12 normal-case">Importe</TableHead>
+                          <TableHead className="pl-8 text-[12px] font-black h-12 normal-case">
+                            Detalle de Cobro
+                          </TableHead>
+                          <TableHead className="text-right text-[12px] font-black h-12 normal-case">
+                            Importe
+                          </TableHead>
                           <TableHead className="w-[80px] h-12"></TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {carrito.length === 0 ? (
                           <TableRow className="hover:bg-transparent">
-                            <TableCell
-                              colSpan={3}
-                              className="h-64 text-center"
-                            >
+                            <TableCell colSpan={3} className="h-64 text-center">
                               <div className="flex flex-col items-center gap-4 text-muted-foreground/40">
                                 <BookOpen className="h-12 w-12 opacity-20" />
-                                <p className="text-sm font-bold uppercase tracking-widest">Bandeja Vacía</p>
+                                <p className="text-sm font-bold uppercase tracking-widest">
+                                  Bandeja Vacía
+                                </p>
                               </div>
                             </TableCell>
                           </TableRow>
@@ -587,24 +726,42 @@ export default function NuevaInscripcionPage() {
                           carrito.map((item, index) => (
                             <TableRow
                               key={index}
-                              className={`hover:bg-primary/5 transition-colors border-primary/5 group ${item.error ? "bg-destructive/10 border-destructive/50" : ""
-                                }`}
+                              className={`hover:bg-primary/5 transition-colors border-primary/5 group ${
+                                item.error
+                                  ? "bg-destructive/10 border-destructive/50"
+                                  : ""
+                              }`}
                             >
                               <TableCell className="pl-8 py-5">
                                 <div className="flex items-center gap-2">
                                   {item.error && (
-                                    <Badge variant="destructive" className="h-5 w-5 p-0 flex items-center justify-center rounded-full">
+                                    <Badge
+                                      variant="destructive"
+                                      className="h-5 w-5 p-0 flex items-center justify-center rounded-full"
+                                    >
                                       !
                                     </Badge>
                                   )}
                                   <div>
-                                    <p className={`font-black text-base transition-colors ${item.error ? "text-destructive" : "text-foreground group-hover:text-primary"
-                                      }`}>
+                                    <p
+                                      className={`font-black text-base transition-color breajk-words whitespace-normal  ${
+                                        item.error
+                                          ? "text-destructive"
+                                          : "text-foreground group-hover:text-primary"
+                                      }`}
+                                    >
                                       {item.curso.nombre}
                                     </p>
-                                    <p className={`text-xs font-bold uppercase tracking-widest mt-1 break-words whitespace-normal ${item.error ? "text-destructive/80" : "text-muted-foreground"
-                                      }`}>
-                                      {item.error ? item.mensajeError : `Paralelo: ${item.paralelo.nombre}`}
+                                    <p
+                                      className={`text-xs font-bold uppercase tracking-widest mt-1 break-words whitespace-normal ${
+                                        item.error
+                                          ? "text-destructive/80"
+                                          : "text-muted-foreground"
+                                      }`}
+                                    >
+                                      {item.error
+                                        ? item.mensajeError
+                                        : `Paralelo: ${item.paralelo.nombre}`}
                                     </p>
                                   </div>
                                 </div>
@@ -632,8 +789,12 @@ export default function NuevaInscripcionPage() {
                   <div className="p-8 space-y-8 bg-card border-t border-primary/5 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
                     <div className="flex justify-between items-end">
                       <div className="flex flex-col gap-1">
-                        <span className="text-[14px] font-black text-muted-foreground">Total Liquidación</span>
-                        <span className="text-lg font-black text-foreground">BOLIVIANOS</span>
+                        <span className="text-[14px] font-black text-muted-foreground">
+                          Total Liquidación
+                        </span>
+                        <span className="text-lg font-black text-foreground">
+                          BOLIVIANOS
+                        </span>
                       </div>
                       <span className="text-5xl font-black text-primary tracking-tighter">
                         Bs. {totalMonto.toFixed(2)}

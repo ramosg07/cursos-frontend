@@ -33,14 +33,14 @@ interface AgregarEditarUsuarioModalProps {
 }
 
 const formSchema = z.object({
-  nombres: z.string().min(2, {
+  nombres: z.string("El campo nombres es requerido").min(2, {
     message: "El nombre debe tener al menos 2 caracteres.",
   }),
-  primerApellido: z.string().min(2, {
+  primerApellido: z.string("El campo primer apellido es requerido").min(2, {
     message: "El primer apellido debe tener al menos 2 caracteres.",
   }),
   segundoApellido: z.string().optional(),
-  nroDocumento: z.string().min(5, {
+  nroDocumento: z.string("El campo número de documento es requerido").min(5, {
     message: "El número de documento debe tener al menos 5 caracteres.",
   }),
   fechaNacimiento: z.string().refine(
@@ -50,8 +50,8 @@ const formSchema = z.object({
     { message: "Fecha de nacimiento inválida" }
   ),
   correoElectronico: z
-    .string()
-    .email({ message: "Correo electrónico inválido" }),
+    .email({ message: "Correo electrónico inválido" })
+    .optional(),
   roles: z.array(z.string()).min(1, {
     message: "Seleccione al menos un rol",
   }),
@@ -71,14 +71,17 @@ export function AgregarEditarUsuarioModal({
     resolver: zodResolver(formSchema),
     defaultValues: usuario
       ? {
-          nombres: usuario.persona.nombres,
-          primerApellido: usuario.persona.primerApellido,
-          segundoApellido: usuario.persona.segundoApellido,
-          nroDocumento: usuario.persona.nroDocumento,
+          nombres: usuario.persona.nombres || "",
+          primerApellido: usuario.persona.primerApellido || "",
+          segundoApellido: usuario.persona.segundoApellido || "",
+          nroDocumento: usuario.persona.nroDocumento || "",
           fechaNacimiento:
-            dayjs.utc(usuario.persona.fechaNacimiento).format("YYYY-MM-DD") ||
+            (usuario.persona.fechaNacimiento &&
+              dayjs
+                .utc(usuario.persona.fechaNacimiento)
+                .format("YYYY-MM-DD")) ||
             "",
-          correoElectronico: usuario.correoElectronico,
+          correoElectronico: usuario.correoElectronico || "",
           roles: usuario.usuarioRol.map((rol) => rol.rol.id),
         }
       : {
