@@ -65,8 +65,9 @@ export function UsuariosDatatable02() {
                 alt={row.original.persona?.nombres || "Avatar"}
               />
               <AvatarFallback>
-                {`${row.original.persona?.nombres?.[0] || ""}${row.original.persona?.primerApellido?.[0] || ""
-                  }`}
+                {`${row.original.persona?.nombres?.[0] || ""}${
+                  row.original.persona?.primerApellido?.[0] || ""
+                }`}
               </AvatarFallback>
             </Avatar>
           </div>
@@ -79,7 +80,6 @@ export function UsuariosDatatable02() {
       header: ({ column }) => (
         <SortableHeader column={column} title="Nro. Documento" />
       ),
-      size: 150,
       meta: { mobileTitle: "Nro. Documento" },
     },
     {
@@ -123,6 +123,9 @@ export function UsuariosDatatable02() {
     },
     {
       accessorKey: "Estado",
+      header: () => (
+        <div className="text-center normal-case text-sm">Estados</div>
+      ),
       cell: ({ row }) => {
         return (
           <Badge
@@ -142,7 +145,9 @@ export function UsuariosDatatable02() {
     },
     {
       id: "actions",
-      header: "Acciones",
+      header: () => (
+        <div className="text-center normal-case text-sm">Acciones</div>
+      ),
       cell: ({ row }) => {
         return (
           <div className="flex items-center gap-2">
@@ -228,6 +233,7 @@ export function UsuariosDatatable02() {
           ],
         }}
         titulo={"Gestión de usuarios"}
+        subtitulo="Gestión y visualización de usuarios"
         update={updateTable}
         onResetUpdate={() => setUpdateTable(false)}
       />

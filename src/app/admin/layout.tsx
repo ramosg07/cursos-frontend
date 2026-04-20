@@ -34,23 +34,14 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider>
       <AppSidebar variant="floating" />
-      <SidebarInset>
+      <SidebarInset className="min-w-0 overflow-hidden">
         <HeaderAdmin />
-        <div className="flex overflow-hidden">
-          <div
-            id="main-content"
-            className={cn(
-              "relative h-full w-full overflow-y-auto transition-all duration-300"
-            )}
-          >
-            <main>
-              <div className="px-4 pt-6 pb-6 lg:px-6">
-                <div className="min-h-[calc(100vh-100px)] w-full">
-                  {children}
-                </div>
-              </div>
-            </main>
-          </div>
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <main className="flex-1 overflow-y-auto overflow-x-hidden">
+            <div className="px-4 pt-6 pb-6 lg:px-6">
+              <div className="min-h-[calc(100vh-100px)] w-full">{children}</div>
+            </div>
+          </main>
         </div>
       </SidebarInset>
     </SidebarProvider>

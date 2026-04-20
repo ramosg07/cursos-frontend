@@ -239,6 +239,7 @@ export function CursosDatatable() {
           ],
         }}
         titulo={"Gestión de cursos"}
+        subtitulo="Gestión y visualización de cursos."
         update={updateTable}
         onResetUpdate={() => setUpdateTable(false)}
       />

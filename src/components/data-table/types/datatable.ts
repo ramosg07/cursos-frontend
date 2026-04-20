@@ -20,6 +20,7 @@ export interface DataTableProps<TData, TValue> {
   toolBarConfig?: ToolBarConfigType;
 
   titulo: string;
+  subtitulo?: string;
   update: boolean;
   onResetUpdate: () => void;
   params?: Record<string, any>;

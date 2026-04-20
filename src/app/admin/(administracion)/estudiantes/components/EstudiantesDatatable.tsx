@@ -66,9 +66,7 @@ export function EstudiantesDatatable() {
     },
     {
       accessorKey: "estado",
-      header: ({ column }) => (
-        <SortableHeader column={column} title="Estado" />
-      ),
+      header: ({ column }) => <SortableHeader column={column} title="Estado" />,
       cell: ({ row }) => (
         <Badge
           variant={
@@ -155,6 +153,7 @@ export function EstudiantesDatatable() {
           ],
         }}
         titulo={"Gestión de estudiantes"}
+        subtitulo="Gestión y visualización de estudiantes"
         update={updateTable}
         onResetUpdate={() => setUpdateTable(false)}
       />

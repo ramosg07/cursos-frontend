@@ -138,7 +138,7 @@ const Detail = () => {
                 {nombrePropio(
                   `${user.persona?.nombres} ${user.persona?.primerApellido} ${
                     user.persona?.segundoApellido || ""
-                  }`,
+                  }`
                 )}
               </h2>
               <p className="text-sm font-semibold">{obtenerRolActual()}</p>
@@ -176,16 +176,18 @@ const Detail = () => {
             <div className="mt-4 flex items-center">
               <Cake className="mr-2" />
               <div>
-                {dayjs(user.persona.fechaNacimiento).format("DD/MM/YYYY")}
+                {user.persona.fechaNacimiento
+                  ? dayjs(user.persona.fechaNacimiento).format("DD/MM/YYYY")
+                  : "Sin definir"}
               </div>
             </div>
             <div className="mt-4 flex items-center">
               <Mail className="mr-2" />
-              <div>{user.correoElectronico}</div>
+              <div>{user.correoElectronico ?? "Sin definir"}</div>
             </div>
             <div className="mt-4 flex items-center">
               <Phone className="mr-2" />
-              <div>{user.persona.telefono ?? "No disponible"}</div>
+              <div>{user.persona.telefono ?? "Sin definir"}</div>
             </div>
             {/* <div className="mt-4 flex items-center">
               <VenusAndMars className="mr-2" />

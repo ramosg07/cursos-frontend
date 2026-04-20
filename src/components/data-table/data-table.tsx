@@ -64,6 +64,7 @@ export function DataTable<TData, TValue>({
     components: [],
   },
   titulo,
+  subtitulo,
   update,
   onResetUpdate,
   params,
@@ -312,8 +313,12 @@ export function DataTable<TData, TValue>({
     <div className="space-y-8 animate-fade-in">
       <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
         <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-black tracking-tight text-gradient">{titulo}</h1>
-          <p className="text-sm font-medium text-muted-foreground/80 lowercase first-letter:uppercase">Gestión y visualización de datos de {titulo}</p>
+          <h1 className="text-3xl font-black tracking-tight text-gradient">
+            {titulo}
+          </h1>
+          <p className="text-sm font-medium text-muted-foreground/80 lowercase first-letter:uppercase">
+            {subtitulo}
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           {getActionsTable(actionsTable, toolBarConfig)}
@@ -355,9 +360,9 @@ export function DataTable<TData, TValue>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                     </TableHead>
                   ))}
                 </TableRow>

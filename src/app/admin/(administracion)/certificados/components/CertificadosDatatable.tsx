@@ -92,6 +92,7 @@ export function CertificadosDatatable({ onEdit, onAdd }: Props) {
       filters={filters}
       apiUrl={"/plantillas-certificados"}
       titulo={"Plantillas de Certificados"}
+      subtitulo={"Listado de plantillas de certificados"}
       update={updateTable}
       onResetUpdate={() => setUpdateTable(false)}
       toolBarConfig={{

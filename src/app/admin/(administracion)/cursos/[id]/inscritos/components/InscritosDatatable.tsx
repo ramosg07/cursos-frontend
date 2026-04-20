@@ -53,7 +53,7 @@ export function InscritosDatatable({ curso }: Props) {
     useState<boolean>(false);
   const [printModalOpen, setPrintModalOpen] = useState<boolean>(false);
   const [selectedInscripciones, setSelectedInscripciones] = useState<string[]>(
-    []
+    [],
   );
 
   // Función para manejar el cambio de selección en el DataTable
@@ -343,8 +343,8 @@ export function InscritosDatatable({ curso }: Props) {
               disponibles === 0
                 ? "text-destructive border-destructive/30 bg-destructive/5"
                 : disponibles <= 2
-                ? "text-yellow-600 border-yellow-400/30 bg-yellow-50 dark:bg-yellow-900/10"
-                : "text-green-700 border-green-400/30 bg-green-50 dark:bg-green-900/10";
+                  ? "text-yellow-600 border-yellow-400/30 bg-yellow-50 dark:bg-yellow-900/10"
+                  : "text-green-700 border-green-400/30 bg-green-50 dark:bg-green-900/10";
 
             return (
               <div
@@ -367,8 +367,8 @@ export function InscritosDatatable({ curso }: Props) {
                       disponibles === 0
                         ? "bg-destructive"
                         : disponibles <= 2
-                        ? "bg-yellow-500"
-                        : "bg-green-500"
+                          ? "bg-yellow-500"
+                          : "bg-green-500"
                     }`}
                     style={{ width: `${Math.min(porcentajeOcupado, 100)}%` }}
                   />
@@ -428,6 +428,7 @@ export function InscritosDatatable({ curso }: Props) {
           ],
         }}
         titulo={""}
+        subtitulo={"Inscripciones del curso"}
         update={updateTable}
         onResetUpdate={() => setUpdateTable(false)}
       />
