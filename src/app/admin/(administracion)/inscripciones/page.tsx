@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthProvider";
 import { toast } from "sonner";
 import {
-  Search,
   UserPlus,
   Trash2,
   BookOpen,
@@ -15,6 +14,7 @@ import {
   Download,
   Loader2,
   Undo2,
+  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,12 +36,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox";
 import { print } from "@/lib/print";
 import { EstudianteBusqueda } from "../cursos/[id]/inscritos/types";
 import { Curso, Paralelo } from "../cursos/types";
@@ -57,8 +58,6 @@ export default function NuevaInscripcionPage() {
   // Estado para Cursos y Selección
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [loadingCursos, setLoadingCursos] = useState(false);
-  const [busquedaCurso, setBusquedaCurso] = useState("");
-  const [mostrarDropdownCurso, setMostrarDropdownCurso] = useState(false);
   const [cursoSeleccionado, setCursoSeleccionado] = useState<Curso | null>(
     null
   );
@@ -88,36 +87,54 @@ export default function NuevaInscripcionPage() {
 
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleBusquedaCurso = useCallback((valor: string) => {
-    setBusquedaCurso(valor);
-    setMostrarDropdownCurso(true);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      fetchCursos(valor);
-    }, 350);
-  }, []);
-
   useEffect(() => {
     validarCarrito();
   }, [estudiante, carrito.length]);
 
-  const fetchCursos = async (filtro: string) => {
-    setLoadingCursos(true);
-    try {
-      const response = await sessionRequest<any>({
-        url: "/cursos",
-        method: "get",
-        params: { filtro, limite: 20 },
-      });
-      if (response && response.data?.datos?.filas) {
-        setCursos(response.data.datos.filas);
+  const fetchCursos = useCallback(
+    async (filtro: string, limite = 20) => {
+      setLoadingCursos(true);
+      try {
+        const response = await sessionRequest<any>({
+          url: "/cursos",
+          method: "get",
+          params: { filtro: filtro ? filtro : undefined, limite },
+        });
+        if (response && response.data?.datos?.filas) {
+          setCursos(response.data.datos.filas);
+        }
+      } catch (error) {
+        print("Error fetching cursos", error);
+      } finally {
+        setLoadingCursos(false);
       }
-    } catch (error) {
-      print("Error fetching cursos", error);
-    } finally {
-      setLoadingCursos(false);
-    }
-  };
+    },
+    [sessionRequest]
+  );
+
+  const handleBusquedaCurso = useCallback(
+    (valor: string) => {
+      if (!valor.trim()) {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        fetchCursos("", 10);
+        return;
+      }
+      const hayCoincidenciaLocal = cursos.some((c) =>
+        c.nombre.toLowerCase().includes(valor.toLowerCase())
+      );
+      if (hayCoincidenciaLocal) return;
+
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        fetchCursos(valor, 20);
+      }, 350);
+    },
+    [cursos, fetchCursos]
+  );
+
+  useEffect(() => {
+    if (estudiante) fetchCursos("", 10);
+  }, [estudiante, fetchCursos]);
 
   const handleSearchEstudiante = async () => {
     if (!nroDocumento.trim()) return;
@@ -171,7 +188,7 @@ export default function NuevaInscripcionPage() {
     setIdParaleloSeleccionado("");
   };
 
-  const validarCarrito = async () => {
+  const validarCarrito = useCallback(async () => {
     if (!estudiante || carrito.length === 0) return;
 
     try {
@@ -204,7 +221,7 @@ export default function NuevaInscripcionPage() {
     } catch (error) {
       print("Error validando carrito", error);
     }
-  };
+  }, [estudiante, carrito, sessionRequest]);
 
   const quitarDelCarrito = (index: number) => {
     const nuevoCarrito = [...carrito];
@@ -329,9 +346,9 @@ export default function NuevaInscripcionPage() {
     setEstudiante(null);
     setCarrito([]);
     setCursoSeleccionado(null);
-    setBusquedaCurso("");
     setIdCursoSeleccionado("");
     setIdParaleloSeleccionado("");
+    setCursos([]);
     setExito(false);
     setIdsInscripcionCreadas([]);
   };
@@ -396,14 +413,19 @@ export default function NuevaInscripcionPage() {
             <Separator className="mb-4" />
             <div className="space-y-3">
               {carrito.map((item, idx) => (
-                <div key={idx} className="flex justify-between items-center">
-                  <div className="text-left">
-                    <p className="font-bold text-sm">{item.curso.nombre}</p>
-                    <p className="text-xs text-muted-foreground">
+                <div
+                  key={idx}
+                  className="flex justify-between items-center gap-2"
+                >
+                  <div className="text-left min-w-0">
+                    <p className="font-bold text-sm truncate">
+                      {item.curso.nombre}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
                       {item.paralelo.nombre}
                     </p>
                   </div>
-                  <span className="font-mono font-bold">
+                  <span className="font-mono font-bold whitespace-nowrap">
                     Bs. {item.curso.monto}
                   </span>
                 </div>
@@ -547,124 +569,129 @@ export default function NuevaInscripcionPage() {
                   </div>
                 </CardHeader>
                 <CardContent className="px-8 pb-8 space-y-6">
-                  <div className="space-y-3 relative">
+                  {/* Combobox de Cursos */}
+                  <div className="space-y-3">
                     <label className="text-[14px] font-black text-muted-foreground ml-1">
                       Curso Académico
                     </label>
-                    {cursoSeleccionado ? (
-                      <div className="flex items-center justify-between h-auto px-4 rounded-md border-2 bg-muted/30 font-bold text-base">
-                        <div>
-                          <span className="text-muted-foreground">
-                            {cursoSeleccionado.nombre}
-                          </span>
-                          <span className="text-primary ml-2">
-                            — Bs. {cursoSeleccionado.monto}
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
+                    <Combobox
+                      items={cursos.map((c) => c.nombre)}
+                      value={cursoSeleccionado?.nombre ?? ""}
+                      onValueChange={(nombre) => {
+                        const curso = cursos.find((c) => c.nombre === nombre);
+                        if (curso) {
+                          setCursoSeleccionado(curso);
+                          setIdCursoSeleccionado(curso.id);
+                          setIdParaleloSeleccionado("");
+                        } else {
+                          setCursoSeleccionado(null);
+                          setIdCursoSeleccionado("");
+                          setIdParaleloSeleccionado("");
+                        }
+                      }}
+                    >
+                      <ComboboxInput
+                        placeholder="Buscar curso por nombre..."
+                        showClear={!!cursoSeleccionado}
+                        onChange={(e) => {
+                          handleBusquedaCurso(e.target.value);
+                          if (!e.target.value) {
                             setCursoSeleccionado(null);
-                            setBusquedaCurso("");
                             setIdCursoSeleccionado("");
                             setIdParaleloSeleccionado("");
-                          }}
-                          className="text-muted-foreground hover:text-destructive transition-colors ml-2"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="relative">
-                          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <input
-                            type="text"
-                            placeholder="Buscar curso por nombre..."
-                            value={busquedaCurso}
-                            onChange={(e) =>
-                              handleBusquedaCurso(e.target.value)
-                            }
-                            onFocus={() => {
-                              setMostrarDropdownCurso(true);
-                              if (!busquedaCurso) fetchCursos("");
-                            }}
-                            onBlur={() =>
-                              setTimeout(
-                                () => setMostrarDropdownCurso(false),
-                                200
-                              )
-                            }
-                            className="h-14 w-full pl-10 pr-4 rounded-md border-2 bg-muted/30 font-bold text-base focus:outline-none focus:ring-2 focus:ring-primary/30"
-                          />
-                          {loadingCursos && (
-                            <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
-                          )}
-                        </div>
-                        {mostrarDropdownCurso && cursos.length > 0 && (
-                          <div className="absolute z-50 w-full mt-1 bg-card border-2 rounded-lg shadow-xl max-h-64 overflow-y-auto">
-                            {cursos.map((c) => (
-                              <button
-                                key={c.id}
-                                type="button"
-                                className="w-full text-left px-4 py-3 hover:bg-primary/10 transition-colors flex justify-between items-center"
-                                onMouseDown={() => {
-                                  setCursoSeleccionado(c);
-                                  setIdCursoSeleccionado(c.id);
-                                  setBusquedaCurso(c.nombre);
-                                  setMostrarDropdownCurso(false);
-                                  setIdParaleloSeleccionado("");
-                                }}
-                              >
-                                <span className="font-bold text-sm">
-                                  {c.nombre}
-                                </span>
-                                <span className="text-primary text-sm font-bold ml-2">
-                                  Bs. {c.monto}
-                                </span>
-                              </button>
-                            ))}
+                          }
+                        }}
+                        className="w-full h-14 text-base font-bold bg-muted/30 border-2"
+                      />
+                      <ComboboxContent>
+                        {loadingCursos ? (
+                          <div className="flex items-center justify-center py-6 gap-2 text-sm text-muted-foreground">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Buscando...
                           </div>
+                        ) : (
+                          <>
+                            <ComboboxEmpty>
+                              No se encontraron cursos.
+                            </ComboboxEmpty>
+                            <ComboboxList>
+                              {(nombre) => {
+                                const curso = cursos.find(
+                                  (c) => c.nombre === nombre
+                                );
+                                return (
+                                  <ComboboxItem key={nombre} value={nombre}>
+                                    <span className="font-bold flex-1">
+                                      {nombre}
+                                    </span>
+                                    {curso && (
+                                      <span className="text-primary font-bold text-sm ml-auto">
+                                        Bs. {curso.monto}
+                                      </span>
+                                    )}
+                                  </ComboboxItem>
+                                );
+                              }}
+                            </ComboboxList>
+                          </>
                         )}
-                        {mostrarDropdownCurso &&
-                          !loadingCursos &&
-                          cursos.length === 0 &&
-                          busquedaCurso && (
-                            <div className="absolute z-50 w-full mt-1 bg-card border-2 rounded-lg shadow-xl p-4 text-center text-muted-foreground text-sm">
-                              No se encontraron cursos con ese nombre
-                            </div>
-                          )}
-                      </>
-                    )}
+                      </ComboboxContent>
+                    </Combobox>
                   </div>
 
+                  {/* Combobox de Paralelos */}
                   {idCursoSeleccionado && cursoSeleccionado && (
                     <div className="space-y-3 animate-in fade-in slide-in-from-top-4 duration-300">
                       <label className="text-[14px] font-black text-muted-foreground ml-1">
                         Paralelo / Turno
                       </label>
-                      <Select
-                        value={idParaleloSeleccionado}
-                        onValueChange={setIdParaleloSeleccionado}
+                      <Combobox
+                        items={cursoSeleccionado.paralelos
+                          .filter((p) => (p.cupo ?? 0) > 0)
+                          .map((p) => p.nombre)}
+                        value={
+                          cursoSeleccionado.paralelos.find(
+                            (p) => p.id === idParaleloSeleccionado
+                          )?.nombre ?? ""
+                        }
+                        onValueChange={(nombreParalelo) => {
+                          const paralelo = cursoSeleccionado.paralelos.find(
+                            (p) => p.nombre === nombreParalelo
+                          );
+                          setIdParaleloSeleccionado(paralelo?.id ?? "");
+                        }}
                       >
-                        <SelectTrigger className="h-14 w-full text-base font-bold bg-muted/30 border-2">
-                          <SelectValue placeholder="Seleccione un paralelo..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {cursos
-                            .find((c) => c.id === idCursoSeleccionado)
-                            ?.paralelos.map((p) => (
-                              <SelectItem
-                                key={p.id}
-                                value={p.id}
-                                disabled={(p.cupo ?? 0) === 0}
-                                className="font-bold text-sm"
-                              >
-                                {p.nombre} ({p.cupo ?? 0} cupos disponibles)
-                              </SelectItem>
-                            ))}
-                        </SelectContent>
-                      </Select>
+                        <ComboboxInput
+                          placeholder="Seleccione un paralelo..."
+                          showClear={!!idParaleloSeleccionado}
+                          className="w-full h-14 text-base font-bold bg-muted/30 border-2"
+                        />
+                        <ComboboxContent>
+                          <ComboboxEmpty>
+                            No se encontraron paralelos.
+                          </ComboboxEmpty>
+                          <ComboboxList>
+                            {(nombreParalelo) => {
+                              const p = cursoSeleccionado.paralelos.find(
+                                (p) => p.nombre === nombreParalelo
+                              );
+                              return (
+                                <ComboboxItem
+                                  key={nombreParalelo}
+                                  value={nombreParalelo}
+                                >
+                                  <span className="font-bold">
+                                    {nombreParalelo}
+                                  </span>
+                                  <span className="ml-auto text-sm text-muted-foreground">
+                                    {p?.cupo ?? 0} cupos
+                                  </span>
+                                </ComboboxItem>
+                              );
+                            }}
+                          </ComboboxList>
+                        </ComboboxContent>
+                      </Combobox>
                     </div>
                   )}
 
@@ -753,7 +780,7 @@ export default function NuevaInscripcionPage() {
                                       {item.curso.nombre}
                                     </p>
                                     <p
-                                      className={`text-xs font-bold uppercase tracking-widest mt-1 break-words whitespace-normal ${
+                                      className={`text-xs font-bold uppercase tracking-widest mt-1 wrap-break-word whitespace-normal ${
                                         item.error
                                           ? "text-destructive/80"
                                           : "text-muted-foreground"
