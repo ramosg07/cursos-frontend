@@ -3,7 +3,7 @@
 import { DataTable } from "@/components/data-table/data-table";
 import { SortableHeader } from "@/components/data-table/sortable-header";
 import { ColumnDef } from "@tanstack/react-table";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Estudiante } from "../types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { AgregarEditarEstudianteModal } from "./AgregarEditarEstudianteModal";
 import { ActivarInactivarEstudianteModal } from "./ActivarInactivarEstudianteModal";
 import { BulkUploadModal } from "./BulkUploadModal";
+import { useAuth } from "@/contexts/AuthProvider";
 
 export function EstudiantesDatatable() {
   const [updateTable, setUpdateTable] = useState(false);
@@ -35,6 +36,28 @@ export function EstudiantesDatatable() {
     setSelectEstudiante(estudiante);
     setActivarInactivarModalOpen(true);
   };
+
+  const { checkPermission } = useAuth();
+
+  const [permissions, setPermissions] = useState({
+    create: false,
+    read: false,
+    update: false,
+    delete: false,
+  });
+
+  useEffect(() => {
+    const fetchPermissions = async () => {
+      setPermissions({
+        create: await checkPermission("/admin/estudiantes", "create"),
+        read: await checkPermission("/admin/estudiantes", "read"),
+        update: await checkPermission("/admin/estudiantes", "update"),
+        delete: await checkPermission("/admin/estudiantes", "delete"),
+      });
+    };
+
+    fetchPermissions().catch(print);
+  }, [checkPermission]);
 
   const columns: ColumnDef<Estudiante>[] = [
     {
@@ -78,34 +101,38 @@ export function EstudiantesDatatable() {
       ),
       meta: { mobileTitle: "Estado" },
     },
-    {
-      id: "actions",
-      header: () => (
-        <div className="text-center normal-case text-sm">Acciones</div>
-      ),
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          {row.original.estado === "ACTIVO" && (
-            <Button
-              title="Editar"
-              variant="outline"
-              size={"icon"}
-              onClick={() => handleAgregarEditarEstudiante(row.original)}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-          )}
-          <Switch
-            id={"switch-estudiante-" + row.original.id}
-            checked={row.original.estado === "ACTIVO"}
-            onCheckedChange={() =>
-              handleActivarInactivarEstudiante(row.original)
-            }
-          />
-        </div>
-      ),
-      meta: { mobileTitle: "Acciones" },
-    },
+    ...(permissions.update
+      ? [
+          {
+            id: "actions",
+            header: () => (
+              <div className="text-center normal-case text-sm">Acciones</div>
+            ),
+            cell: ({ row }: any) => (
+              <div className="flex items-center gap-2">
+                {row.original.estado === "ACTIVO" && (
+                  <Button
+                    title="Editar"
+                    variant="outline"
+                    size={"icon"}
+                    onClick={() => handleAgregarEditarEstudiante(row.original)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                )}
+                <Switch
+                  id={"switch-estudiante-" + row.original.id}
+                  checked={row.original.estado === "ACTIVO"}
+                  onCheckedChange={() =>
+                    handleActivarInactivarEstudiante(row.original)
+                  }
+                />
+              </div>
+            ),
+            meta: { mobileTitle: "Acciones" },
+          },
+        ]
+      : []),
   ];
 
   const filters: FilterType[] = [
@@ -129,28 +156,30 @@ export function EstudiantesDatatable() {
         filters={filters}
         apiUrl={"/estudiantes"}
         toolBarConfig={{
-          components: [
-            <Button
-              key={"BulkUpload"}
-              title="Carga masiva"
-              variant="outline"
-              className="flex gap-2"
-              onClick={() => setBulkUploadModalOpen(true)}
-            >
-              <Upload className="h-4 w-4" />
-              <span>Carga Masiva</span>
-            </Button>,
-            <Button
-              key={"Agregar"}
-              title="Agregar estudiante"
-              variant="default"
-              className="flex gap-2"
-              onClick={() => handleAgregarEditarEstudiante(null)}
-            >
-              <Plus className="h-4 w-4" />
-              <span>Nuevo Estudiante</span>
-            </Button>,
-          ],
+          components: permissions.create
+            ? [
+                <Button
+                  key={"BulkUpload"}
+                  title="Carga masiva"
+                  variant="outline"
+                  className="flex gap-2"
+                  onClick={() => setBulkUploadModalOpen(true)}
+                >
+                  <Upload className="h-4 w-4" />
+                  <span>Carga Masiva</span>
+                </Button>,
+                <Button
+                  key={"Agregar"}
+                  title="Agregar estudiante"
+                  variant="default"
+                  className="flex gap-2"
+                  onClick={() => handleAgregarEditarEstudiante(null)}
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Nuevo Estudiante</span>
+                </Button>,
+              ]
+            : [],
         }}
         titulo={"Gestión de estudiantes"}
         subtitulo="Gestión y visualización de estudiantes"
