@@ -12,34 +12,29 @@ export interface Inscripcion {
   estudiante: {
     id: string;
     codigoPersonal?: string | null;
-    usuario: {
-      id: string;
-      usuario: string;
-      correoElectronico: string;
-      persona: {
-        id: string;
-        nombres: string;
-        primerApellido: string;
-        segundoApellido?: string | null;
-        nroDocumento: string;
-      };
-    };
+    usuario: Usuario;
   };
+  usuarioInscripcion: Usuario;
+  usuarioDesinscripcion: Usuario;
 }
 
 export interface EstudianteBusqueda {
   id: string;
   codigoPersonal?: string | null;
-  usuario: {
-    id: string;
-    usuario: string;
-    correoElectronico: string;
-    persona: {
-      id: string;
-      nombres: string;
-      primerApellido: string;
-      segundoApellido?: string | null;
-      nroDocumento: string;
-    };
-  };
+  usuario: Usuario;
+}
+
+interface Persona {
+  id: string;
+  nombres: string;
+  primerApellido: string;
+  segundoApellido?: string | null;
+  nroDocumento: string;
+}
+
+interface Usuario {
+  id: string;
+  usuario: string;
+  correoElectronico: string;
+  persona: Persona;
 }
