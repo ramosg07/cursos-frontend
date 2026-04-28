@@ -16,6 +16,7 @@ import {
   Undo2,
   Search,
 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -46,6 +47,7 @@ import {
 import { print } from "@/lib/print";
 import { EstudianteBusqueda } from "../cursos/[id]/inscritos/types";
 import { Curso, Paralelo } from "../cursos/types";
+import { Consulta } from "./components/Consulta";
 
 export default function NuevaInscripcionPage() {
   const { sessionRequest } = useAuth();
@@ -84,6 +86,7 @@ export default function NuevaInscripcionPage() {
     []
   );
   const [generandoRecibo, setGenerandoRecibo] = useState(false);
+  const [activeTab, setActiveTab] = useState("registro");
 
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -449,408 +452,446 @@ export default function NuevaInscripcionPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black tracking-tight bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent pb-1">
-            Inscripción General
+            Gestión de Inscripciones
           </h1>
           <p className="text-muted-foreground">
-            Sistema de cobro y registro múltiple de estudiantes.
+            Sistema de registro y consulta de inscripciones.
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-12 space-y-8">
-          {/* SECCIÓN 1: ESTUDIANTE */}
-          <Card className="overflow-hidden border-2 border-primary/10 shadow-xl shadow-primary/5 bg-gradient-to-br from-card to-muted/30">
-            <CardHeader className="bg-primary/5 border-b border-primary/10 px-8 py-6">
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-2xl bg-primary shadow-lg shadow-primary/30 flex items-center justify-center">
-                  <UserPlus className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <CardTitle className="text-xl font-black">
-                    Paso 1: Estudiante
-                  </CardTitle>
-                  <CardDescription className="text-base">
-                    Verificación de identidad y estado académico
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="px-8 pt-2 pb-8">
-              <div className="flex flex-col md:flex-row items-end gap-4">
-                <div className="flex-1 w-full space-y-3">
-                  <label className="text-sm font-black text-muted-foreground ml-1">
-                    Documento de Identidad (CI)
-                  </label>
-                  <div className="relative mt-2">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <Input
-                      placeholder="Ej. 8457214"
-                      value={nroDocumento}
-                      onChange={(e) => setNroDocumento(e.target.value)}
-                      onKeyDown={(e) =>
-                        e.key === "Enter" && handleSearchEstudiante()
-                      }
-                      className="h-10 pl-12 text-lg font-bold bg-muted/50 border-2 focus-visible:ring-primary/20"
-                    />
-                  </div>
-                </div>
-                <Button
-                  onClick={handleSearchEstudiante}
-                  disabled={loadingEstudiante || !nroDocumento}
-                  className="h-10 px-10 text-lg font-black shadow-lg shadow-primary/20 active:scale-95 transition-all"
-                  size="lg"
-                >
-                  {loadingEstudiante ? (
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      Buscar Estudiante <Search className="h-5 w-5" />
-                    </div>
-                  )}
-                </Button>
-              </div>
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="w-full space-y-6"
+      >
+        <TabsList className="bg-muted/50 p-1 h-12 border-2 border-primary/5">
+          <TabsTrigger
+            value="registro"
+            className="px-8 font-black text-xs uppercase tracking-widest gap-2"
+          >
+            <UserPlus className="h-4 w-4" /> Nueva Inscripción
+          </TabsTrigger>
+          <TabsTrigger
+            value="consulta"
+            className="px-8 font-black text-xs uppercase tracking-widest gap-2"
+          >
+            <Search className="h-4 w-4" /> Consultar por CI
+          </TabsTrigger>
+        </TabsList>
 
-              {estudiante && (
-                <div className="mt-8 p-6 rounded-3xl border-2 border-primary/20 bg-primary/5 flex flex-col md:flex-row items-center justify-between gap-6 animate-in slide-in-from-bottom-4 duration-500">
-                  <div className="flex items-center gap-6">
-                    <div className="h-13 w-13 rounded-2xl bg-primary flex items-center justify-center text-white font-black text-3xl shadow-xl shadow-primary/20">
-                      {estudiante.usuario.persona.nombres[0]}
+        <TabsContent value="registro" className="space-y-8 mt-0 border-0 p-0">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-12 space-y-8">
+              {/* SECCIÓN 1: ESTUDIANTE */}
+              <Card className="overflow-hidden border-2 border-primary/10 shadow-xl shadow-primary/5 bg-gradient-to-br from-card to-muted/30">
+                <CardHeader className="bg-primary/5 border-b border-primary/10 px-8 py-6">
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-2xl bg-primary shadow-lg shadow-primary/30 flex items-center justify-center">
+                      <UserPlus className="h-6 w-6 text-white" />
                     </div>
                     <div>
-                      <p className="font-black text-xl">
-                        {estudiante.usuario.persona.nombres}{" "}
-                        {estudiante.usuario.persona.primerApellido}{" "}
-                        {estudiante.usuario.persona.segundoApellido}
-                      </p>
-                      <div className="flex flex-wrap gap-3 mt-2">
-                        <Badge
-                          variant="outline"
-                          className="font-bold border-primary/30"
-                        >
-                          CI: {estudiante.usuario.persona.nroDocumento}
-                        </Badge>
-                        {estudiante.codigoPersonal && (
-                          <Badge
-                            variant="default"
-                            className="bg-primary hover:bg-primary font-bold"
-                          >
-                            Matrícula: {estudiante.codigoPersonal}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <Button
-                    variant="link"
-                    size="sm"
-                    onClick={() => reset()}
-                    className="text-muted-foreground hover:text-destructive font-black text-xs uppercase tracking-widest gap-2"
-                  >
-                    <Undo2 className="h-4 w-4" /> Cambiar Estudiante
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* SECCIÓN 2: CURSOS */}
-          {estudiante && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in duration-700">
-              <Card className="h-fit border-2 border-primary/5 shadow-xl shadow-primary/5 flex flex-col overflow-hidden gap-4">
-                <CardHeader className="bg-card px-8 pt-8">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                      <BookOpen className="h-5 w-5" />
-                    </div>
-                    <CardTitle className="text-xl font-black">
-                      Paso 2: Selección de Cursos
-                    </CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent className="px-8 pb-8 space-y-6">
-                  {/* Combobox de Cursos */}
-                  <div className="space-y-3">
-                    <label className="text-[14px] font-black text-muted-foreground ml-1">
-                      Curso Académico
-                    </label>
-                    <Combobox
-                      items={cursos.map((c) => c.nombre)}
-                      value={cursoSeleccionado?.nombre ?? ""}
-                      onValueChange={(nombre) => {
-                        const curso = cursos.find((c) => c.nombre === nombre);
-                        if (curso) {
-                          setCursoSeleccionado(curso);
-                          setIdCursoSeleccionado(curso.id);
-                          setIdParaleloSeleccionado("");
-                        } else {
-                          setCursoSeleccionado(null);
-                          setIdCursoSeleccionado("");
-                          setIdParaleloSeleccionado("");
-                        }
-                      }}
-                    >
-                      <ComboboxInput
-                        placeholder="Buscar curso por nombre..."
-                        showClear={!!cursoSeleccionado}
-                        onChange={(e) => {
-                          handleBusquedaCurso(e.target.value);
-                          if (!e.target.value) {
-                            setCursoSeleccionado(null);
-                            setIdCursoSeleccionado("");
-                            setIdParaleloSeleccionado("");
-                          }
-                        }}
-                        className="w-full h-14 text-base font-bold bg-muted/30 border-2"
-                      />
-                      <ComboboxContent>
-                        {loadingCursos ? (
-                          <div className="flex items-center justify-center py-6 gap-2 text-sm text-muted-foreground">
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            Buscando...
-                          </div>
-                        ) : (
-                          <>
-                            <ComboboxEmpty>
-                              No se encontraron cursos.
-                            </ComboboxEmpty>
-                            <ComboboxList>
-                              {(nombre) => {
-                                const curso = cursos.find(
-                                  (c) => c.nombre === nombre
-                                );
-                                return (
-                                  <ComboboxItem key={nombre} value={nombre}>
-                                    <span className="font-bold flex-1">
-                                      {nombre}
-                                    </span>
-                                    {curso && (
-                                      <span className="text-primary font-bold text-sm ml-auto">
-                                        Bs. {curso.monto}
-                                      </span>
-                                    )}
-                                  </ComboboxItem>
-                                );
-                              }}
-                            </ComboboxList>
-                          </>
-                        )}
-                      </ComboboxContent>
-                    </Combobox>
-                  </div>
-
-                  {/* Combobox de Paralelos */}
-                  {idCursoSeleccionado && cursoSeleccionado && (
-                    <div className="space-y-3 animate-in fade-in slide-in-from-top-4 duration-300">
-                      <label className="text-[14px] font-black text-muted-foreground ml-1">
-                        Paralelo / Turno
-                      </label>
-                      <Combobox
-                        items={cursoSeleccionado.paralelos
-                          .filter((p) => (p.cupo ?? 0) > 0)
-                          .map((p) => p.nombre)}
-                        value={
-                          cursoSeleccionado.paralelos.find(
-                            (p) => p.id === idParaleloSeleccionado
-                          )?.nombre ?? ""
-                        }
-                        onValueChange={(nombreParalelo) => {
-                          const paralelo = cursoSeleccionado.paralelos.find(
-                            (p) => p.nombre === nombreParalelo
-                          );
-                          setIdParaleloSeleccionado(paralelo?.id ?? "");
-                        }}
-                      >
-                        <ComboboxInput
-                          placeholder="Seleccione un paralelo..."
-                          showClear={!!idParaleloSeleccionado}
-                          className="w-full h-14 text-base font-bold bg-muted/30 border-2"
-                        />
-                        <ComboboxContent>
-                          <ComboboxEmpty>
-                            No se encontraron paralelos.
-                          </ComboboxEmpty>
-                          <ComboboxList>
-                            {(nombreParalelo) => {
-                              const p = cursoSeleccionado.paralelos.find(
-                                (p) => p.nombre === nombreParalelo
-                              );
-                              return (
-                                <ComboboxItem
-                                  key={nombreParalelo}
-                                  value={nombreParalelo}
-                                >
-                                  <span className="font-bold">
-                                    {nombreParalelo}
-                                  </span>
-                                  <span className="ml-auto text-sm text-muted-foreground">
-                                    {p?.cupo ?? 0} cupos
-                                  </span>
-                                </ComboboxItem>
-                              );
-                            }}
-                          </ComboboxList>
-                        </ComboboxContent>
-                      </Combobox>
-                    </div>
-                  )}
-
-                  <Button
-                    className="w-full h-14 text-lg font-black shadow-lg shadow-primary/10 active:scale-95 transition-all"
-                    disabled={!idParaleloSeleccionado}
-                    onClick={agregarAlCarrito}
-                  >
-                    Agregar a la bandeja <ArrowRight className="h-5 w-5 ml-2" />
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* SECCIÓN 3: BANDEJA (CARRITO) */}
-              <Card className="md:row-span-2 border-2 border-primary/5 shadow-2xl flex flex-col overflow-hidden bg-gradient-to-br from-card to-primary/5">
-                <CardHeader className="bg-card px-8 pt-8 pb-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                        <CreditCard className="h-5 w-5" />
-                      </div>
                       <CardTitle className="text-xl font-black">
-                        Paso 3: Bandeja
+                        Paso 1: Estudiante
                       </CardTitle>
-                    </div>
-                    <div className="h-8 px-3 rounded-lg bg-primary text-white  text-[10px] font-black flex items-center gap-2">
-                      {carrito.length}
-                      {carrito.length === 1 ? "ITEM" : "ITEMS"}
+                      <CardDescription className="text-base">
+                        Verificación de identidad y estado académico
+                      </CardDescription>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="p-0 flex-1 flex flex-col">
-                  <div className="flex-1 overflow-auto min-h-[300px]">
-                    <Table>
-                      <TableHeader className="bg-muted/50 sticky top-0 z-10">
-                        <TableRow className="hover:bg-transparent border-0">
-                          <TableHead className="pl-8 text-[12px] font-black h-12 normal-case">
-                            Detalle de Cobro
-                          </TableHead>
-                          <TableHead className="text-right text-[12px] font-black h-12 normal-case">
-                            Importe
-                          </TableHead>
-                          <TableHead className="w-[80px] h-12"></TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {carrito.length === 0 ? (
-                          <TableRow className="hover:bg-transparent">
-                            <TableCell colSpan={3} className="h-64 text-center">
-                              <div className="flex flex-col items-center gap-4 text-muted-foreground/40">
-                                <BookOpen className="h-12 w-12 opacity-20" />
-                                <p className="text-sm font-bold uppercase tracking-widest">
-                                  Bandeja Vacía
-                                </p>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ) : (
-                          carrito.map((item, index) => (
-                            <TableRow
-                              key={index}
-                              className={`hover:bg-primary/5 transition-colors border-primary/5 group ${
-                                item.error
-                                  ? "bg-destructive/10 border-destructive/50"
-                                  : ""
-                              }`}
-                            >
-                              <TableCell className="pl-8 py-5">
-                                <div className="flex items-center gap-2">
-                                  {item.error && (
-                                    <Badge
-                                      variant="destructive"
-                                      className="h-5 w-5 p-0 flex items-center justify-center rounded-full"
-                                    >
-                                      !
-                                    </Badge>
-                                  )}
-                                  <div>
-                                    <p
-                                      className={`font-black text-base transition-color breajk-words whitespace-normal  ${
-                                        item.error
-                                          ? "text-destructive"
-                                          : "text-foreground group-hover:text-primary"
-                                      }`}
-                                    >
-                                      {item.curso.nombre}
-                                    </p>
-                                    <p
-                                      className={`text-xs font-bold uppercase tracking-widest mt-1 wrap-break-word whitespace-normal ${
-                                        item.error
-                                          ? "text-destructive/80"
-                                          : "text-muted-foreground"
-                                      }`}
-                                    >
-                                      {item.error
-                                        ? item.mensajeError
-                                        : `Paralelo: ${item.paralelo.nombre}`}
-                                    </p>
-                                  </div>
-                                </div>
-                              </TableCell>
-                              <TableCell className="text-right font-mono font-black text-base py-5">
-                                Bs. {item.curso.monto}
-                              </TableCell>
-                              <TableCell className="pr-6 py-5">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => quitarDelCarrito(index)}
-                                  className="h-10 w-10 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
-                                >
-                                  <Trash2 className="h-5 w-5" />
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))
-                        )}
-                      </TableBody>
-                    </Table>
+                <CardContent className="px-8 pt-2 pb-8">
+                  <div className="flex flex-col md:flex-row items-end gap-4">
+                    <div className="flex-1 w-full space-y-3">
+                      <label className="text-sm font-black text-muted-foreground ml-1">
+                        Documento de Identidad (CI)
+                      </label>
+                      <div className="relative mt-2">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input
+                          placeholder="Ej. 8457214"
+                          value={nroDocumento}
+                          onChange={(e) => setNroDocumento(e.target.value)}
+                          onKeyDown={(e) =>
+                            e.key === "Enter" && handleSearchEstudiante()
+                          }
+                          className="h-10 pl-12 text-lg font-bold bg-muted/50 border-2 focus-visible:ring-primary/20"
+                        />
+                      </div>
+                    </div>
+                    <Button
+                      onClick={handleSearchEstudiante}
+                      disabled={loadingEstudiante || !nroDocumento}
+                      className="h-10 px-10 text-lg font-black shadow-lg shadow-primary/20 active:scale-95 transition-all"
+                      size="lg"
+                    >
+                      {loadingEstudiante ? (
+                        <Loader2 className="h-6 w-6 animate-spin" />
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          Buscar Estudiante <Search className="h-5 w-5" />
+                        </div>
+                      )}
+                    </Button>
                   </div>
 
-                  <div className="p-8 space-y-8 bg-card border-t border-primary/5 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
-                    <div className="flex justify-between items-end">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-[14px] font-black text-muted-foreground">
-                          Total Liquidación
-                        </span>
-                        <span className="text-lg font-black text-foreground">
-                          BOLIVIANOS
-                        </span>
+                  {estudiante && (
+                    <div className="mt-8 p-6 rounded-3xl border-2 border-primary/20 bg-primary/5 flex flex-col md:flex-row items-center justify-between gap-6 animate-in slide-in-from-bottom-4 duration-500">
+                      <div className="flex items-center gap-6">
+                        <div className="h-13 w-13 rounded-2xl bg-primary flex items-center justify-center text-white font-black text-3xl shadow-xl shadow-primary/20">
+                          {estudiante.usuario.persona.nombres[0]}
+                        </div>
+                        <div>
+                          <p className="font-black text-xl">
+                            {estudiante.usuario.persona.nombres}{" "}
+                            {estudiante.usuario.persona.primerApellido}{" "}
+                            {estudiante.usuario.persona.segundoApellido}
+                          </p>
+                          <div className="flex flex-wrap gap-3 mt-2">
+                            <Badge
+                              variant="outline"
+                              className="font-bold border-primary/30"
+                            >
+                              CI: {estudiante.usuario.persona.nroDocumento}
+                            </Badge>
+                            {estudiante.codigoPersonal && (
+                              <Badge
+                                variant="default"
+                                className="bg-primary hover:bg-primary font-bold"
+                              >
+                                Matrícula: {estudiante.codigoPersonal}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      <span className="text-5xl font-black text-primary tracking-tighter">
-                        Bs. {totalMonto.toFixed(2)}
-                      </span>
-                    </div>
-
-                    <div className="space-y-3">
                       <Button
-                        className="w-full h-14 text-xl font-black shadow-2xl shadow-primary/30 hover:shadow-primary/40 active:scale-[0.98] transition-all gap-4"
-                        disabled={carrito.length === 0 || procesando}
-                        onClick={handleFinalizarInscripcion}
+                        variant="link"
+                        size="sm"
+                        onClick={() => reset()}
+                        className="text-muted-foreground hover:text-destructive font-black text-xs uppercase tracking-widest gap-2"
                       >
-                        {procesando ? (
-                          <Loader2 className="h-8 w-8 animate-spin" />
-                        ) : (
-                          <>
-                            <FileText className="h-8 w-8" />
-                            Finalizar y cobrar
-                          </>
-                        )}
+                        <Undo2 className="h-4 w-4" /> Cambiar Estudiante
                       </Button>
                     </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
+
+              {/* SECCIÓN 2: CURSOS */}
+              {estudiante && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in duration-700">
+                  <Card className="h-fit border-2 border-primary/5 shadow-xl shadow-primary/5 flex flex-col overflow-hidden gap-4">
+                    <CardHeader className="bg-card px-8 pt-8">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                          <BookOpen className="h-5 w-5" />
+                        </div>
+                        <CardTitle className="text-xl font-black">
+                          Paso 2: Selección de Cursos
+                        </CardTitle>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="px-8 pb-8 space-y-6">
+                      {/* Combobox de Cursos */}
+                      <div className="space-y-3">
+                        <label className="text-[14px] font-black text-muted-foreground ml-1">
+                          Curso Académico
+                        </label>
+                        <Combobox
+                          items={cursos.map((c) => c.nombre)}
+                          value={cursoSeleccionado?.nombre ?? ""}
+                          onValueChange={(nombre) => {
+                            const curso = cursos.find(
+                              (c) => c.nombre === nombre
+                            );
+                            if (curso) {
+                              setCursoSeleccionado(curso);
+                              setIdCursoSeleccionado(curso.id);
+                              setIdParaleloSeleccionado("");
+                            } else {
+                              setCursoSeleccionado(null);
+                              setIdCursoSeleccionado("");
+                              setIdParaleloSeleccionado("");
+                            }
+                          }}
+                        >
+                          <ComboboxInput
+                            placeholder="Buscar curso por nombre..."
+                            showClear={!!cursoSeleccionado}
+                            onChange={(e) => {
+                              handleBusquedaCurso(e.target.value);
+                              if (!e.target.value) {
+                                setCursoSeleccionado(null);
+                                setIdCursoSeleccionado("");
+                                setIdParaleloSeleccionado("");
+                              }
+                            }}
+                            className="w-full h-14 text-base font-bold bg-muted/30 border-2"
+                          />
+                          <ComboboxContent>
+                            {loadingCursos ? (
+                              <div className="flex items-center justify-center py-6 gap-2 text-sm text-muted-foreground">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Buscando...
+                              </div>
+                            ) : (
+                              <>
+                                <ComboboxEmpty>
+                                  No se encontraron cursos.
+                                </ComboboxEmpty>
+                                <ComboboxList>
+                                  {(nombre) => {
+                                    const curso = cursos.find(
+                                      (c) => c.nombre === nombre
+                                    );
+                                    return (
+                                      <ComboboxItem key={nombre} value={nombre}>
+                                        <span className="font-bold flex-1">
+                                          {nombre}
+                                        </span>
+                                        {curso && (
+                                          <span className="text-primary font-bold text-sm ml-auto">
+                                            Bs. {curso.monto}
+                                          </span>
+                                        )}
+                                      </ComboboxItem>
+                                    );
+                                  }}
+                                </ComboboxList>
+                              </>
+                            )}
+                          </ComboboxContent>
+                        </Combobox>
+                      </div>
+
+                      {/* Combobox de Paralelos */}
+                      {idCursoSeleccionado && cursoSeleccionado && (
+                        <div className="space-y-3 animate-in fade-in slide-in-from-top-4 duration-300">
+                          <label className="text-[14px] font-black text-muted-foreground ml-1">
+                            Paralelo / Turno
+                          </label>
+                          <Combobox
+                            items={cursoSeleccionado.paralelos
+                              .filter((p) => (p.cupo ?? 0) > 0)
+                              .map((p) => p.nombre)}
+                            value={
+                              cursoSeleccionado.paralelos.find(
+                                (p) => p.id === idParaleloSeleccionado
+                              )?.nombre ?? ""
+                            }
+                            onValueChange={(nombreParalelo) => {
+                              const paralelo = cursoSeleccionado.paralelos.find(
+                                (p) => p.nombre === nombreParalelo
+                              );
+                              setIdParaleloSeleccionado(paralelo?.id ?? "");
+                            }}
+                          >
+                            <ComboboxInput
+                              placeholder="Seleccione un paralelo..."
+                              showClear={!!idParaleloSeleccionado}
+                              className="w-full h-14 text-base font-bold bg-muted/30 border-2"
+                            />
+                            <ComboboxContent>
+                              <ComboboxEmpty>
+                                No se encontraron paralelos.
+                              </ComboboxEmpty>
+                              <ComboboxList>
+                                {(nombreParalelo) => {
+                                  const p = cursoSeleccionado.paralelos.find(
+                                    (p) => p.nombre === nombreParalelo
+                                  );
+                                  return (
+                                    <ComboboxItem
+                                      key={nombreParalelo}
+                                      value={nombreParalelo}
+                                    >
+                                      <span className="font-bold">
+                                        {nombreParalelo}
+                                      </span>
+                                      <span className="ml-auto text-sm text-muted-foreground">
+                                        {p?.cupo ?? 0} cupos
+                                      </span>
+                                    </ComboboxItem>
+                                  );
+                                }}
+                              </ComboboxList>
+                            </ComboboxContent>
+                          </Combobox>
+                        </div>
+                      )}
+
+                      <Button
+                        className="w-full h-14 text-lg font-black shadow-lg shadow-primary/10 active:scale-95 transition-all"
+                        disabled={!idParaleloSeleccionado}
+                        onClick={agregarAlCarrito}
+                      >
+                        Agregar a la bandeja{" "}
+                        <ArrowRight className="h-5 w-5 ml-2" />
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  {/* SECCIÓN 3: BANDEJA (CARRITO) */}
+                  <Card className="md:row-span-2 border-2 border-primary/5 shadow-2xl flex flex-col overflow-hidden bg-gradient-to-br from-card to-primary/5">
+                    <CardHeader className="bg-card px-8 pt-8 pb-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                            <CreditCard className="h-5 w-5" />
+                          </div>
+                          <CardTitle className="text-xl font-black">
+                            Paso 3: Bandeja
+                          </CardTitle>
+                        </div>
+                        <div className="h-8 px-3 rounded-lg bg-primary text-white  text-[10px] font-black flex items-center gap-2">
+                          {carrito.length}
+                          {carrito.length === 1 ? "ITEM" : "ITEMS"}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-0 flex-1 flex flex-col">
+                      <div className="flex-1 overflow-auto min-h-[300px]">
+                        <Table>
+                          <TableHeader className="bg-muted/50 sticky top-0 z-10">
+                            <TableRow className="hover:bg-transparent border-0">
+                              <TableHead className="pl-8 text-[12px] font-black h-12 normal-case">
+                                Detalle de Cobro
+                              </TableHead>
+                              <TableHead className="text-right text-[12px] font-black h-12 normal-case">
+                                Importe
+                              </TableHead>
+                              <TableHead className="w-[80px] h-12"></TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {carrito.length === 0 ? (
+                              <TableRow className="hover:bg-transparent">
+                                <TableCell
+                                  colSpan={3}
+                                  className="h-64 text-center"
+                                >
+                                  <div className="flex flex-col items-center gap-4 text-muted-foreground/40">
+                                    <BookOpen className="h-12 w-12 opacity-20" />
+                                    <p className="text-sm font-bold uppercase tracking-widest">
+                                      Bandeja Vacía
+                                    </p>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ) : (
+                              carrito.map((item, index) => (
+                                <TableRow
+                                  key={index}
+                                  className={`hover:bg-primary/5 transition-colors border-primary/5 group ${
+                                    item.error
+                                      ? "bg-destructive/10 border-destructive/50"
+                                      : ""
+                                  }`}
+                                >
+                                  <TableCell className="pl-8 py-5">
+                                    <div className="flex items-center gap-2">
+                                      {item.error && (
+                                        <Badge
+                                          variant="destructive"
+                                          className="h-5 w-5 p-0 flex items-center justify-center rounded-full"
+                                        >
+                                          !
+                                        </Badge>
+                                      )}
+                                      <div>
+                                        <p
+                                          className={`font-black text-base transition-color breajk-words whitespace-normal  ${
+                                            item.error
+                                              ? "text-destructive"
+                                              : "text-foreground group-hover:text-primary"
+                                          }`}
+                                        >
+                                          {item.curso.nombre}
+                                        </p>
+                                        <p
+                                          className={`text-xs font-bold uppercase tracking-widest mt-1 wrap-break-word whitespace-normal ${
+                                            item.error
+                                              ? "text-destructive/80"
+                                              : "text-muted-foreground"
+                                          }`}
+                                        >
+                                          {item.error
+                                            ? item.mensajeError
+                                            : `Paralelo: ${item.paralelo.nombre}`}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="text-right font-mono font-black text-base py-5">
+                                    Bs. {item.curso.monto}
+                                  </TableCell>
+                                  <TableCell className="pr-6 py-5">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => quitarDelCarrito(index)}
+                                      className="h-10 w-10 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
+                                    >
+                                      <Trash2 className="h-5 w-5" />
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))
+                            )}
+                          </TableBody>
+                        </Table>
+                      </div>
+
+                      <div className="p-8 space-y-8 bg-card border-t border-primary/5 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+                        <div className="flex justify-between items-end">
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[14px] font-black text-muted-foreground">
+                              Total Liquidación
+                            </span>
+                            <span className="text-lg font-black text-foreground">
+                              BOLIVIANOS
+                            </span>
+                          </div>
+                          <span className="text-5xl font-black text-primary tracking-tighter">
+                            Bs. {totalMonto.toFixed(2)}
+                          </span>
+                        </div>
+
+                        <div className="space-y-3">
+                          <Button
+                            className="w-full h-14 text-xl font-black shadow-2xl shadow-primary/30 hover:shadow-primary/40 active:scale-[0.98] transition-all gap-4"
+                            disabled={carrito.length === 0 || procesando}
+                            onClick={handleFinalizarInscripcion}
+                          >
+                            {procesando ? (
+                              <Loader2 className="h-8 w-8 animate-spin" />
+                            ) : (
+                              <>
+                                <FileText className="h-8 w-8" />
+                                Finalizar y cobrar
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="consulta" className="space-y-8 mt-0 border-0 p-0">
+          <Consulta
+            inscribir={(data: any) => {
+              setNroDocumento(data.nroDocumento);
+              setActiveTab("registro");
+            }}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
