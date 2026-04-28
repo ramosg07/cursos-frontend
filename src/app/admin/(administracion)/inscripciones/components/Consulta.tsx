@@ -24,7 +24,10 @@ import {
   Search,
   UserPlus,
   History,
+  Printer,
+  FileText,
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
 import { toast } from "sonner";
 import { print } from "@/lib/print";
@@ -44,6 +47,8 @@ export function Consulta({ inscribir }: Props) {
   const [estudianteConsulta, setEstudianteConsulta] = useState<any | null>(
     null,
   );
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [printingMultiple, setPrintingMultiple] = useState(false);
 
   const handleConsultaInscripciones = async () => {
     if (!ciConsulta.trim()) return;
@@ -51,6 +56,7 @@ export function Consulta({ inscribir }: Props) {
     setBusquedaRealizada(true);
     setInscripcionesConsulta([]);
     setEstudianteConsulta(null);
+    setSelectedIds([]);
     try {
       const response = await sessionRequest<{
         datos: any[];
@@ -108,6 +114,67 @@ export function Consulta({ inscribir }: Props) {
       }
     } catch (error) {
       toast.error("Error al descargar el recibo");
+      print("Error al descargar el recibo", error);
+    }
+  };
+
+  const handleDescargarReciboMultiple = async () => {
+    if (selectedIds.length === 0) return;
+    setPrintingMultiple(true);
+    try {
+      const response = await sessionRequest<Blob>({
+        url: `/inscripciones/multiple/recibo`,
+        method: "post",
+        data: { idsInscripcion: selectedIds },
+        responseType: "blob",
+      });
+
+      if (response && response.data) {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        const fecha = new Date().toISOString().slice(0, 10);
+        link.href = url;
+        link.setAttribute("download", `recibos-multiples-${fecha}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        toast.success(
+          `Se han descargado ${selectedIds.length} recibos correctamente`,
+        );
+      }
+    } catch (error) {
+      toast.error("Error al descargar los recibos agrupados");
+    } finally {
+      setPrintingMultiple(false);
+    }
+  };
+
+  const handleToggleSelection = (id: string) => {
+    setSelectedIds((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((i) => i !== id);
+      }
+      if (prev.length >= 10) {
+        toast.warning("Límite alcanzado", {
+          description: "Solo puede seleccionar hasta 10 cursos para imprimir.",
+        });
+        return prev;
+      }
+      return [...prev, id];
+    });
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const ids = inscripcionesConsulta.slice(0, 10).map((ins) => ins.id);
+      setSelectedIds(ids);
+      if (inscripcionesConsulta.length > 10) {
+        toast.info("Selección limitada", {
+          description: "Se han seleccionado las primeras 10 inscripciones.",
+        });
+      }
+    } else {
+      setSelectedIds([]);
     }
   };
 
@@ -204,14 +271,43 @@ export function Consulta({ inscribir }: Props) {
 
             {inscripcionesConsulta.length > 0 && (
               <div className="space-y-4">
-                <h4 className="text-lg font-black flex items-center gap-2 px-2">
-                  <History className="h-5 w-5 text-primary" /> Cursos Inscritos
-                </h4>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-2">
+                  <h4 className="text-lg font-black flex items-center gap-2">
+                    <History className="h-5 w-5 text-primary" /> Cursos
+                    Inscritos
+                  </h4>
+                  {selectedIds.length > 0 && (
+                    <Button
+                      size="sm"
+                      className="bg-accent hover:bg-accent/90 text-accent-foreground font-black shadow-lg shadow-accent/20 animate-in zoom-in-95 duration-200"
+                      onClick={handleDescargarReciboMultiple}
+                      disabled={printingMultiple}
+                    >
+                      {printingMultiple ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Printer className="mr-2 h-4 w-4" />
+                      )}
+                      Imprimir Recibos ({selectedIds.length}/10)
+                    </Button>
+                  )}
+                </div>
                 <Card className="border-2 border-primary/5 shadow-2xl overflow-hidden">
                   <Table>
                     <TableHeader className="bg-muted/50">
                       <TableRow>
-                        <TableHead className="pl-8 font-black text-xs uppercase tracking-widest">
+                        <TableHead className="w-[50px] pl-6">
+                          <Checkbox
+                            checked={
+                              selectedIds.length ===
+                                Math.min(inscripcionesConsulta.length, 10) &&
+                              selectedIds.length > 0
+                            }
+                            onCheckedChange={handleSelectAll}
+                            aria-label="Seleccionar todos"
+                          />
+                        </TableHead>
+                        <TableHead className="font-black text-xs uppercase tracking-widest">
                           Curso / Paralelo
                         </TableHead>
                         <TableHead className="font-black text-xs uppercase tracking-widest text-center">
@@ -220,18 +316,33 @@ export function Consulta({ inscribir }: Props) {
                         <TableHead className="font-black text-xs uppercase tracking-widest text-right">
                           Monto
                         </TableHead>
-                        <TableHead className="w-[100px]"></TableHead>
+                        <TableHead className="w-[80px] pr-8 text-right"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {inscripcionesConsulta.map((ins) => (
                         <TableRow
                           key={ins.id}
-                          className="hover:bg-primary/5 transition-colors group"
+                          className={`hover:bg-primary/5 transition-colors group ${
+                            selectedIds.includes(ins.id) ? "bg-primary/5" : ""
+                          }`}
                         >
-                          <TableCell className="pl-8 py-5">
+                          <TableCell className="pl-6 py-5">
+                            <Checkbox
+                              checked={selectedIds.includes(ins.id)}
+                              onCheckedChange={() =>
+                                handleToggleSelection(ins.id)
+                              }
+                              disabled={
+                                !selectedIds.includes(ins.id) &&
+                                selectedIds.length >= 10
+                              }
+                              aria-label={`Seleccionar ${ins.paralelo?.curso?.nombre}`}
+                            />
+                          </TableCell>
+                          <TableCell className="py-5">
                             <div>
-                              <p className="font-black text-base group-hover:text-primary transition-colors">
+                              <p className="font-black text-base group-hover:text-primary transition-colors line-clamp-1">
                                 {ins.paralelo?.curso?.nombre}
                               </p>
                               <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mt-1">
@@ -270,19 +381,19 @@ export function Consulta({ inscribir }: Props) {
                               </Badge>
                             </div>
                           </TableCell>
-                          {/* <TableCell className="pr-8 text-right">
+                          <TableCell className="pr-8 text-right">
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-10 w-10 p-0 rounded-xl hover:bg-primary hover:text-white transition-all shadow-none"
+                              className="h-9 w-9 p-0 rounded-xl hover:bg-primary hover:text-white transition-all shadow-none"
                               onClick={() =>
                                 handleDescargarReciboIndividual(ins.id)
                               }
-                              title="Descargar Recibo"
+                              title="Imprimir Recibo Individual"
                             >
-                              <Download className="h-5 w-5" />
+                              <FileText className="h-4 w-4" />
                             </Button>
-                          </TableCell> */}
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
