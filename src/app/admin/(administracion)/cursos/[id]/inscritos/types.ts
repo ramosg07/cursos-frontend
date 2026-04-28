@@ -9,6 +9,7 @@ export interface Inscripcion {
     id: string;
     nombre: string;
   };
+  montoPagado: number;
   estudiante: {
     id: string;
     codigoPersonal?: string | null;

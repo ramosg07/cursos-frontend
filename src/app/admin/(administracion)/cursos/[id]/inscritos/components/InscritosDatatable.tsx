@@ -17,6 +17,7 @@ import {
   Printer,
   BadgeDollarSign,
   UserMinus,
+  Download,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -39,6 +40,7 @@ import { Curso } from "../../../types";
 import { useAuth } from "@/contexts/AuthProvider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { print } from "@/lib/print";
 
 interface Props {
   curso: Curso;
@@ -130,6 +132,13 @@ export function InscritosDatatable({ curso }: Props) {
         <SortableHeader column={column} title="Documento" />
       ),
       meta: { mobileTitle: "Documento" },
+    },
+    {
+      accessorKey: "estudiante.codigoPersonal",
+      header: () => (
+        <div className="text-center normal-case text-sm">Matrícula</div>
+      ),
+      meta: { mobileTitle: "Matrícula" },
     },
     {
       accessorKey: "estudiante.usuario.persona.nombres",
@@ -301,6 +310,69 @@ export function InscritosDatatable({ curso }: Props) {
     setPrintModalOpen(true);
   };
 
+  const handleExportCSV = async () => {
+    try {
+      toast.info("Generando reporte CSV...");
+      const response = await sessionRequest<{
+        datos: Inscripcion[];
+        total: number;
+      }>({
+        url: `/inscripciones/curso/${idCurso}`,
+        method: "get",
+      });
+
+      if (response && response.data) {
+        const inscritos = response.data.datos;
+        if (!inscritos || inscritos.length === 0) {
+          toast.warning("No hay datos para exportar");
+          return;
+        }
+
+        // Cabeceras: Documento, Nombres, Apellidos, Paralelo, Fecha, Monto, Estado
+        const headers = [
+          "Nro. Documento",
+          "Matricula",
+          "Estudiante",
+          "Paralelo",
+          "Fecha Inscripcion",
+        ];
+
+        const csvRows = [
+          headers.join(","),
+          ...inscritos.map((ins) => {
+            const p = ins.estudiante?.usuario?.persona;
+            const rowData = [
+              p?.nroDocumento || "",
+              ins.estudiante.codigoPersonal || "",
+              `"${p?.nombres || ""} ${p?.primerApellido || ""} ${p?.segundoApellido || ""}"`,
+              `"Paralelo ${ins.paralelo?.nombre || ""}"`,
+              dayjs(ins.fechaInscripcion).format("DD/MM/YYYY HH:mm"),
+            ];
+            return rowData.join(",");
+          }),
+        ];
+
+        // Usar BOM para que Excel detecte UTF-8 correctamente
+        const csvContent = "\uFEFF" + csvRows.join("\n");
+        const blob = new Blob([csvContent], {
+          type: "text/csv;charset=utf-8;",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        const fileName = `inscritos_${curso.nombre.replace(/ /g, "_")}_${estadoTab.toLowerCase()}.csv`;
+        link.setAttribute("download", fileName);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success("CSV descargado correctamente");
+      }
+    } catch (error) {
+      print("Error al exportar los datos", error);
+      toast.error("Error al exportar los datos");
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-4">
@@ -453,6 +525,18 @@ export function InscritosDatatable({ curso }: Props) {
         onSelectedItemsChange={handleSelectedItemsChange}
         toolBarConfig={{
           components: [
+            permissions.update && esCoordinadorGeneral && (
+              <Button
+                key={"ExportCSV"}
+                title="Exportar CSV"
+                variant="outline"
+                className="flex gap-2"
+                onClick={handleExportCSV}
+              >
+                <Download className="h-4 w-4" />
+                <span>Exportar CSV</span>
+              </Button>
+            ),
             permissions.update && esCoordinadorGeneral && (
               <Button
                 key={"BulkUpload"}
