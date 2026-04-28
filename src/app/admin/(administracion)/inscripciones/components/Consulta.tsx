@@ -24,10 +24,8 @@ import {
   Search,
   UserPlus,
   History,
-  Printer,
   FileText,
 } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
 import { toast } from "sonner";
 import { print } from "@/lib/print";
@@ -37,7 +35,9 @@ interface Props {
   inscribir: (data: any) => void;
 }
 export function Consulta({ inscribir }: Props) {
-  const { sessionRequest } = useAuth();
+  const { sessionRequest, user } = useAuth();
+  const rolActivo = user?.roles.find((rol) => user.idRol === rol.idRol);
+  const esCoordinadorGeneral = rolActivo?.rol === "COORDINADOR GENERAL";
 
   // Estado para Consulta por CI
   const [ciConsulta, setCiConsulta] = useState("");
@@ -198,7 +198,7 @@ export function Consulta({ inscribir }: Props) {
                     </div>
                   </div>
                 </div>
-                {inscripcionesConsulta.length > 0 && (
+                {esCoordinadorGeneral && inscripcionesConsulta.length > 0 && (
                   <Button
                     onClick={handleDescargarHistorial}
                     disabled={printingReport}
