@@ -38,6 +38,7 @@ import dayjs from "dayjs";
 import { Curso } from "../../../types";
 import { useAuth } from "@/contexts/AuthProvider";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Props {
   curso: Curso;
@@ -55,6 +56,7 @@ export function InscritosDatatable({ curso }: Props) {
   const [selectedInscripciones, setSelectedInscripciones] = useState<string[]>(
     [],
   );
+  const [estadoTab, setEstadoTab] = useState<string>("ACTIVO");
 
   // Función para manejar el cambio de selección en el DataTable
   const handleSelectedItemsChange = useCallback((items: Inscripcion[]) => {
@@ -143,7 +145,9 @@ export function InscritosDatatable({ curso }: Props) {
     },
     {
       accessorKey: "paralelo.nombre",
-      header: "Paralelo",
+      header: () => (
+        <div className="text-center normal-case text-sm">Paralelo</div>
+      ),
       cell: ({ row }) => {
         const p = row.original.paralelo;
         return p ? `Paralelo ${p.nombre}` : "—";
@@ -152,61 +156,95 @@ export function InscritosDatatable({ curso }: Props) {
     },
     {
       accessorKey: "fechaInscripcion",
-      header: "Fecha Inscripción",
+      header: () => (
+        <div className="text-center normal-case text-sm">Fecha Inscripción</div>
+      ),
       cell: ({ row }) =>
         dayjs(row.original.fechaInscripcion).format("DD/MM/YYYY HH:mm"),
       meta: { mobileTitle: "Fecha" },
     },
     {
+      accessorKey: "usuarioInscripcion",
+      header: () => (
+        <div className="text-center normal-case text-sm">
+          Coordinador de curso
+        </div>
+      ),
+      cell: ({ row }) => {
+        const p = row.original.usuarioInscripcion?.persona;
+        const p2 = row.original.usuarioDesinscripcion?.persona;
+        if (!p && !p2) return "—";
+        return row.original.estado === "ACTIVO"
+          ? `${p.nombres} ${p.primerApellido ?? ""} ${p.segundoApellido ?? ""}`
+          : `${p2.nombres} ${p2.primerApellido ?? ""} ${p2.segundoApellido ?? ""}`;
+      },
+      meta: { mobileTitle: "Coordinador de curso" },
+    },
+    {
       id: "acciones",
-      header: "Acciones",
-      cell: ({ row }) => (
-        <div className="flex items-center gap-1">
-          {idPlantillaCertificado && esCertificador && (
-            <Button
-              variant="ghost"
-              size="icon"
-              title="Imprimir certificado"
-              onClick={() => handleOpenPrintModal([row.original.id])}
-            >
-              <Printer className="h-4 w-4" />
-            </Button>
-          )}
+      header: () => (
+        <div className="text-center normal-case text-sm">Acciones</div>
+      ),
 
-          {permissions.delete && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="ghost" size="icon" title="Desinscribir">
-                  <UserMinus className="h-4 w-4 text-destructive" />
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1 justify-center">
+          {row.original.estado === "ACTIVO" && (
+            <>
+              {idPlantillaCertificado && esCertificador && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  title="Imprimir certificado"
+                  onClick={() => handleOpenPrintModal([row.original.id])}
+                >
+                  <Printer className="h-4 w-4" />
                 </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>¿Está seguro?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Esta acción marcará la inscripción de{" "}
-                    <strong>
-                      {row.original.estudiante?.usuario?.persona?.nombres}{" "}
-                      {
-                        row.original.estudiante?.usuario?.persona
-                          ?.primerApellido
-                      }
-                    </strong>{" "}
-                    como inactiva. Podrá volver a inscribirlo después si es
-                    necesario.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => handleDesinscribir(row.original.id)}
-                    className="bg-destructive hover:bg-destructive/90"
-                  >
-                    Confirmar Desinscripción
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+              )}
+
+              {permissions.delete && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon" title="Desinscribir">
+                      <UserMinus className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>¿Está seguro?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Esta acción marcará la inscripción de{" "}
+                        <strong>
+                          {row.original.estudiante?.usuario?.persona?.nombres}{" "}
+                          {
+                            row.original.estudiante?.usuario?.persona
+                              ?.primerApellido
+                          }
+                        </strong>{" "}
+                        como inactiva. Podrá volver a inscribirlo después si es
+                        necesario.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDesinscribir(row.original.id)}
+                        className="bg-destructive hover:bg-destructive/90"
+                      >
+                        Confirmar Desinscripción
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+            </>
+          )}
+          {row.original.estado === "INACTIVO" && (
+            <Badge
+              variant="outline"
+              className="text-destructive border-destructive/30 bg-destructive/5"
+            >
+              DESINCRITO
+            </Badge>
           )}
         </div>
       ),
@@ -378,11 +416,40 @@ export function InscritosDatatable({ curso }: Props) {
           })}
       </div>
 
+      <div className="flex items-center justify-between mt-4">
+        <Tabs
+          defaultValue="ACTIVO"
+          value={estadoTab}
+          onValueChange={setEstadoTab}
+          className="w-full"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <TabsList className="grid w-[400px] grid-cols-2">
+              <TabsTrigger value="ACTIVO" className="flex gap-2">
+                Activos
+                <Badge
+                  variant="secondary"
+                  className="ml-1 h-5 px-1.5 min-w-[1.25rem]"
+                >
+                  {curso.paralelos.reduce(
+                    (acc, p) => acc + (p.inscritos ?? 0),
+                    0,
+                  )}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="INACTIVO">
+                Desinscritos / Historial
+              </TabsTrigger>
+            </TabsList>
+          </div>
+        </Tabs>
+      </div>
+
       <DataTable
         columns={columns}
         filters={filters}
         apiUrl={"/inscripciones"}
-        params={{ idCurso }}
+        params={{ idCurso, estado: estadoTab }}
         onSelectedItemsChange={handleSelectedItemsChange}
         toolBarConfig={{
           components: [
