@@ -4,6 +4,8 @@ export interface Curso {
   descripcion?: string | null;
   fechaInicio?: string | null;
   fechaFin?: string | null;
+  montoEstudiante: number;
+  montoDocente: number;
   monto: number;
   estado: string;
   cursoCoordinador: CursoCoordinador[];

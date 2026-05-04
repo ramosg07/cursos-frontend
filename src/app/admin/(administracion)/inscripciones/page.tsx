@@ -201,7 +201,8 @@ export default function NuevaInscripcionPage() {
         url: "/inscripciones/multiple/validar",
         method: "post",
         data: {
-          idEstudiante: estudiante.id,
+          idEstudiante: estudiante.tipoPersona === 'ESTUDIANTE' ? estudiante.id : undefined,
+          idDocente: estudiante.tipoPersona === 'DOCENTE' ? estudiante.id : undefined,
           idsParalelo: carrito.map((item) => item.paralelo.id),
         },
       });
@@ -233,7 +234,12 @@ export default function NuevaInscripcionPage() {
   };
 
   const totalMonto = carrito.reduce(
-    (acc, item) => acc + Number(item.curso.monto),
+    (acc, item) => {
+      const monto = estudiante?.tipoPersona === 'DOCENTE' 
+        ? item.curso.montoDocente 
+        : item.curso.montoEstudiante;
+      return acc + Number(monto || 0);
+    },
     0
   );
 
@@ -253,7 +259,8 @@ export default function NuevaInscripcionPage() {
         url: "/inscripciones/multiple",
         method: "post",
         data: {
-          idEstudiante: estudiante.id,
+          idEstudiante: estudiante.tipoPersona === 'ESTUDIANTE' ? estudiante.id : undefined,
+          idDocente: estudiante.tipoPersona === 'DOCENTE' ? estudiante.id : undefined,
           idsParalelo: carrito.map((item) => item.paralelo.id),
         },
       });
@@ -429,7 +436,7 @@ export default function NuevaInscripcionPage() {
                     </p>
                   </div>
                   <span className="font-mono font-bold whitespace-nowrap">
-                    Bs. {item.curso.monto}
+                    Bs. {estudiante?.tipoPersona === 'DOCENTE' ? item.curso.montoDocente : item.curso.montoEstudiante}
                   </span>
                 </div>
               ))}
@@ -492,10 +499,10 @@ export default function NuevaInscripcionPage() {
                     </div>
                     <div>
                       <CardTitle className="text-xl font-black">
-                        Paso 1: Estudiante
+                        Paso 1: Estudiante / Docente
                       </CardTitle>
                       <CardDescription className="text-base">
-                        Verificación de identidad y estado académico
+                        Verificación de identidad y rol (Estudiante o Docente)
                       </CardDescription>
                     </div>
                   </div>
@@ -529,7 +536,7 @@ export default function NuevaInscripcionPage() {
                         <Loader2 className="h-6 w-6 animate-spin" />
                       ) : (
                         <div className="flex items-center gap-2">
-                          Buscar Estudiante <Search className="h-5 w-5" />
+                          Buscar Persona <Search className="h-5 w-5" />
                         </div>
                       )}
                     </Button>
@@ -554,14 +561,12 @@ export default function NuevaInscripcionPage() {
                             >
                               CI: {estudiante.usuario.persona.nroDocumento}
                             </Badge>
-                            {estudiante.codigoPersonal && (
-                              <Badge
-                                variant="default"
-                                className="bg-primary hover:bg-primary font-bold"
-                              >
-                                Matrícula: {estudiante.codigoPersonal}
-                              </Badge>
-                            )}
+                            <Badge
+                              variant="secondary"
+                              className="font-bold"
+                            >
+                              {estudiante.tipoPersona}
+                            </Badge>
                           </div>
                         </div>
                       </div>
@@ -571,7 +576,7 @@ export default function NuevaInscripcionPage() {
                         onClick={() => reset()}
                         className="text-muted-foreground hover:text-destructive font-black text-xs uppercase tracking-widest gap-2"
                       >
-                        <Undo2 className="h-4 w-4" /> Cambiar Estudiante
+                        <Undo2 className="h-4 w-4" /> Cambiar Persona
                       </Button>
                     </div>
                   )}
@@ -652,7 +657,7 @@ export default function NuevaInscripcionPage() {
                                         </span>
                                         {curso && (
                                           <span className="text-primary font-bold text-sm ml-auto">
-                                            Bs. {curso.monto}
+                                            Bs. {estudiante?.tipoPersona === 'DOCENTE' ? curso.montoDocente : curso.montoEstudiante}
                                           </span>
                                         )}
                                       </ComboboxItem>
@@ -824,7 +829,7 @@ export default function NuevaInscripcionPage() {
                                     </div>
                                   </TableCell>
                                   <TableCell className="text-right font-mono font-black text-base py-5">
-                                    Bs. {item.curso.monto}
+                                    Bs. {estudiante?.tipoPersona === 'DOCENTE' ? item.curso.montoDocente : item.curso.montoEstudiante}
                                   </TableCell>
                                   <TableCell className="pr-6 py-5">
                                     <Button
