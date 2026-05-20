@@ -119,12 +119,20 @@ export function CursosDatatable() {
       meta: { mobileTitle: "Coordinadores" },
     },
     {
-      accessorKey: "monto",
+      accessorKey: "montoEstudiante",
       header: () => (
-        <div className="text-center normal-case text-sm">Monto (Bs.)</div>
+        <div className="text-center normal-case text-sm">(Bs.) Estudiante</div>
       ),
-      cell: ({ row }) => Number(row.original.monto).toFixed(2),
-      meta: { mobileTitle: "Monto" },
+      cell: ({ row }) => Number(row.original.montoDocente).toFixed(2),
+      meta: { mobileTitle: "Monto Estudiante" },
+    },
+    {
+      accessorKey: "montoDocente",
+      header: () => (
+        <div className="text-center normal-case text-sm">(Bs.) Docente</div>
+      ),
+      cell: ({ row }) => Number(row.original.montoEstudiante).toFixed(2),
+      meta: { mobileTitle: "Monto Docente" },
     },
     {
       accessorKey: "estado",
