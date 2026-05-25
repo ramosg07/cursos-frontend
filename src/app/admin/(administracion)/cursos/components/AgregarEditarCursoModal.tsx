@@ -125,9 +125,8 @@ export function AgregarEditarCursoModal({
           descripcion: curso.descripcion ?? "",
           fechaInicio: dayjs.utc(curso.fechaInicio).format("YYYY-MM-DD") || "",
           fechaFin: dayjs.utc(curso.fechaFin).format("YYYY-MM-DD") || "",
-          montoEstudiante: Number(curso.montoEstudiante) || Number(curso.monto) || 0,
-          montoDocente: Number(curso.montoDocente) || Number(curso.monto) || 0,
-          monto: Number(curso.monto) || 0,
+          montoEstudiante: Number(curso.montoEstudiante) || 0,
+          montoDocente: Number(curso.montoDocente) || 0,
           coordinadores: coordinadoresActivos,
           paralelos: (curso.paralelos || []).map((p) => ({
             id: p.id,
