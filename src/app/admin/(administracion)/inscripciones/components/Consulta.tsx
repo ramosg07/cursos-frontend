@@ -129,11 +129,10 @@ export function Consulta({ inscribir }: Props) {
           </div>
           <div>
             <CardTitle className="text-xl font-black">
-              Consultar Historial por Estudiante
+              Consultar Historial
             </CardTitle>
             <CardDescription className="text-base">
-              Verifique los cursos en los que ya se encuentra inscrito el
-              estudiante.
+              Verifique los cursos en los que ya se encuentra inscrito.
             </CardDescription>
           </div>
         </div>
@@ -346,7 +345,7 @@ export function Consulta({ inscribir }: Props) {
                       });
                     }}
                   >
-                    Ir a Inscribir Estudiante
+                    Ir a Inscribir
                   </Button>
                 </CardContent>
               </Card>

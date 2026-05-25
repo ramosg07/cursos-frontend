@@ -11,39 +11,39 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/contexts/AuthProvider";
-import { Estudiante } from "../types";
+import { Docente } from "../types";
 import { toast } from "sonner";
 
 interface Props {
-  estudiante: Estudiante | null;
+  docente: Docente | null;
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export function ActivarInactivarEstudianteModal({
-  estudiante,
+export function ActivarInactivarDocenteModal({
+  docente,
   isOpen,
   onClose,
   onSuccess,
 }: Props) {
   const { sessionRequest } = useAuth();
 
-  if (!estudiante) return null;
+  if (!docente) return null;
 
-  const isActivating = estudiante.estado !== "ACTIVO";
+  const isActivating = docente.estado !== "ACTIVO";
   const actionLabel = isActivating ? "activar" : "inactivar";
 
   const handleConfirm = async () => {
     try {
-      const url = `/estudiantes/${estudiante.id}/${isActivating ? "activar" : "inactivar"}`;
+      const url = `/docentes/${docente.id}/${isActivating ? "activar" : "inactivar"}`;
       await sessionRequest({
         url,
         method: "patch",
       });
 
       toast.success(
-        `Estudiante ${isActivating ? "activado" : "inactivado"} correctamente`,
+        `Docente ${isActivating ? "activado" : "inactivado"} correctamente`,
       );
       onSuccess();
     } catch (error: any) {
@@ -63,13 +63,13 @@ export function ActivarInactivarEstudianteModal({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            ¿Está seguro de {actionLabel} al estudiante?
+            ¿Está seguro de {actionLabel} al docente?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Esta acción cambiará el estado del estudiante{" "}
+            Esta acción cambiará el estado del docente{" "}
             <strong>
-              {estudiante.usuario.persona.nombres}{" "}
-              {estudiante.usuario.persona.primerApellido}
+              {docente.usuario.persona.nombres}{" "}
+              {docente.usuario.persona.primerApellido}
             </strong>{" "}
             a {isActivating ? "ACTIVO" : "INACTIVO"}.
           </AlertDialogDescription>

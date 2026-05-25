@@ -62,7 +62,9 @@ const formSchema = z.object({
       },
       { message: "Fecha fin inválida" }
     ),
-  monto: z.coerce.number().min(1, "El monto debe ser mayor a 0"),
+  montoEstudiante: z.coerce.number().min(1, "El monto debe ser mayor a 0"),
+  montoDocente: z.coerce.number().min(1, "El monto debe ser mayor a 0"),
+  monto: z.coerce.number().optional(),
   coordinadores: z.array(z.string()).optional(),
   paralelos: z
     .array(
@@ -123,7 +125,8 @@ export function AgregarEditarCursoModal({
           descripcion: curso.descripcion ?? "",
           fechaInicio: dayjs.utc(curso.fechaInicio).format("YYYY-MM-DD") || "",
           fechaFin: dayjs.utc(curso.fechaFin).format("YYYY-MM-DD") || "",
-          monto: Number(curso.monto) || 0,
+          montoEstudiante: Number(curso.montoEstudiante) || 0,
+          montoDocente: Number(curso.montoDocente) || 0,
           coordinadores: coordinadoresActivos,
           paralelos: (curso.paralelos || []).map((p) => ({
             id: p.id,
@@ -136,6 +139,8 @@ export function AgregarEditarCursoModal({
           descripcion: "",
           fechaInicio: "",
           fechaFin: "",
+          montoEstudiante: 0,
+          montoDocente: 0,
           monto: 0,
           coordinadores: [],
           paralelos: [{ nombre: "A", cupo: 30 }],
@@ -160,6 +165,8 @@ export function AgregarEditarCursoModal({
           descripcion: values.descripcion || null,
           fechaInicio: values.fechaInicio || null,
           fechaFin: values.fechaFin || null,
+          montoEstudiante: values.montoEstudiante,
+          montoDocente: values.montoDocente,
           monto: values.monto,
           coordinadores: values.coordinadores ?? [],
           paralelos: values.paralelos ?? [],
@@ -295,26 +302,54 @@ export function AgregarEditarCursoModal({
                     );
                   }}
                 />
-                <Controller
-                  name="monto"
-                  control={form.control}
-                  render={({ field, fieldState }) => (
-                    <Field aria-invalid={fieldState.invalid} className="w-full">
-                      <FieldLabel>Monto (Bs.)</FieldLabel>
-                      <Input
-                        id="monto"
-                        type="number"
-                        placeholder="Ingrese el monto del curso"
-                        {...field}
+                <div className="flex w-full gap-4">
+                  <Controller
+                    name="montoEstudiante"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field
                         aria-invalid={fieldState.invalid}
-                        disabled={coordinadorCurso}
-                      />
-                      {fieldState.invalid && (
-                        <FieldError errors={[fieldState.error]} />
-                      )}
-                    </Field>
-                  )}
-                />
+                        className="w-full"
+                      >
+                        <FieldLabel>Monto Estudiante (Bs.)</FieldLabel>
+                        <Input
+                          id="montoEstudiante"
+                          type="number"
+                          placeholder="Monto Estudiante"
+                          {...field}
+                          aria-invalid={fieldState.invalid}
+                          disabled={coordinadorCurso}
+                        />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name="montoDocente"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field
+                        aria-invalid={fieldState.invalid}
+                        className="w-full"
+                      >
+                        <FieldLabel>Monto Docente (Bs.)</FieldLabel>
+                        <Input
+                          id="montoDocente"
+                          type="number"
+                          placeholder="Monto Docente"
+                          {...field}
+                          aria-invalid={fieldState.invalid}
+                          disabled={coordinadorCurso}
+                        />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                </div>
               </div>
             </div>
             <div className="pl-4">

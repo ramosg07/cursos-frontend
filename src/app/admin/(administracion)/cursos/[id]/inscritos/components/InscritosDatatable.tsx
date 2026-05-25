@@ -268,21 +268,6 @@ export function InscritosDatatable({ curso }: Props) {
       list: [{ description: "Todos", code: "all" }],
       type: "text",
     },
-    {
-      name: "idParalelo",
-      label: "Paralelo",
-      value: "all",
-      list: [
-        { description: "Todos", code: "all" },
-        ...(curso.paralelos || [])
-          .filter((p) => p.estado === "ACTIVO")
-          .map((p) => ({
-            description: `Paralelo ${p.nombre}`,
-            code: p.id,
-          })),
-      ],
-      type: "select",
-    },
   ];
 
   function updateDataTable() {
@@ -396,7 +381,7 @@ export function InscritosDatatable({ curso }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div className="flex items-start gap-3 p-4 border rounded-lg bg-card shadow-sm">
           <div className="mt-1 bg-primary/10 p-2 rounded-full">
             <Info className="h-4 w-4 text-primary" />
@@ -436,9 +421,20 @@ export function InscritosDatatable({ curso }: Props) {
           </div>
           <div>
             <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-              Monto
+              Monto Estudiante
             </p>
-            <p className="text-sm">{curso.monto || "—"}</p>
+            <p className="text-sm">{curso.montoEstudiante || "—"}</p>
+          </div>
+        </div>
+        <div className="flex items-start gap-3 p-4 border rounded-lg bg-card shadow-sm">
+          <div className="mt-1 bg-primary/10 p-2 rounded-full">
+            <BadgeDollarSign className="h-4 w-4 text-primary" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              Monto Docente
+            </p>
+            <p className="text-sm">{curso.montoDocente || "—"}</p>
           </div>
         </div>
       </div>

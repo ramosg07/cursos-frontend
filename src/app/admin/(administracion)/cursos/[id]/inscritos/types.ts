@@ -23,6 +23,7 @@ export interface EstudianteBusqueda {
   id: string;
   codigoPersonal?: string | null;
   usuario: Usuario;
+  tipoPersona?: 'ESTUDIANTE' | 'DOCENTE';
 }
 
 interface Persona {
