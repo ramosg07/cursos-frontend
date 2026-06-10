@@ -26,7 +26,7 @@ export default function LectorQRPage() {
   const { user, isAuthLoading } = useAuth();
   const router = useRouter();
   const [cameraPermission, setCameraPermission] = useState<boolean | null>(
-    null,
+    null
   );
   const [scanning, setScanning] = useState(false);
   const [cameras, setCameras] = useState<any[]>([]);
@@ -78,15 +78,11 @@ export default function LectorQRPage() {
           defaultCamera,
           {
             fps: 15,
-            qrbox: 300,
-            videoConstraints: {
-              width: { ideal: 1920 },
-              height: { ideal: 1080 },
+            qrbox: (width, height) => {
+              console.log({ width, height });
+              const size = Math.min(width, height) * 0.7;
+              return { width: size, height: size };
             },
-            // qrbox: (width, height) => {
-            //   const size = Math.min(width, height) * 0.7;
-            //   return { width: size, height: size };
-            // },
           },
           (decodedText) => {
             // Éxito: extraemos el código del certificado
@@ -97,13 +93,13 @@ export default function LectorQRPage() {
               router.push(`/admin/certificados/verificar?codigo=${match[0]}`);
             } else {
               toast.warning(
-                "QR escaneado con éxito, pero no contiene un formato de certificado oficial.",
+                "QR escaneado con éxito, pero no contiene un formato de certificado oficial."
               );
             }
           },
           (errorMessage) => {
             // Silencioso - escaneando...
-          },
+          }
         );
         setScanning(true);
       } else {
@@ -132,7 +128,7 @@ export default function LectorQRPage() {
   };
 
   const handleCameraChange = async (
-    e: React.ChangeEvent<HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const id = e.target.value;
     setSelectedCameraId(id);
@@ -180,7 +176,7 @@ export default function LectorQRPage() {
 
         <CardContent className="space-y-6 flex flex-col items-center justify-center">
           {/* Zona de Cámara */}
-          <div className="relative w-full aspect-square max-w-[320px] rounded-2xl border border-border overflow-hidden shadow-inner flex items-center justify-center">
+          <div className="relative w-full aspect-[4/3] max-w-[420px] rounded-2xl border border-border overflow-hidden shadow-inner flex items-center justify-center">
             {/* Elemento de renderizado para html5-qrcode */}
             <div
               id="reader"
