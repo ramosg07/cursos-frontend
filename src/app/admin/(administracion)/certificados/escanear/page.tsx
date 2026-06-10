@@ -78,10 +78,15 @@ export default function LectorQRPage() {
           defaultCamera,
           {
             fps: 15,
-            qrbox: (width, height) => {
-              const size = Math.min(width, height) * 0.7;
-              return { width: size, height: size };
+            qrbox: 300,
+            videoConstraints: {
+              width: { ideal: 1920 },
+              height: { ideal: 1080 },
             },
+            // qrbox: (width, height) => {
+            //   const size = Math.min(width, height) * 0.7;
+            //   return { width: size, height: size };
+            // },
           },
           (decodedText) => {
             // Éxito: extraemos el código del certificado

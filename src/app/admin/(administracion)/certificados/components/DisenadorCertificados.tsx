@@ -154,7 +154,9 @@ export function DisenadorCertificados({
   ) => {
     setConfig((prev) => ({
       ...prev,
-      campos: prev.campos.map((c) => (c.id === id ? { ...c, [field]: value } : c)),
+      campos: prev.campos.map((c) =>
+        c.id === id ? { ...c, [field]: value } : c,
+      ),
     }));
   };
 
@@ -386,49 +388,24 @@ export function DisenadorCertificados({
                 </Button>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground uppercase tracking-wider pb-1">
-                    Contenido del Campo
-                  </Label>
-                  <div className="space-y-2 pt-2 pb-2 w-full">
-                    <Label>Tipo de Texto</Label>
-                    <Select
-                      value={selectedCampo.variable ? "variable" : "estatico"}
-                      onValueChange={(val) => {
-                        if (val === "estatico") {
-                          handleTextChange(selectedId!, "variable", "");
-                        } else {
-                          const firstVar = CAMPOS_VARIABLES[0];
-                          handleMultipleFieldsChange(selectedId!, {
-                            variable: firstVar.id,
-                            valor: `[${firstVar.label.toUpperCase()}]`,
-                            testValue: firstVar.testValue,
-                          });
-                        }
-                      }}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="w-full">
-                        <SelectItem value="estatico">Texto Estático</SelectItem>
-                        <SelectItem value="variable">Variable del Sistema</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {selectedCampo.variable ? (
-                    <div className="space-y-2 w-full">
-                      <Label>Variable del Sistema</Label>
+                {selectedCampo.tipo !== "qr" && (
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground uppercase tracking-wider pb-1">
+                      Contenido del Campo
+                    </Label>
+                    <div className="space-y-2 pt-2 pb-2 w-full">
+                      <Label>Tipo de Texto</Label>
                       <Select
-                        value={selectedCampo.variable}
+                        value={selectedCampo.variable ? "variable" : "estatico"}
                         onValueChange={(val) => {
-                          const v = CAMPOS_VARIABLES.find((x) => x.id === val);
-                          if (v) {
+                          if (val === "estatico") {
+                            handleTextChange(selectedId!, "variable", "");
+                          } else {
+                            const firstVar = CAMPOS_VARIABLES[0];
                             handleMultipleFieldsChange(selectedId!, {
-                              variable: v.id,
-                              valor: `[${v.label.toUpperCase()}]`,
-                              testValue: v.testValue,
+                              variable: firstVar.id,
+                              valor: `[${firstVar.label.toUpperCase()}]`,
+                              testValue: firstVar.testValue,
                             });
                           }
                         }}
@@ -437,87 +414,135 @@ export function DisenadorCertificados({
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent className="w-full">
-                          {CAMPOS_VARIABLES.map((v) => (
-                            <SelectItem key={v.id} value={v.id}>
-                              {v.label}
-                            </SelectItem>
-                          ))}
+                          <SelectItem value="estatico">
+                            Texto Estático
+                          </SelectItem>
+                          <SelectItem value="variable">
+                            Variable del Sistema
+                          </SelectItem>
                         </SelectContent>
                       </Select>
-                      <p className="text-[10px] text-muted-foreground italic">
-                        Esta variable se reemplazará automáticamente al generar
-                        el certificado.
-                      </p>
                     </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <Label>Texto Estático</Label>
-                      <Textarea
-                        className="min-h-[120px]"
-                        value={selectedCampo.valor}
-                        onChange={(e) =>
-                          handleTextChange(selectedId!, "valor", e.target.value)
-                        }
-                      />
-                    </div>
-                  )}
-                </div>
+                    {selectedCampo.variable ? (
+                      <div className="space-y-2 w-full">
+                        <Label>Variable del Sistema</Label>
+                        <Select
+                          value={selectedCampo.variable}
+                          onValueChange={(val) => {
+                            const v = CAMPOS_VARIABLES.find(
+                              (x) => x.id === val,
+                            );
+                            if (v) {
+                              handleMultipleFieldsChange(selectedId!, {
+                                variable: v.id,
+                                valor: `[${v.label.toUpperCase()}]`,
+                                testValue: v.testValue,
+                              });
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="w-full">
+                            {CAMPOS_VARIABLES.map((v) => (
+                              <SelectItem key={v.id} value={v.id}>
+                                {v.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <p className="text-[10px] text-muted-foreground italic">
+                          Esta variable se reemplazará automáticamente al
+                          generar el certificado.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <Label>Texto Estático</Label>
+                        <Textarea
+                          className="min-h-[120px]"
+                          value={selectedCampo.valor}
+                          onChange={(e) =>
+                            handleTextChange(
+                              selectedId!,
+                              "valor",
+                              e.target.value,
+                            )
+                          }
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
                 <div className="space-y-4 pt-4">
                   <Label className="text-xs text-muted-foreground uppercase tracking-wider">
                     Estilo y Formato
                   </Label>
-                  <div className="space-y-2">
-                    <Label>Tamaño de Fuente</Label>
-                    <Input
-                      type="number"
-                      value={selectedCampo.fontSize}
-                      onChange={(e) =>
-                        handleTextChange(
-                          selectedId!,
-                          "fontSize",
-                          parseInt(e.target.value),
-                        )
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Color de Texto</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        type="color"
-                        className="w-12 p-1 h-10"
-                        value={selectedCampo.fill}
-                        onChange={(e) =>
-                          handleTextChange(selectedId!, "fill", e.target.value)
-                        }
-                      />
-                      <Input
-                        type="text"
-                        value={selectedCampo.fill}
-                        onChange={(e) =>
-                          handleTextChange(selectedId!, "fill", e.target.value)
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2 w-full">
-                    <Label>Alineación</Label>
-                    <Select
-                      value={selectedCampo.align}
-                      onValueChange={(val: any) =>
-                        handleTextChange(selectedId!, "align", val)
-                      }
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="left">Izquierda</SelectItem>
-                        <SelectItem value="center">Centro</SelectItem>
-                        <SelectItem value="right">Derecha</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  {selectedCampo.tipo !== "qr" && (
+                    <>
+                      <div className="space-y-2">
+                        <Label>Tamaño de Fuente</Label>
+                        <Input
+                          type="number"
+                          value={selectedCampo.fontSize}
+                          onChange={(e) =>
+                            handleTextChange(
+                              selectedId!,
+                              "fontSize",
+                              parseInt(e.target.value),
+                            )
+                          }
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Color de Texto</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            type="color"
+                            className="w-12 p-1 h-10"
+                            value={selectedCampo.fill}
+                            onChange={(e) =>
+                              handleTextChange(
+                                selectedId!,
+                                "fill",
+                                e.target.value,
+                              )
+                            }
+                          />
+                          <Input
+                            type="text"
+                            value={selectedCampo.fill}
+                            onChange={(e) =>
+                              handleTextChange(
+                                selectedId!,
+                                "fill",
+                                e.target.value,
+                              )
+                            }
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2 w-full">
+                        <Label>Alineación</Label>
+                        <Select
+                          value={selectedCampo.align}
+                          onValueChange={(val: any) =>
+                            handleTextChange(selectedId!, "align", val)
+                          }
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="left">Izquierda</SelectItem>
+                            <SelectItem value="center">Centro</SelectItem>
+                            <SelectItem value="right">Derecha</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </>
+                  )}
                   <div className="space-y-2">
                     <Label>Ancho de Caja (px)</Label>
                     <Input
@@ -532,22 +557,24 @@ export function DisenadorCertificados({
                       }
                     />
                   </div>
-                  {/* {!selectedCampo.variable && ( */}
-                  <div className="space-y-2">
-                    <Label>Valor de Prueba (Vista Previa)</Label>
-                    <Input
-                      value={selectedCampo.testValue || ""}
-                      placeholder="Texto para previsualizar"
-                      onChange={(e) =>
-                        handleTextChange(
-                          selectedId!,
-                          "testValue",
-                          e.target.value,
-                        )
-                      }
-                    />
-                  </div>
-                  {/* )} */}
+                  {selectedCampo.tipo !== "qr" && (
+                    <>
+                      <div className="space-y-2">
+                        <Label>Valor de Prueba (Vista Previa)</Label>
+                        <Input
+                          value={selectedCampo.testValue || ""}
+                          placeholder="Texto para previsualizar"
+                          onChange={(e) =>
+                            handleTextChange(
+                              selectedId!,
+                              "testValue",
+                              e.target.value,
+                            )
+                          }
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -666,16 +693,30 @@ export function DisenadorCertificados({
                             width={size}
                             height={size}
                             fill="#f3f4f6"
-                            stroke={selectedId === campo.id && !isPreview ? "#0070f3" : "#374151"}
-                            strokeWidth={selectedId === campo.id && !isPreview ? 2 : 1}
-                            dash={selectedId === campo.id && !isPreview ? undefined : [4, 4]}
+                            stroke={
+                              selectedId === campo.id && !isPreview
+                                ? "#0070f3"
+                                : "#374151"
+                            }
+                            strokeWidth={
+                              selectedId === campo.id && !isPreview ? 2 : 1
+                            }
+                            dash={
+                              selectedId === campo.id && !isPreview
+                                ? undefined
+                                : [4, 4]
+                            }
                             scaleX={campo.scaleX || 1}
                             scaleY={campo.scaleY || 1}
                             draggable={campo.draggable && !isPreview}
-                            onClick={() => !isPreview && setSelectedId(campo.id)}
+                            onClick={() =>
+                              !isPreview && setSelectedId(campo.id)
+                            }
                             onDragStart={() => setSelectedId(campo.id)}
                             onDragEnd={(e) => handleDragEnd(e, campo.id)}
-                            onTransformEnd={(e) => handleTransformEnd(e, campo.id)}
+                            onTransformEnd={(e) =>
+                              handleTransformEnd(e, campo.id)
+                            }
                           />
                           <Text
                             text="[ QR VERIFICACIÓN ]"
