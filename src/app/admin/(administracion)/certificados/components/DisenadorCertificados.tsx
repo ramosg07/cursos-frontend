@@ -7,6 +7,7 @@ import {
   Text,
   Image as KonvaImage,
   Transformer,
+  Rect,
 } from "react-konva";
 import useImage from "use-image";
 import { Button } from "@/components/ui/button";
@@ -187,6 +188,30 @@ export function DisenadorCertificados({
       align: "left",
       draggable: true,
       width: 300,
+    };
+    setConfig({
+      ...config,
+      campos: [...config.campos, nuevoCampo],
+    });
+    setSelectedId(nuevoId);
+  };
+
+  const handleAgregarQR = () => {
+    const nuevoId = `qr_${Date.now()}`;
+    const nuevoCampo: CertificadoCampo = {
+      id: nuevoId,
+      tipo: "qr",
+      valor: "QR_VERIFICACIÓN",
+      variable: "",
+      testValue: "",
+      x: 100,
+      y: 100,
+      fontSize: 12,
+      fontFamily: "Arial",
+      fill: "#000000",
+      align: "center",
+      draggable: true,
+      width: 120,
     };
     setConfig({
       ...config,
@@ -557,6 +582,14 @@ export function DisenadorCertificados({
                 <Plus className="h-4 w-4 mr-2" />
                 Agregar Texto
               </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={handleAgregarQR}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Agregar Código QR
+              </Button>
             </CardContent>
           </Card>
         </div>
@@ -622,6 +655,45 @@ export function DisenadorCertificados({
                     />
                   )}
                   {config.campos.map((campo) => {
+                    if (campo.tipo === "qr") {
+                      const size = campo.width || 120;
+                      return (
+                        <React.Fragment key={campo.id}>
+                          <Rect
+                            id={campo.id}
+                            x={campo.x}
+                            y={campo.y}
+                            width={size}
+                            height={size}
+                            fill="#f3f4f6"
+                            stroke={selectedId === campo.id && !isPreview ? "#0070f3" : "#374151"}
+                            strokeWidth={selectedId === campo.id && !isPreview ? 2 : 1}
+                            dash={selectedId === campo.id && !isPreview ? undefined : [4, 4]}
+                            scaleX={campo.scaleX || 1}
+                            scaleY={campo.scaleY || 1}
+                            draggable={campo.draggable && !isPreview}
+                            onClick={() => !isPreview && setSelectedId(campo.id)}
+                            onDragStart={() => setSelectedId(campo.id)}
+                            onDragEnd={(e) => handleDragEnd(e, campo.id)}
+                            onTransformEnd={(e) => handleTransformEnd(e, campo.id)}
+                          />
+                          <Text
+                            text="[ QR VERIFICACIÓN ]"
+                            x={campo.x}
+                            y={campo.y + size / 2 - 6}
+                            width={size}
+                            scaleX={campo.scaleX || 1}
+                            scaleY={campo.scaleY || 1}
+                            align="center"
+                            fontSize={10}
+                            fontFamily="monospace"
+                            fill="#374151"
+                            listening={false}
+                          />
+                        </React.Fragment>
+                      );
+                    }
+
                     const displayValue = isPreview
                       ? campo.testValue || campo.valor
                       : campo.valor;

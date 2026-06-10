@@ -15,7 +15,7 @@ export interface CertificadoConfig {
 
 export interface CertificadoCampo {
   id: string;
-  tipo: "texto";
+  tipo: "texto" | "qr";
   valor: string; // Etiqueta (Nombre, Curso, etc)
   x: number;
   y: number;
