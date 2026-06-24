@@ -350,68 +350,66 @@ export function DataTable<TData, TValue>({
         ))}
       </div>
       <Card className="hidden rounded-3xl border border-white/10 glass-card overflow-hidden md:block shadow-xl">
-        <div className="relative overflow-x-auto">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id} className="whitespace-nowrap">
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id} className="whitespace-normal">
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {/* Mostrar esqueleto */}
+            {isLoading || isFetching ? (
+              Array.from({ length: pagination.pageSize }).map((_, index) => (
+                <TableRow key={`loading-${index}`}>
+                  {Array.from({ length: columns.length }).map(
+                    (_, cellIndex) => (
+                      <TableCell key={`loading-cell-${cellIndex}`}>
+                        <div className="h-4 w-full animate-pulse rounded bg-muted"></div>
+                      </TableCell>
+                    ),
+                  )}
+                </TableRow>
+              ))
+            ) : table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => {
+                return (
+                  <TableRow key={`row-${row.id}`}>
+                    {row.getVisibleCells().map((cell) => {
+                      return (
+                        <TableCell key={`cell-${cell.id}`}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
                           )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {/* Mostrar esqueleto */}
-              {isLoading || isFetching ? (
-                Array.from({ length: pagination.pageSize }).map((_, index) => (
-                  <TableRow key={`loading-${index}`}>
-                    {Array.from({ length: columns.length }).map(
-                      (_, cellIndex) => (
-                        <TableCell key={`loading-cell-${cellIndex}`}>
-                          <div className="h-4 w-full animate-pulse rounded bg-muted"></div>
                         </TableCell>
-                      ),
-                    )}
+                      );
+                    })}
                   </TableRow>
-                ))
-              ) : table.getRowModel().rows.length ? (
-                table.getRowModel().rows.map((row) => {
-                  return (
-                    <TableRow key={`row-${row.id}`}>
-                      {row.getVisibleCells().map((cell) => {
-                        return (
-                          <TableCell key={`cell-${cell.id}`}>
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
-                          </TableCell>
-                        );
-                      })}
-                    </TableRow>
-                  );
-                })
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    <DataTableEmpty />
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                );
+              })
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  <DataTableEmpty />
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </Card>
       <DataTablePagination
         table={table}
