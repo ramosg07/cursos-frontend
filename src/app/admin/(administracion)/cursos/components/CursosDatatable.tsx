@@ -123,7 +123,7 @@ export function CursosDatatable() {
       header: () => (
         <div className="text-center normal-case text-sm">(Bs.) Estudiante</div>
       ),
-      cell: ({ row }) => Number(row.original.montoDocente).toFixed(2),
+      cell: ({ row }) => Number(row.original.montoEstudiante).toFixed(2),
       meta: { mobileTitle: "Monto Estudiante" },
     },
     {
@@ -131,7 +131,7 @@ export function CursosDatatable() {
       header: () => (
         <div className="text-center normal-case text-sm">(Bs.) Docente</div>
       ),
-      cell: ({ row }) => Number(row.original.montoEstudiante).toFixed(2),
+      cell: ({ row }) => Number(row.original.montoDocente).toFixed(2),
       meta: { mobileTitle: "Monto Docente" },
     },
     {
