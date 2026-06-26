@@ -15,6 +15,10 @@ export interface Inscripcion {
     codigoPersonal?: string | null;
     usuario: Usuario;
   };
+  docente: {
+    id: string;
+    usuario: Usuario;
+  };
   usuarioInscripcion: Usuario;
   usuarioDesinscripcion: Usuario;
 }

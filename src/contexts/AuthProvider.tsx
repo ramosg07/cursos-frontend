@@ -323,7 +323,7 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
       setUser(userData)
       guardarCookie('auth', access_token, { path: '/' })
-      router.replace('/admin/home')
+      await router.replace('/admin/home')
     } catch (error) {
       print('Error changing role:', error)
       throw error

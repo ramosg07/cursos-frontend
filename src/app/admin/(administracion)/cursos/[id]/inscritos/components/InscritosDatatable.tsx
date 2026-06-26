@@ -56,7 +56,7 @@ export function InscritosDatatable({ curso }: Props) {
     useState<boolean>(false);
   const [printModalOpen, setPrintModalOpen] = useState<boolean>(false);
   const [selectedInscripciones, setSelectedInscripciones] = useState<string[]>(
-    [],
+    []
   );
   const [estadoTab, setEstadoTab] = useState<string>("ACTIVO");
 
@@ -131,6 +131,27 @@ export function InscritosDatatable({ curso }: Props) {
       header: ({ column }) => (
         <SortableHeader column={column} title="Documento" />
       ),
+      cell: ({ row }) => {
+        const docente = row.original.docente;
+        const estudiante = row.original.estudiante;
+        if (estudiante) {
+          return (
+            <div className="flex gap-1">
+              <Badge variant={"success"}>Estudiante</Badge>
+              <p>{estudiante?.usuario?.persona?.nroDocumento}</p>
+            </div>
+          );
+        }
+        if (docente) {
+          return (
+            <div className="flex gap-1">
+              <Badge variant={"secondary"}>Docente</Badge>
+              <p>{docente?.usuario?.persona?.nroDocumento}</p>
+            </div>
+          );
+        }
+        return "—";
+      },
       meta: { mobileTitle: "Documento" },
     },
     {
@@ -143,12 +164,20 @@ export function InscritosDatatable({ curso }: Props) {
     {
       accessorKey: "estudiante.usuario.persona.nombres",
       header: ({ column }) => (
-        <SortableHeader column={column} title="Estudiante" />
+        <SortableHeader column={column} title="Estudiante / Docente" />
       ),
       cell: ({ row }) => {
-        const p = row.original.estudiante?.usuario?.persona;
-        if (!p) return "—";
-        return `${p.nombres} ${p.primerApellido} ${p.segundoApellido ?? ""}`;
+        const docente = row.original.docente;
+        const estudiante = row.original.estudiante;
+        if (estudiante) {
+          const p = estudiante?.usuario?.persona;
+          return `${p.nombres} ${p.primerApellido} ${p.segundoApellido ?? ""}`;
+        }
+        if (docente) {
+          const p = docente?.usuario?.persona;
+          return `${p.nombres} ${p.primerApellido} ${p.segundoApellido ?? ""}`;
+        }
+        return "—";
       },
       meta: { mobileTitle: "Estudiante" },
     },
@@ -185,7 +214,9 @@ export function InscritosDatatable({ curso }: Props) {
         if (!p && !p2) return "—";
         return row.original.estado === "ACTIVO"
           ? `${p.nombres} ${p.primerApellido ?? ""} ${p.segundoApellido ?? ""}`
-          : `${p2.nombres} ${p2.primerApellido ?? ""} ${p2.segundoApellido ?? ""}`;
+          : `${p2.nombres} ${p2.primerApellido ?? ""} ${
+              p2.segundoApellido ?? ""
+            }`;
       },
       meta: { mobileTitle: "Coordinador de curso" },
     },
@@ -329,7 +360,9 @@ export function InscritosDatatable({ curso }: Props) {
             const rowData = [
               p?.nroDocumento || "",
               ins.estudiante.codigoPersonal || "",
-              `"${p?.nombres || ""} ${p?.primerApellido || ""} ${p?.segundoApellido || ""}"`,
+              `"${p?.nombres || ""} ${p?.primerApellido || ""} ${
+                p?.segundoApellido || ""
+              }"`,
               `"Paralelo ${ins.paralelo?.nombre || ""}"`,
               dayjs(ins.fechaInscripcion).format("DD/MM/YYYY HH:mm"),
             ];
@@ -345,7 +378,10 @@ export function InscritosDatatable({ curso }: Props) {
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        const fileName = `inscritos_${curso.nombre.replace(/ /g, "_")}_${estadoTab.toLowerCase()}.csv`;
+        const fileName = `inscritos_${curso.nombre.replace(
+          / /g,
+          "_"
+        )}_${estadoTab.toLowerCase()}.csv`;
         link.setAttribute("download", fileName);
         document.body.appendChild(link);
         link.click();
@@ -449,8 +485,8 @@ export function InscritosDatatable({ curso }: Props) {
               disponibles === 0
                 ? "text-destructive border-destructive/30 bg-destructive/5"
                 : disponibles <= 2
-                  ? "text-yellow-600 border-yellow-400/30 bg-yellow-50 dark:bg-yellow-900/10"
-                  : "text-green-700 border-green-400/30 bg-green-50 dark:bg-green-900/10";
+                ? "text-yellow-600 border-yellow-400/30 bg-yellow-50 dark:bg-yellow-900/10"
+                : "text-green-700 border-green-400/30 bg-green-50 dark:bg-green-900/10";
 
             return (
               <div
@@ -473,8 +509,8 @@ export function InscritosDatatable({ curso }: Props) {
                       disponibles === 0
                         ? "bg-destructive"
                         : disponibles <= 2
-                          ? "bg-yellow-500"
-                          : "bg-green-500"
+                        ? "bg-yellow-500"
+                        : "bg-green-500"
                     }`}
                     style={{ width: `${Math.min(porcentajeOcupado, 100)}%` }}
                   />
@@ -501,7 +537,7 @@ export function InscritosDatatable({ curso }: Props) {
                 >
                   {curso.paralelos.reduce(
                     (acc, p) => acc + (p.inscritos ?? 0),
-                    0,
+                    0
                   )}
                 </Badge>
               </TabsTrigger>
