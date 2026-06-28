@@ -45,7 +45,7 @@ export function Consulta({ inscribir }: Props) {
   const [loadingConsulta, setLoadingConsulta] = useState(false);
   const [busquedaRealizada, setBusquedaRealizada] = useState(false);
   const [estudianteConsulta, setEstudianteConsulta] = useState<any | null>(
-    null,
+    null
   );
   const [printingReport, setPrintingReport] = useState(false);
 
@@ -67,7 +67,12 @@ export function Consulta({ inscribir }: Props) {
         const filas = response.data.datos;
         setInscripcionesConsulta(filas);
         if (filas.length > 0) {
-          setEstudianteConsulta(filas[0].estudiante);
+          if (filas[0].estudiante) {
+            setEstudianteConsulta(filas[0].estudiante);
+          }
+          if (filas[0].docente) {
+            setEstudianteConsulta(filas[0].estudiante);
+          }
         } else {
           // Si no hay inscripciones, intentar buscar al estudiante para mostrar su info al menos
           try {
@@ -85,7 +90,7 @@ export function Consulta({ inscribir }: Props) {
       }
     } catch (error: any) {
       toast.error(
-        error?.response?.data?.mensaje || "Error al consultar inscripciones",
+        error?.response?.data?.mensaje || "Error al consultar inscripciones"
       );
     } finally {
       setLoadingConsulta(false);
@@ -270,13 +275,13 @@ export function Consulta({ inscribir }: Props) {
                             <div className="flex flex-col items-center">
                               <span className="font-bold text-sm">
                                 {new Date(
-                                  ins.fechaInscripcion,
+                                  ins.fechaInscripcion
                                 ).toLocaleDateString()}
                               </span>
                               <span className="text-[10px] text-muted-foreground">
                                 <Calendar className="h-3 w-3 inline mr-1" />
                                 {new Date(
-                                  ins.fechaInscripcion,
+                                  ins.fechaInscripcion
                                 ).toLocaleTimeString([], {
                                   hour: "2-digit",
                                   minute: "2-digit",
@@ -313,7 +318,7 @@ export function Consulta({ inscribir }: Props) {
                       {inscripcionesConsulta
                         .reduce(
                           (acc, curr) => acc + Number(curr.montoPagado),
-                          0,
+                          0
                         )
                         .toFixed(2)}
                     </span>
