@@ -139,8 +139,8 @@ export const DataTableFilter = ({
                     <Field className="w-full bg-background">
                       <Popover
                         key={"popoverComponent"}
-                        open={openMultiSelect}
-                        onOpenChange={setOpenMultiSelect}
+                        open={openSelect}
+                        onOpenChange={setOpenSelect}
                       >
                         <PopoverTrigger asChild>
                           <Button
@@ -179,9 +179,9 @@ export const DataTableFilter = ({
                                   <CommandItem
                                     key={dataSelect.code}
                                     {...field}
-                                    value={dataSelect.code}
-                                    onSelect={(currentValue) => {
-                                      form.setValue(filter.name, currentValue);
+                                    value={dataSelect.description}
+                                    onSelect={() => {
+                                      form.setValue(filter.name, dataSelect.code);
                                       setOpenSelect(false);
                                     }}
                                   >
