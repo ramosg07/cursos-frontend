@@ -19,7 +19,7 @@ export const DataTableFilter = ({
   dataTableFilter,
   onSearchField,
 }: FilterDataTableType) => {
-  let filterValues: any = {};
+  const filterValues: any = {};
   dataTableFilter.forEach((filter) => {
     Object.assign(filterValues, { [filter.name]: filter.value });
   });

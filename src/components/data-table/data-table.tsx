@@ -84,6 +84,7 @@ export function DataTable<TData, TValue>({
     pageSize: 10,
   });
   const [appliedFilters, setAppliedFilters] = useState<any>({});
+  const appliedFiltersRef = useRef<Record<string, any>>({});
   const [showFilters, setShowFilters] = useState(false);
 
   const toggleFilters = () => {
@@ -162,6 +163,22 @@ export function DataTable<TData, TValue>({
   });
 
   const lastSelectionRef = useRef<string>("");
+
+  const areFiltersEqual = (
+    firstFilters: Record<string, any>,
+    secondFilters: Record<string, any>,
+  ) => {
+    const firstKeys = Object.keys(firstFilters);
+    const secondKeys = Object.keys(secondFilters);
+
+    if (firstKeys.length !== secondKeys.length) return false;
+
+    return firstKeys.every((key) => firstFilters[key] === secondFilters[key]);
+  };
+
+  useEffect(() => {
+    appliedFiltersRef.current = appliedFilters;
+  }, [appliedFilters]);
 
   useEffect(() => {
     const selectionString = JSON.stringify(rowSelection);
@@ -289,12 +306,23 @@ export function DataTable<TData, TValue>({
   }
 
   const handleFilterUpdate = (filters: any) => {
-    setAppliedFilters({
-      ...appliedFilters,
+    const currentFilters = appliedFiltersRef.current;
+    const nextFilters = {
+      ...currentFilters,
       ...filters,
-    });
+    };
 
-    table.setPageIndex(0);
+    if (areFiltersEqual(currentFilters, nextFilters)) {
+      return;
+    }
+
+    appliedFiltersRef.current = nextFilters;
+    setAppliedFilters(nextFilters);
+    setPagination((currentPagination) => {
+      if (currentPagination.pageIndex === 0) return currentPagination;
+
+      return { ...currentPagination, pageIndex: 0 };
+    });
   };
 
   if (isLoading && !data) {
