@@ -27,4 +27,3 @@ export interface CrearEstudianteDto {
   codigoPersonal?: string | null;
 }
 
-export interface ActualizarEstudianteDto extends Partial<CrearEstudianteDto> {}
