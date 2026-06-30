@@ -108,12 +108,15 @@ export function DisenadorCertificados({
       transformerRef.current.getLayer().batchDraw();
     }
   }, [selectedId]);
+
   const getFullFondoUrl = () => {
     if (!fondoUrl) return "";
     if (fondoUrl.startsWith("http")) return fondoUrl;
-    const baseUrl = Constants.baseUrl.replace("/api", "");
-    const cleanFondoUrl = fondoUrl.startsWith("/") ? fondoUrl : `/${fondoUrl}`;
-    return `${baseUrl}${cleanFondoUrl}`;
+
+    const apiUrl = new URL(Constants.baseUrl);
+    const url = `${apiUrl.origin}${fondoUrl.startsWith("/") ? fondoUrl : `/${fondoUrl}`}`;
+    console.warn({ apiUrl, url });
+    return url;
   };
 
   const [fondo] = useImage(getFullFondoUrl(), "anonymous");
