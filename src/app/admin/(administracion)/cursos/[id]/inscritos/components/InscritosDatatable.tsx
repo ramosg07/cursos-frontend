@@ -18,6 +18,7 @@ import {
   BadgeDollarSign,
   UserMinus,
   Download,
+  History,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -34,6 +35,7 @@ import { toast } from "sonner";
 import { AgregarInscripcionModal } from "./AgregarInscripcionModal";
 import { BulkInscripcionModal } from "./BulkInscripcionModal";
 import { PrintCertificatesModal } from "./PrintCertificatesModal";
+import { HistorialImpresionesModal } from "./HistorialImpresionesModal";
 import Link from "next/link";
 import dayjs from "dayjs";
 import { Curso } from "../../../types";
@@ -59,6 +61,10 @@ export function InscritosDatatable({ curso }: Props) {
     []
   );
   const [estadoTab, setEstadoTab] = useState<string>("ACTIVO");
+  const [historialModalInscripcion, setHistorialModalInscripcion] = useState<{
+    id: string;
+    nombre: string;
+  } | null>(null);
 
   // Función para manejar el cambio de selección en el DataTable
   const handleSelectedItemsChange = useCallback((items: Inscripcion[]) => {
@@ -238,6 +244,26 @@ export function InscritosDatatable({ curso }: Props) {
                   onClick={() => handleOpenPrintModal([row.original.id])}
                 >
                   <Printer className="h-4 w-4" />
+                </Button>
+              )}
+              {idPlantillaCertificado && esCertificador && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  title="Historial de impresiones"
+                  onClick={() => {
+                    const est = row.original.estudiante?.usuario?.persona;
+                    const doc = row.original.docente?.usuario?.persona;
+                    const p = est || doc;
+                    setHistorialModalInscripcion({
+                      id: row.original.id,
+                      nombre: p
+                        ? `${p.nombres} ${p.primerApellido} ${p.segundoApellido ?? ""}`.trim()
+                        : "—",
+                    });
+                  }}
+                >
+                  <History className="h-4 w-4 text-muted-foreground" />
                 </Button>
               )}
 
@@ -638,6 +664,14 @@ export function InscritosDatatable({ curso }: Props) {
           selectedInscripciones={selectedInscripciones}
           isOpen={printModalOpen}
           onClose={() => setPrintModalOpen(false)}
+        />
+      )}
+      {historialModalInscripcion && (
+        <HistorialImpresionesModal
+          idInscripcion={historialModalInscripcion.id}
+          nombreEstudiante={historialModalInscripcion.nombre}
+          isOpen={!!historialModalInscripcion}
+          onClose={() => setHistorialModalInscripcion(null)}
         />
       )}
     </div>
