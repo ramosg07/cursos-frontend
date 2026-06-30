@@ -26,5 +26,3 @@ export interface CrearDocenteDto {
   fechaNacimiento?: string | null;
   codigoPersonal?: string | null;
 }
-
-export interface ActualizarDocenteDto extends Partial<CrearDocenteDto> { }

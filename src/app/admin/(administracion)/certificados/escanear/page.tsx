@@ -68,7 +68,9 @@ export default function LectorQRPage() {
         if (scannerRef.current) {
           try {
             await scannerRef.current.stop();
-          } catch (e) {}
+          } catch (e) {
+            console.error(e);
+          }
         }
 
         const html5QrCode = new Html5Qrcode("reader");
@@ -79,10 +81,10 @@ export default function LectorQRPage() {
           {
             fps: 15,
             qrbox: (width, height) => {
-              console.log({ width, height });
               const size = Math.min(width, height) * 0.7;
               return { width: size, height: size };
             },
+            aspectRatio: 1,
           },
           (decodedText) => {
             // Éxito: extraemos el código del certificado
@@ -99,6 +101,7 @@ export default function LectorQRPage() {
           },
           (errorMessage) => {
             // Silencioso - escaneando...
+            console.log(errorMessage);
           }
         );
         setScanning(true);

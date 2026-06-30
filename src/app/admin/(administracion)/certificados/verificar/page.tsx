@@ -144,7 +144,7 @@ function VerificarCertificadoContent() {
       <div className="container max-w-lg mx-auto py-12 px-4">
         <Card className="border-destructive/40 shadow-2xl bg-destructive/5 overflow-hidden animate-shake">
           <div className="h-2 bg-destructive" />
-          <CardHeader className="text-center pb-2">
+          <CardHeader className="text-center">
             <div className="mx-auto bg-destructive/10 p-3 rounded-full w-fit mb-4">
               <AlertTriangle className="h-10 w-10 text-destructive" />
             </div>
@@ -155,16 +155,16 @@ function VerificarCertificadoContent() {
               Certificado No Válido o Falsificado
             </CardDescription>
           </CardHeader>
-          <CardContent className="text-center py-4 space-y-4">
+          <CardContent className="text-center space-y-3">
             <p className="text-sm text-muted-foreground leading-relaxed">
               El código de verificación proporcionado no coincide con ningún
-              certificado emitido en nuestra base de datos.
+              certificado emitido en nuestro sistema.
             </p>
             <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3 text-xs font-mono text-destructive break-all">
               Código: {codigo || "Ninguno"}
             </div>
           </CardContent>
-          <CardFooter className="flex justify-center border-t border-destructive/10 bg-destructive/5 pt-4">
+          <CardFooter className="flex justify-center border-t border-destructive/10 bg-destructive/5 py-4">
             <Button
               variant="outline"
               onClick={() => router.push("/admin/certificados")}
