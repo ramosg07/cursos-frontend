@@ -55,12 +55,13 @@ export function HistorialImpresionesModal({
     const fetchHistorial = async () => {
       setLoading(true);
       try {
-        const response = await sessionRequest<HistorialData>({
+        const response = await sessionRequest<any>({
           url: `/certificados/impresiones/${idInscripcion}`,
           method: "GET",
         });
-        if (response?.data) {
-          setData(response.data);
+        console.warn({ response: response?.data?.datos });
+        if (response?.data?.datos) {
+          setData(response.data?.datos);
         }
       } catch (error) {
         print("Error al cargar historial de impresiones", error);
@@ -75,7 +76,13 @@ export function HistorialImpresionesModal({
 
   // Agrupar lotes masivos para mostrar agrupador
   const lotesMasivos = data
-    ? [...new Set(data.impresiones.filter((i) => i.idLoteMasivo).map((i) => i.idLoteMasivo!))]
+    ? [
+        ...new Set(
+          data.impresiones
+            .filter((i) => i.idLoteMasivo)
+            .map((i) => i.idLoteMasivo!),
+        ),
+      ]
     : [];
 
   return (

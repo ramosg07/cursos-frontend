@@ -54,9 +54,18 @@ export function PrintCertificatesModal({
         toast.success("Certificados generados correctamente");
         onClose();
       }
-    } catch (error) {
-      print("Error al generar certificados", error);
-      toast.error("Error al generar certificados");
+    } catch (error: any) {
+      if (error instanceof Blob) {
+        const text = await error.text();
+        const json = JSON.parse(text);
+        toast.error(
+          Array.isArray(json.message)
+            ? json.message[0]
+            : json.message || "Error al inscribir",
+        );
+      } else {
+        toast.error(error?.message || "Error al inscribir");
+      }
     } finally {
       setIsPrinting(false);
     }
