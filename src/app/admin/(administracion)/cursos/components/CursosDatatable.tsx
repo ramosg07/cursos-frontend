@@ -164,7 +164,7 @@ export function CursosDatatable() {
               </Button>
             </Link>
           )}
-          {permissions.update && (
+          {permissions.update && row.original.estado === "ACTIVO" && (
             <Button
               title="Editar"
               variant="outline"
@@ -174,7 +174,7 @@ export function CursosDatatable() {
               <Edit className="h-4 w-4" />
             </Button>
           )}
-          {row.original.estado === "ACTIVO" && coordinadorGeneral && (
+          {permissions.update && coordinadorGeneral && (
             <Switch
               id={"switch-curso-" + row.original.id}
               defaultChecked={row.original.estado === "ACTIVO"}
