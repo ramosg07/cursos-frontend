@@ -55,5 +55,30 @@ export const usePrefasApi = () => {
       });
       return res?.data.datos;
     },
+
+    // --- PRODUCTOS ---
+    getProductos: async () => {
+      const res = await api.sessionRequest<any>({
+        url: "/prefas/productos",
+        method: "GET",
+      });
+      return res?.data.datos;
+    },
+    createProducto: async (data: Partial<ProductoPrefa>) => {
+      const res = await api.sessionRequest<any>({
+        url: "/prefas/productos",
+        method: "POST",
+        data,
+      });
+      return res?.data.datos;
+    },
+    updateProducto: async (id: string, data: Partial<ProductoPrefa>) => {
+      const res = await api.sessionRequest<any>({
+        url: `/prefas/productos/${id}`,
+        method: "PATCH",
+        data,
+      });
+      return res?.data.datos;
+    },
   };
 };
