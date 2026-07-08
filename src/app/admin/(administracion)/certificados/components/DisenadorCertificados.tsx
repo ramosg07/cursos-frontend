@@ -52,12 +52,11 @@ const LETTER_SIZE = {
 const CAMPOS_VARIABLES = [
   {
     id: "nombre",
-    label: "Nombre Completo (Estudiante)",
+    label: "Nombre Completo (Inscrito)",
     testValue: "JUAN PEREZ PEREZ",
   },
-  { id: "nombres", label: "Nombres", testValue: "JUAN" },
-  { id: "primer_apellido", label: "Primer Apellido", testValue: "PEREZ" },
-  { id: "segundo_apellido", label: "Segundo Apellido", testValue: "PEREZ" },
+  { id: "nombres", label: "Nombres (Inscrito)", testValue: "JUAN" },
+  { id: "apellidos", label: "Apellidos (Inscrito)", testValue: "PEREZ PEREZ" },
   { id: "ci", label: "Nro. Documento", testValue: "1234567 LP" },
   { id: "matricula", label: "Matrícula/Código", testValue: "2024-001" },
   { id: "curso", label: "Nombre del Curso", testValue: "DESARROLLO WEB" },
