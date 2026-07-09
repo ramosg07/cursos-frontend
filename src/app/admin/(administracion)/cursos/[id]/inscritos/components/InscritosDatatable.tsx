@@ -58,7 +58,7 @@ export function InscritosDatatable({ curso }: Props) {
     useState<boolean>(false);
   const [printModalOpen, setPrintModalOpen] = useState<boolean>(false);
   const [selectedInscripciones, setSelectedInscripciones] = useState<string[]>(
-    []
+    [],
   );
   const [estadoTab, setEstadoTab] = useState<string>("ACTIVO");
   const [historialModalInscripcion, setHistorialModalInscripcion] = useState<{
@@ -373,6 +373,7 @@ export function InscritosDatatable({ curso }: Props) {
         // Cabeceras: Documento, Nombres, Apellidos, Paralelo, Fecha, Monto, Estado
         const headers = [
           "Nro. Documento",
+          "Tipo",
           "Matricula",
           "Estudiante",
           "Paralelo",
@@ -382,16 +383,19 @@ export function InscritosDatatable({ curso }: Props) {
         const csvRows = [
           headers.join(","),
           ...inscritos.map((ins) => {
-            const p = ins.estudiante?.usuario?.persona;
+            const tipoPersona = ins.estudiante ? "ESTUDIANTE" : "DOCENTE";
+            const participante = ins.estudiante ?? ins.docente;
+            const p = participante?.usuario?.persona;
+
             const rowData = [
               p?.nroDocumento || "",
-              ins.estudiante.codigoPersonal || "",
-              `"${p?.nombres || ""} ${p?.primerApellido || ""} ${
-                p?.segundoApellido || ""
-              }"`,
+              tipoPersona,
+              participante?.codigoPersonal || "",
+              `"${p?.nombres || ""} ${p?.primerApellido || ""} ${p?.segundoApellido || ""}"`,
               `"Paralelo ${ins.paralelo?.nombre || ""}"`,
               dayjs(ins.fechaInscripcion).format("DD/MM/YYYY HH:mm"),
             ];
+
             return rowData.join(",");
           }),
         ];
@@ -406,7 +410,7 @@ export function InscritosDatatable({ curso }: Props) {
         link.href = url;
         const fileName = `inscritos_${curso.nombre.replace(
           / /g,
-          "_"
+          "_",
         )}_${estadoTab.toLowerCase()}.csv`;
         link.setAttribute("download", fileName);
         document.body.appendChild(link);
@@ -511,8 +515,8 @@ export function InscritosDatatable({ curso }: Props) {
               disponibles === 0
                 ? "text-destructive border-destructive/30 bg-destructive/5"
                 : disponibles <= 2
-                ? "text-yellow-600 border-yellow-400/30 bg-yellow-50 dark:bg-yellow-900/10"
-                : "text-green-700 border-green-400/30 bg-green-50 dark:bg-green-900/10";
+                  ? "text-yellow-600 border-yellow-400/30 bg-yellow-50 dark:bg-yellow-900/10"
+                  : "text-green-700 border-green-400/30 bg-green-50 dark:bg-green-900/10";
 
             return (
               <div
@@ -535,8 +539,8 @@ export function InscritosDatatable({ curso }: Props) {
                       disponibles === 0
                         ? "bg-destructive"
                         : disponibles <= 2
-                        ? "bg-yellow-500"
-                        : "bg-green-500"
+                          ? "bg-yellow-500"
+                          : "bg-green-500"
                     }`}
                     style={{ width: `${Math.min(porcentajeOcupado, 100)}%` }}
                   />
@@ -563,7 +567,7 @@ export function InscritosDatatable({ curso }: Props) {
                 >
                   {curso.paralelos.reduce(
                     (acc, p) => acc + (p.inscritos ?? 0),
-                    0
+                    0,
                   )}
                 </Badge>
               </TabsTrigger>
