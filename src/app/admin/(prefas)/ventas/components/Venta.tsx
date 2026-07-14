@@ -66,9 +66,8 @@ export function Venta() {
   const [exito, setExito] = useState(false);
 
   // IDs de las compras creadas (para el recibo)
-  const [idsComprasCreadas, setIdsComprasCreadas] = useState<string[]>([]);
+  const [idVenta, setIdVenta] = useState<string | null>(null);
   const [generandoRecibo, setGenerandoRecibo] = useState(false);
-
 
   // Bandeja de Ventas (Carrito)
   const [carrito, setCarrito] = useState<
@@ -85,23 +84,16 @@ export function Venta() {
     setLoadingPostulante(true);
     setPostulante(null);
     try {
-      // const response = await sessionRequest<{
-      //   finalizado: boolean;
-      //   datos: PostulanteBusqueda;
-      // }>({
-      //   url: `/postulantes/${nroDocumento}/buscar`,
-      //   method: "GET",
-      // });
-      // if (response && response.data.datos) {
-      //   setPostulante(response.data.datos);
-      // }
-      setPostulante({
-        id: "123",
-        nroDocumento: nroDocumento,
-        nombres: "Juan",
-        primerApellido: "Pérez",
-        segundoApellido: "Gómez",
+      const response = await sessionRequest<{
+        finalizado: boolean;
+        datos: PostulanteBusqueda;
+      }>({
+        url: `prefas/postulantes/${nroDocumento}/buscar`,
+        method: "GET",
       });
+      if (response && response.data.datos) {
+        setPostulante(response.data.datos);
+      }
     } catch (error: any) {
       toast.error(error?.message || "Postulante no encontrado");
     } finally {
@@ -117,47 +109,21 @@ export function Venta() {
     setCantidad(1);
     setProductos([]);
     setExito(false);
-    setIdsComprasCreadas([]);
+    setIdVenta(null);
   };
 
   const fetchProductos = useCallback(
     async (filtro: string, limite = 20) => {
       setLoadingProductos(true);
       try {
-        // const response = await sessionRequest<any>({
-        //   url: "/productos",
-        //   method: "GET",
-        //   params: { filtro: filtro ? filtro : undefined, limite },
-        // });
-        // if (response && response.data?.datos?.filas) {
-        //   setProductos(response.data.datos.filas);
-        // }
-        setProductos([
-          {
-            id: "1",
-            tipo: "PRODUCTO",
-            nombre: "Producto 1",
-            descripcion: "Descripción del producto 1",
-            precio: 1000,
-            stock: 10,
-          },
-          {
-            id: "2",
-            tipo: "PRODUCTO",
-            nombre: "Producto 2",
-            descripcion: "Descripción del producto 2",
-            precio: 100,
-            stock: 5,
-          },
-          {
-            id: "3",
-            tipo: "CURSO",
-            nombre: "Curso 1",
-            descripcion: "Descripción del curso 1",
-            precio: 500,
-            stock: 15,
-          },
-        ]);
+        const response = await sessionRequest<any>({
+          url: "/prefas/productos",
+          method: "GET",
+          params: { filtro: filtro ? filtro : undefined, limite },
+        });
+        if (response && response.data?.datos?.filas) {
+          setProductos(response.data.datos.filas);
+        }
       } catch (error) {
         print("Error fetching productos", error);
       } finally {
@@ -232,11 +198,14 @@ export function Venta() {
       const response = await sessionRequest<{
         datos: { idProducto: string; mensaje: string }[];
       }>({
-        url: "/inscripciones/multiple/validar",
+        url: "/ventas/multiple/validar",
         method: "post",
         data: {
           idPostulante: postulante.id,
-          idsProductos: carrito.map((item) => item.producto.id),
+          detalles: carrito.map((item) => ({
+            idProducto: item.producto.id,
+            cantidad: item.cantidad,
+          })),
         },
       });
 
@@ -277,14 +246,16 @@ export function Venta() {
         method: "post",
         data: {
           idPostulante: postulante.id,
-          idsProductos: carrito.map((item) => item.producto.id),
+          detalles: carrito.map((item) => ({
+            idProducto: item.producto.id,
+            cantidad: item.cantidad,
+          })),
         },
       });
 
       // Extraer IDs de las inscripciones creadas para el recibo
-      const compras = response?.data?.datos || [];
-      const ids = compras.map((compra) => compra.id);
-      setIdsComprasCreadas(ids);
+      const venta: any = response?.data?.datos || [];
+      setIdVenta(venta.id);
 
       toast.success("Comprado correctamente todos los productos");
       setExito(true);
@@ -334,14 +305,14 @@ export function Venta() {
   };
 
   const downloadReceipt = async () => {
-    if (idsComprasCreadas.length === 0) return;
+    if (!idVenta) return;
     setGenerandoRecibo(true);
     try {
       const response = await sessionRequest<Blob>({
         url: "/ventas/multiple/recibo",
         method: "post",
         data: {
-          idsInscripcion: idsComprasCreadas,
+          idVenta: idVenta,
         },
         responseType: "blob",
       });

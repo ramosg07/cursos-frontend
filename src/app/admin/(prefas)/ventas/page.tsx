@@ -43,7 +43,9 @@ export default function NuevaVentaPage() {
           <Venta />
         </TabsContent>
         <TabsContent value="consulta" className="space-y-8 mt-0 border-0 p-0">
-          <Consulta />
+          <Consulta  comprar={(data: any) => {
+            setActiveTab("registro");
+          }}/>
         </TabsContent>
       </Tabs>
     </div>
