@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
-import { Users, DollarSign, Loader2 } from "lucide-react";
+import { Users, DollarSign, Loader2, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 import { print } from "@/lib/print";
 import {
@@ -15,40 +15,64 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UsuarioCoordinador } from "@/app/admin/(administracion)/cursos/types";
 import { DatePickerSimple } from "@/components/DatePickerSimple";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 
+// ─── Tipos ────────────────────────────────────────────────────────────────────
+
 interface RecaudacionData {
   total: number;
   cantidad: number;
 }
 
-export default function Dashboard() {
+type VendedorPrefa = {
+  id: string;
+  usuario: string;
+  persona: {
+    nombres: string;
+    primerApellido: string;
+    segundoApellido?: string;
+  };
+};
+
+// ─── Sub-componente de filtros + KPIs ─────────────────────────────────────────
+
+function RecaudacionPanel({
+  titulo,
+  subtitulo,
+  labelUsuario,
+  usuarios,
+  endpoint,
+  kpiLabel,
+  kpiIcon,
+}: {
+  titulo: string;
+  subtitulo: string;
+  labelUsuario: string;
+  usuarios: Array<{ id: string; label: string }>;
+  endpoint: string;
+  kpiLabel: string;
+  kpiIcon: React.ReactNode;
+}) {
   const { sessionRequest } = useAuth();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<RecaudacionData | null>(null);
 
   const [filtros, setFiltros] = useState({
-    fechaInicio: dayjs.utc().format("YYYY-MM-DD") || "",
-    fechaFin: dayjs.utc().format("YYYY-MM-DD") || "",
+    fechaInicio: dayjs.utc().format("YYYY-MM-DD"),
+    fechaFin: dayjs.utc().format("YYYY-MM-DD"),
     idUsuario: "todos",
   });
 
-  const [coordinadores, setCoordinadores] = useState<UsuarioCoordinador[]>([]);
-
-  const user = useAuth().user;
-  const rolActivo = user?.roles.find((rol) => user.idRol === rol.idRol);
-  const esCoordinadorGeneral = rolActivo?.rol === "COORDINADOR GENERAL";
-  const esAdministrador = rolActivo?.rol === "ADMINISTRADOR";
-
-  const fetchRecaudacion = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
       const response = await sessionRequest<RecaudacionData>({
-        url: "/dashboard/recaudacion",
+        url: endpoint,
         method: "get",
         params: {
           fechaInicio: dayjs(filtros.fechaInicio).startOf("day").toISOString(),
@@ -68,46 +92,20 @@ export default function Dashboard() {
     }
   };
 
-  const fetchCoordinadores = async () => {
-    try {
-      const response = await sessionRequest<{
-        finalizado: boolean;
-        datos: { filas: UsuarioCoordinador[]; total: number };
-      }>({
-        url: "/usuarios/coordinadores",
-        method: "get",
-      });
-      if (response) {
-        setCoordinadores(response.data.datos.filas);
-      }
-    } catch (error) {
-      print("Error fetching coordinators", error);
-    }
-  };
-
+  // Cargar al montar
   useEffect(() => {
-    if (esCoordinadorGeneral || esAdministrador) {
-      fetchRecaudacion();
-      fetchCoordinadores();
-    }
+    fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!esCoordinadorGeneral && !esAdministrador) {
-    return <></>;
-  }
-
   return (
-    <div className="space-y-8 animate-fade-in pt-10">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-3xl font-extrabold tracking-tight text-gradient">
-          Dashboard de Recaudación
-        </h2>
-        <p className="text-muted-foreground font-medium">
-          Visualiza el resumen de ingresos por inscripciones en tiempo real.
-        </p>
+    <div className="space-y-6">
+      <div className="flex flex-col gap-0.5">
+        <p className="font-semibold text-lg">{titulo}</p>
+        <p className="text-muted-foreground text-sm">{subtitulo}</p>
       </div>
 
+      {/* Filtros */}
       <div className="glass p-6 rounded-2xl border-white/10 shadow-lg flex flex-wrap items-end gap-6">
         <Field className="w-full md:w-56">
           <DatePickerSimple
@@ -125,7 +123,7 @@ export default function Dashboard() {
         </Field>
         <Field className="w-full md:w-72">
           <FieldLabel className="tracking-wider mb-1 ml-1">
-            Coordinador de Curso
+            {labelUsuario}
           </FieldLabel>
           <Select
             value={filtros.idUsuario}
@@ -134,21 +132,20 @@ export default function Dashboard() {
             }
           >
             <SelectTrigger className="h-11 bg-background/50 rounded-xl border-white/10 focus:ring-primary/20 transition-all">
-              <SelectValue placeholder="Seleccione un coordinador" />
+              <SelectValue placeholder={`Seleccione un ${labelUsuario.toLowerCase()}`} />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-white/10 shadow-xl">
-              <SelectItem value="todos">Todos los coordinadores</SelectItem>
-              {coordinadores.map((c) => (
-                <SelectItem key={c.id} value={c.id}>
-                  {c.persona.nombres} {c.persona.primerApellido}{" "}
-                  {c.persona.segundoApellido || ""}
+              <SelectItem value="todos">Todos</SelectItem>
+              {usuarios.map((u) => (
+                <SelectItem key={u.id} value={u.id}>
+                  {u.label}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </Field>
         <Button
-          onClick={fetchRecaudacion}
+          onClick={fetchData}
           disabled={loading}
           className="h-11 px-8 rounded-xl bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-95"
         >
@@ -157,6 +154,7 @@ export default function Dashboard() {
         </Button>
       </div>
 
+      {/* KPIs */}
       <div className="grid gap-6 md:grid-cols-2">
         <Card className="relative overflow-hidden border-none glass-card group p-4 pb-6">
           <div className="absolute top-20 right-15 w-80 h-80 bg-primary/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-primary/20 transition-colors" />
@@ -177,14 +175,15 @@ export default function Dashboard() {
             </p>
           </CardContent>
         </Card>
+
         <Card className="relative overflow-hidden border-none glass-card group p-4 pb-6">
           <div className="absolute top-20 right-15 w-80 h-80 bg-primary/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-primary/20 transition-colors" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
-              Inscripciones
+              {kpiLabel}
             </CardTitle>
             <div className="p-2 bg-primary/10 rounded-lg text-primary">
-              <Users className="h-5 w-5" />
+              {kpiIcon}
             </div>
           </CardHeader>
           <CardContent>
@@ -192,33 +191,133 @@ export default function Dashboard() {
               {loading ? "..." : data?.cantidad || 0}
             </div>
             <p className="text-xs text-muted-foreground mt-1 font-medium italic">
-              Número total de estudiantes inscritos
+              Número total en el rango seleccionado
             </p>
           </CardContent>
         </Card>
       </div>
+    </div>
+  );
+}
 
-      {/* <Card className="border-none glass group overflow-hidden py-6">
-        <CardHeader className="border-b border-white/5 bg-white/5">
-          <div className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg font-bold">Resumen Visual</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent className="p-8">
-          <div className="h-[250px] flex items-center justify-center border-2 border-dashed border-white/10 rounded-2xl bg-white/5 group-hover:bg-white/10 transition-colors">
-            <div className="flex flex-col items-center text-muted-foreground/60">
-              <BarChart3 className="h-10 w-10 mb-3 animate-float" />
-              <span className="font-semibold tracking-wide uppercase text-xs">
-                Próximamente
-              </span>
-              <span className="text-sm mt-1">
-                Gráficos detallados de ingresos
-              </span>
-            </div>
-          </div>
-        </CardContent>
-      </Card> */}
+// ─── Dashboard principal ──────────────────────────────────────────────────────
+
+export default function Dashboard() {
+  const { sessionRequest } = useAuth();
+
+  const [coordinadores, setCoordinadores] = useState<
+    Array<{ id: string; label: string }>
+  >([]);
+  const [vendedoresPrefas, setVendedoresPrefas] = useState<
+    Array<{ id: string; label: string }>
+  >([]);
+
+  const user = useAuth().user;
+  const rolActivo = user?.roles.find((rol) => user.idRol === rol.idRol);
+  const esCoordinadorGeneral = rolActivo?.rol === "COORDINADOR GENERAL";
+  const esAdministrador = rolActivo?.rol === "ADMINISTRADOR";
+
+  const nombreCompleto = (p: {
+    nombres: string;
+    primerApellido: string;
+    segundoApellido?: string;
+  }) =>
+    [p.nombres, p.primerApellido, p.segundoApellido]
+      .filter(Boolean)
+      .join(" ");
+
+  useEffect(() => {
+    if (!esCoordinadorGeneral && !esAdministrador) return;
+
+    // Cargar coordinadores para la pestaña de inscripciones
+    sessionRequest<{
+      finalizado: boolean;
+      datos: { filas: UsuarioCoordinador[]; total: number };
+    }>({
+      url: "/usuarios/coordinadores",
+      method: "get",
+    })
+      .then((res) => {
+        if (res) {
+          setCoordinadores(
+            res.data.datos.filas.map((c) => ({
+              id: c.id,
+              label: nombreCompleto(c.persona),
+            }))
+          );
+        }
+      })
+      .catch((err) => print("Error fetching coordinators", err));
+
+    // Cargar vendedores prefas para la pestaña de ventas
+    sessionRequest<{ finalizado: boolean; datos: VendedorPrefa[] }>({
+      url: "/usuarios/vendedores-prefas",
+      method: "get",
+    })
+      .then((res) => {
+        if (res) {
+          setVendedoresPrefas(
+            res.data.datos.map((v: VendedorPrefa) => ({
+              id: v.id,
+              label: nombreCompleto(v.persona),
+            }))
+          );
+        }
+      })
+      .catch((err) => print("Error fetching vendedores prefas", err));
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (!esCoordinadorGeneral && !esAdministrador) {
+    return <></>;
+  }
+
+  return (
+    <div className="space-y-8 animate-fade-in pt-10">
+      <div className="flex flex-col gap-1">
+        <h2 className="text-3xl font-extrabold tracking-tight text-gradient">
+          Dashboard de Recaudación
+        </h2>
+        <p className="text-muted-foreground font-medium">
+          Visualiza el resumen de ingresos en tiempo real.
+        </p>
+      </div>
+
+      <Tabs defaultValue="inscripciones" className="w-full">
+        <TabsList className="mb-6 rounded-xl h-11">
+          <TabsTrigger value="inscripciones" className="rounded-lg px-6">
+            Inscripciones
+          </TabsTrigger>
+          <TabsTrigger value="prefas" className="rounded-lg px-6">
+            Ventas Prefas
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="inscripciones">
+          <RecaudacionPanel
+            titulo="Recaudación por Inscripciones"
+            subtitulo="Ingresos generados por inscripciones a cursos, filtrados por coordinador."
+            labelUsuario="Coordinador de Curso"
+            usuarios={coordinadores}
+            endpoint="/dashboard/recaudacion"
+            kpiLabel="Inscripciones"
+            kpiIcon={<Users className="h-5 w-5" />}
+          />
+        </TabsContent>
+
+        <TabsContent value="prefas">
+          <RecaudacionPanel
+            titulo="Recaudación por Ventas Prefas"
+            subtitulo="Ingresos generados por ventas en el módulo prefacultativo, filtrados por vendedor."
+            labelUsuario="Vendedor"
+            usuarios={vendedoresPrefas}
+            endpoint="/dashboard/recaudacion-prefas"
+            kpiLabel="Ventas realizadas"
+            kpiIcon={<ShoppingCart className="h-5 w-5" />}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
