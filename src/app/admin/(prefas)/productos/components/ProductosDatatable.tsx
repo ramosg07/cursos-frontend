@@ -3,12 +3,13 @@
 import { DataTable } from "@/components/data-table/data-table";
 import { SortableHeader } from "@/components/data-table/sortable-header";
 import { ColumnDef } from "@tanstack/react-table";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FilterType } from "@/components/data-table/types/filter";
 import { Edit, Plus } from "lucide-react";
 import { ProductoPrefa } from "../../services/prefas.api";
 import { AgregarEditarProductoModal } from "./AgregarEditarProductoModal";
+import { useAuth } from "@/contexts/AuthProvider";
 
 export function ProductosDatatable() {
   const [updateTable, setUpdateTable] = useState(false);
@@ -22,6 +23,15 @@ export function ProductosDatatable() {
     setSelectProducto(producto);
     setAgregarEditarModalOpen(true);
   };
+
+  const { checkPermission } = useAuth();
+
+  const [permissions, setPermissions] = useState({
+    create: false,
+    read: false,
+    update: false,
+    delete: false,
+  });
 
   const columns: ColumnDef<ProductoPrefa>[] = [
     {
@@ -63,27 +73,31 @@ export function ProductosDatatable() {
       ),
       meta: { mobileTitle: "Stock" },
     },
-    {
-      id: "actions",
-      header: () => (
-        <div className="text-center normal-case text-sm">Acciones</div>
-      ),
-      cell: ({ row }) => {
-        return (
-          <div className="flex items-center gap-2 justify-center">
-            <Button
-              title="Editar"
-              variant="outline"
-              size={"icon"}
-              onClick={() => handleAgregarEditar(row.original)}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-          </div>
-        );
-      },
-      meta: { mobileTitle: "Acciones" },
-    },
+    ...(permissions.update
+      ? [
+          {
+            id: "actions",
+            header: () => (
+              <div className="text-center normal-case text-sm">Acciones</div>
+            ),
+            cell: ({ row }: any) => {
+              return (
+                <div className="flex items-center gap-2 justify-center">
+                  <Button
+                    title="Editar"
+                    variant="outline"
+                    size={"icon"}
+                    onClick={() => handleAgregarEditar(row.original)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </div>
+              );
+            },
+            meta: { mobileTitle: "Acciones" },
+          },
+        ]
+      : []),
   ];
 
   const filters: FilterType[] = [
@@ -100,6 +114,19 @@ export function ProductosDatatable() {
     setUpdateTable(true);
   }
 
+  useEffect(() => {
+    const fetchPermissions = async () => {
+      setPermissions({
+        create: await checkPermission("/admin/postulantes", "create"),
+        read: await checkPermission("/admin/postulantes", "read"),
+        update: await checkPermission("/admin/postulantes", "update"),
+        delete: await checkPermission("/admin/postulantes", "delete"),
+      });
+    };
+
+    fetchPermissions().catch(print);
+  }, [checkPermission]);
+
   return (
     <div>
       <DataTable
@@ -108,15 +135,19 @@ export function ProductosDatatable() {
         apiUrl={"/prefas/productos"}
         toolBarConfig={{
           components: [
-            <Button
-              key={"Agregar"}
-              title="Agregar Ítem"
-              variant="outline"
-              size={"icon"}
-              onClick={() => handleAgregarEditar(null)}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>,
+            permissions.create
+              ? [
+                  <Button
+                    key={"Agregar"}
+                    title="Agregar Ítem"
+                    variant="outline"
+                    size={"icon"}
+                    onClick={() => handleAgregarEditar(null)}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>,
+                ]
+              : [],
           ],
         }}
         titulo={"Inventario de Productos y Cursos"}
