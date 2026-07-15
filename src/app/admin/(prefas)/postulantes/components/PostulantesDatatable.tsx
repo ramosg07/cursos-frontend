@@ -6,9 +6,10 @@ import { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FilterType } from "@/components/data-table/types/filter";
-import { Edit, Plus } from "lucide-react";
+import { Edit, Plus, Upload } from "lucide-react";
 import { Postulante } from "../../services/prefas.api";
 import { AgregarEditarPostulanteModal } from "./AgregarEditarPostulanteModal";
+import { BulkUploadPostulantesModal } from "./BulkUploadPostulantesModal";
 
 export function PostulantesDatatable() {
   const [updateTable, setUpdateTable] = useState(false);
@@ -16,6 +17,8 @@ export function PostulantesDatatable() {
     null,
   );
   const [agregarEditarModalOpen, setAgregarEditarModalOpen] =
+    useState<boolean>(false);
+  const [bulkUploadModalOpen, setBulkUploadModalOpen] =
     useState<boolean>(false);
 
   const handleAgregarEditar = (postulante: Postulante | null) => {
@@ -105,6 +108,16 @@ export function PostulantesDatatable() {
         toolBarConfig={{
           components: [
             <Button
+              key={"BulkUpload"}
+              title="Carga masiva"
+              variant="outline"
+              className="flex gap-2"
+              onClick={() => setBulkUploadModalOpen(true)}
+            >
+              <Upload className="h-4 w-4" />
+              <span>Carga Masiva</span>
+            </Button>,
+            <Button
               key={"Agregar"}
               title="Agregar Postulante"
               variant="outline"
@@ -127,6 +140,13 @@ export function PostulantesDatatable() {
           isOpen={agregarEditarModalOpen}
           onSuccess={updateDataTable}
           onClose={() => setAgregarEditarModalOpen(false)}
+        />
+      )}
+      {bulkUploadModalOpen && (
+        <BulkUploadPostulantesModal
+          isOpen={bulkUploadModalOpen}
+          onSuccess={updateDataTable}
+          onClose={() => setBulkUploadModalOpen(false)}
         />
       )}
     </div>
