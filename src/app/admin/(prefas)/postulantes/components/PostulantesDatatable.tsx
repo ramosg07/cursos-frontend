@@ -6,11 +6,12 @@ import { ColumnDef } from "@tanstack/react-table";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FilterType } from "@/components/data-table/types/filter";
-import { Edit, Plus, Upload } from "lucide-react";
+import { Edit, Plus, ShoppingCart, Upload } from "lucide-react";
 import { Postulante } from "../../services/prefas.api";
 import { AgregarEditarPostulanteModal } from "./AgregarEditarPostulanteModal";
 import { BulkUploadPostulantesModal } from "./BulkUploadPostulantesModal";
 import { useAuth } from "@/contexts/AuthProvider";
+import { ComprasModal } from "./ComprasModal";
 
 export function PostulantesDatatable() {
   const [updateTable, setUpdateTable] = useState(false);
@@ -22,9 +23,17 @@ export function PostulantesDatatable() {
   const [bulkUploadModalOpen, setBulkUploadModalOpen] =
     useState<boolean>(false);
 
+  const [mostrarComprasModalOpen, setMostrarComprasModalOpen] =
+    useState<boolean>(false);
+
   const handleAgregarEditar = (postulante: Postulante | null) => {
     setSelectPostulante(postulante);
     setAgregarEditarModalOpen(true);
+  };
+
+  const handleMostrarCompras = (postulante: Postulante | null) => {
+    setSelectPostulante(postulante);
+    setMostrarComprasModalOpen(true);
   };
 
   const { checkPermission } = useAuth();
@@ -89,6 +98,14 @@ export function PostulantesDatatable() {
                     onClick={() => handleAgregarEditar(row.original)}
                   >
                     <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    title="Compras"
+                    variant="outline"
+                    size={"icon"}
+                    onClick={() => handleMostrarCompras(row.original)}
+                  >
+                    <ShoppingCart className="h-4 w-4" />
                   </Button>
                 </div>
               );
@@ -169,6 +186,13 @@ export function PostulantesDatatable() {
           isOpen={agregarEditarModalOpen}
           onSuccess={updateDataTable}
           onClose={() => setAgregarEditarModalOpen(false)}
+        />
+      )}
+      {mostrarComprasModalOpen && (
+        <ComprasModal
+          postulante={selectPostulante}
+          isOpen={mostrarComprasModalOpen}
+          onClose={() => setMostrarComprasModalOpen(false)}
         />
       )}
       {bulkUploadModalOpen && (

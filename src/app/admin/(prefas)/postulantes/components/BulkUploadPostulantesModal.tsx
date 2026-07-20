@@ -9,7 +9,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useAuth } from "@/contexts/AuthProvider";
 import {
   AlertCircle,
@@ -40,6 +43,7 @@ export function BulkUploadPostulantesModal({
     errores: string[];
   } | null>(null);
 
+  const [tipo, setTipo] = useState("PREFACULTATIVO");
   const { sessionRequest } = useAuth();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,13 +54,14 @@ export function BulkUploadPostulantesModal({
   };
 
   const handleUpload = async () => {
-    if (!file) return;
+    if (!file || !tipo) return;
 
     setUploading(true);
     setResult(null);
 
     try {
       const formData = new FormData();
+      formData.append("tipo", tipo);
       formData.append("file", file);
 
       const response = await sessionRequest<{
@@ -127,20 +132,51 @@ export function BulkUploadPostulantesModal({
         </DialogHeader>
 
         {!result ? (
-          <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg gap-4 border-muted-foreground/25">
-            <FileUp className="h-12 w-12 text-muted-foreground" />
-            <Input
-              type="file"
-              accept=".xlsx,.xls,.csv"
-              onChange={handleFileChange}
-              className="max-w-[300px]"
-            />
-            {file && (
-              <p className="text-sm text-blue-600 font-medium">
-                Archivo seleccionado: {file.name}
-              </p>
-            )}
-          </div>
+          <>
+            <Field>
+              <FieldLabel>Tipo de postulante</FieldLabel>
+              <RadioGroup
+                value={tipo}
+                onValueChange={(value: string) => {
+                  setTipo(value);
+                }}
+                className="flex gap-6"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="PREFACULTATIVO" id="prefacultativo" />
+                  <Label htmlFor="prefacultativo">Prefacultativo</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="DISPENSACION" id="dispensacion" />
+                  <Label htmlFor="dispensacion">Dispensacion</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="OTROS" id="otros" />
+                  <Label htmlFor="otros">Otros</Label>
+                </div>
+              </RadioGroup>
+            </Field>
+
+            <div className="flex-1 w-full space-y-3">
+              <label className="text-sm font-black text-muted-foreground ml-1">
+                Tipo de posulante
+              </label>
+            </div>
+            <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg gap-4 border-muted-foreground/25">
+              <FileUp className="h-12 w-12 text-muted-foreground" />
+              <Input
+                type="file"
+                accept=".xlsx,.xls,.csv"
+                onChange={handleFileChange}
+                className="max-w-[300px]"
+              />
+              {file && (
+                <p className="text-sm text-blue-600 font-medium">
+                  Archivo seleccionado: {file.name}
+                </p>
+              )}
+            </div>
+          </>
         ) : (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">

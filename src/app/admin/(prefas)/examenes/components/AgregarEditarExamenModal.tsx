@@ -18,6 +18,8 @@ import { print } from "@/lib/print";
 import dayjs from "dayjs";
 import { validateDateFormat } from "@/lib/dates";
 import { DatePickerSimple } from "@/components/DatePickerSimple";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 interface AgregarEditarExamenModalProps {
   examen: Examen | null;
@@ -41,6 +43,7 @@ const formSchema = z.object({
       },
       { message: "Fecha inicio inválida" },
     ),
+  tipo: z.enum(["PREFACULTATIVO", "DISPENSACION", "OTROS"]),
 });
 
 export function AgregarEditarExamenModal({
@@ -59,10 +62,12 @@ export function AgregarEditarExamenModal({
       ? {
           nombre: examen.nombre || "",
           fecha: dayjs.utc(examen.fecha).format("YYYY-MM-DD") || "",
+          tipo: examen.tipo || "PREFACULTATIVO",
         }
       : {
           nombre: "",
           fecha: "",
+          tipo: "PREFACULTATIVO",
         },
   });
 
@@ -144,6 +149,37 @@ export function AgregarEditarExamenModal({
                 </Field>
               );
             }}
+          />
+          <Controller
+            name="tipo"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field aria-invalid={fieldState.invalid} className="w-full p-0">
+                <FieldLabel className="mb-2">Tipo de examen</FieldLabel>
+                <RadioGroup
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  className="flex gap-6"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem
+                      value="PREFACULTATIVO"
+                      id="prefacultativo"
+                    />
+                    <Label htmlFor="prefacultativo">Prefacultativo</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="DISPENSACION" id="dispensacion" />
+                    <Label htmlFor="dispensacion">Dispensacion</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="OTROS" id="otros" />
+                    <Label htmlFor="otros">Otros</Label>
+                  </div>
+                </RadioGroup>
+                {fieldState.error && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
           />
           <div className="flex w-full justify-end gap-2 pt-4">
             <Button

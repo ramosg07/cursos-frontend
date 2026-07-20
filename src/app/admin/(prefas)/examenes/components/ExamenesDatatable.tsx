@@ -11,6 +11,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { SortableHeader } from "@/components/data-table/sortable-header";
 import { AgregarEditarExamenModal } from "./AgregarEditarExamenModal";
 import dayjs from "dayjs";
+import { Badge } from "@/components/ui/badge";
 
 export function ExamenesDatatable() {
   const { checkPermission } = useAuth();
@@ -73,6 +74,16 @@ export function ExamenesDatatable() {
       cell: ({ row }) =>
         dayjs.utc(row.original.fecha).format("DD/MM/YYYY") ?? "—",
       meta: { mobileTitle: "Fecha" },
+    },
+    {
+      accessorKey: "tipo",
+      header: ({ column }) => <SortableHeader column={column} title="Tipo" />,
+      meta: { mobileTitle: "Tipo" },
+      cell: ({ row }) => (
+        <Badge variant="outline" className="font-bold border-primary/30">
+          {row.original.tipo ?? "-"}
+        </Badge>
+      ),
     },
     ...(permissions.update
       ? [

@@ -15,6 +15,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { print } from "@/lib/print";
 import { Postulante, usePrefasApi } from "../../services/prefas.api";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 interface AgregarEditarPostulanteModalProps {
   postulante: Postulante | null;
@@ -31,6 +33,7 @@ const formSchema = z.object({
   primerApellido: z.string().optional(),
   segundoApellido: z.string().optional(),
   celular: z.string().optional(),
+  tipo: z.enum(["PREFACULTATIVO", "DISPENSACION", "OTROS"]),
 });
 
 export function AgregarEditarPostulanteModal({
@@ -51,6 +54,7 @@ export function AgregarEditarPostulanteModal({
           primerApellido: postulante.primerApellido || "",
           segundoApellido: postulante.segundoApellido || "",
           celular: postulante.celular || "",
+          tipo: postulante.tipo || "PREFACULTATIVO",
         }
       : {
           nroDocumento: "",
@@ -58,6 +62,7 @@ export function AgregarEditarPostulanteModal({
           primerApellido: "",
           segundoApellido: "",
           celular: "",
+          tipo: "PREFACULTATIVO",
         },
   });
 
@@ -99,6 +104,37 @@ export function AgregarEditarPostulanteModal({
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <Controller
+            name="tipo"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field aria-invalid={fieldState.invalid} className="w-full p-0">
+                <FieldLabel className="mb-2">Tipo de postulante</FieldLabel>
+                <RadioGroup
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  className="flex gap-6"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem
+                      value="PREFACULTATIVO"
+                      id="prefacultativo"
+                    />
+                    <Label htmlFor="prefacultativo">Prefacultativo</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="DISPENSACION" id="dispensacion" />
+                    <Label htmlFor="dispensacion">Dispensacion</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="OTROS" id="otros" />
+                    <Label htmlFor="otros">Otros</Label>
+                  </div>
+                </RadioGroup>
+                {fieldState.error && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
           <Controller
             name="nroDocumento"
             control={form.control}

@@ -4,4 +4,6 @@ export interface PostulanteBusqueda {
   nombres: string;
   primerApellido: string;
   segundoApellido?: string | null;
+  celular: string;
+  tipo: string;
 }

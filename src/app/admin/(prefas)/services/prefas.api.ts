@@ -8,6 +8,7 @@ export type Postulante = {
   segundoApellido?: string;
   celular?: string;
   estado: string;
+  tipo: "PREFACULTATIVO" | "DISPENSACION" | "OTROS";
 };
 
 export type ProductoPrefa = {
@@ -41,6 +42,7 @@ export type Examen = {
   id: string;
   nombre: string;
   fecha: string | null;
+  tipo: "PREFACULTATIVO" | "DISPENSACION" | "OTROS";
 };
 
 export type AsignacionSorteo = {

@@ -513,6 +513,18 @@ export function Venta() {
                     >
                       CI: {postulante.nroDocumento}
                     </Badge>
+                    <Badge
+                      variant="outline"
+                      className="font-bold border-primary/30"
+                    >
+                      Celular: {postulante.celular}
+                    </Badge>
+                    <Badge
+                      variant="outline"
+                      className="font-bold border-primary/30"
+                    >
+                      Tipo: {postulante.tipo}
+                    </Badge>
                   </div>
                 </div>
               </div>
