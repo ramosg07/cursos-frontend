@@ -23,6 +23,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import dayjs from "dayjs";
+import { Badge } from "@/components/ui/badge";
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
@@ -45,6 +46,7 @@ type VentaPrefa = {
     primerApellido: string;
     segundoApellido?: string;
     nroDocumento: string;
+    tipo: string;
   };
   vendedor: {
     usuario: string;
@@ -82,7 +84,12 @@ export function ReportesDatatable() {
           <div className="flex flex-col">
             <span className="font-semibold">{nombreCompleto(p)}</span>
             <span className="text-xs text-muted-foreground font-mono">
-              CI: {p.nroDocumento}
+              CI: {p.nroDocumento}{" "}
+              <Badge
+                variant={p.tipo == "DISPENSACION" ? "secondary" : "success"}
+              >
+                {p.tipo.substring(0, 1).toUpperCase()}
+              </Badge>
             </span>
           </div>
         );

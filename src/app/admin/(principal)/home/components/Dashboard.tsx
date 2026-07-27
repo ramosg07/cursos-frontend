@@ -49,6 +49,7 @@ function RecaudacionPanel({
   endpoint,
   kpiLabel,
   kpiIcon,
+  prefas,
 }: {
   titulo: string;
   subtitulo: string;
@@ -57,6 +58,7 @@ function RecaudacionPanel({
   endpoint: string;
   kpiLabel: string;
   kpiIcon: React.ReactNode;
+  prefas?: boolean;
 }) {
   const { sessionRequest } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -66,6 +68,7 @@ function RecaudacionPanel({
     fechaInicio: dayjs.utc().format("YYYY-MM-DD"),
     fechaFin: dayjs.utc().format("YYYY-MM-DD"),
     idUsuario: "todos",
+    tipo: "TODOS",
   });
 
   const fetchData = async () => {
@@ -79,6 +82,7 @@ function RecaudacionPanel({
           fechaFin: dayjs(filtros.fechaFin).endOf("day").toISOString(),
           idUsuario:
             filtros.idUsuario === "todos" ? undefined : filtros.idUsuario,
+          tipo: filtros.tipo === "TODOS" ? undefined : filtros.tipo,
         },
       });
       if (response) {
@@ -121,6 +125,24 @@ function RecaudacionPanel({
             onChange={(e) => setFiltros({ ...filtros, fechaFin: e ?? "" })}
           />
         </Field>
+        {prefas && (
+          <Field className="w-full md:w-72">
+            <FieldLabel className="tracking-wider mb-1 ml-1">Tipo</FieldLabel>
+            <Select
+              value={filtros.tipo}
+              onValueChange={(value) => setFiltros({ ...filtros, tipo: value })}
+            >
+              <SelectTrigger className="h-11 bg-background/50 rounded-xl border-white/10 focus:ring-primary/20 transition-all">
+                <SelectValue placeholder={`Seleccione un tipo de postulante`} />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-white/10 shadow-xl">
+                <SelectItem value="TODOS">TODOS</SelectItem>
+                <SelectItem value={"PREFACULTATIVO"}>PREFACULTATIVO</SelectItem>
+                <SelectItem value={"DISPENSACION"}>DISPENSACION</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+        )}
         <Field className="w-full md:w-72">
           <FieldLabel className="tracking-wider mb-1 ml-1">
             {labelUsuario}
@@ -132,7 +154,9 @@ function RecaudacionPanel({
             }
           >
             <SelectTrigger className="h-11 bg-background/50 rounded-xl border-white/10 focus:ring-primary/20 transition-all">
-              <SelectValue placeholder={`Seleccione un ${labelUsuario.toLowerCase()}`} />
+              <SelectValue
+                placeholder={`Seleccione un ${labelUsuario.toLowerCase()}`}
+              />
             </SelectTrigger>
             <SelectContent className="rounded-xl border-white/10 shadow-xl">
               <SelectItem value="todos">Todos</SelectItem>
@@ -222,9 +246,7 @@ export default function Dashboard() {
     primerApellido: string;
     segundoApellido?: string;
   }) =>
-    [p.nombres, p.primerApellido, p.segundoApellido]
-      .filter(Boolean)
-      .join(" ");
+    [p.nombres, p.primerApellido, p.segundoApellido].filter(Boolean).join(" ");
 
   useEffect(() => {
     if (!esCoordinadorGeneral && !esAdministrador) return;
@@ -243,7 +265,7 @@ export default function Dashboard() {
             res.data.datos.filas.map((c) => ({
               id: c.id,
               label: nombreCompleto(c.persona),
-            }))
+            })),
           );
         }
       })
@@ -260,7 +282,7 @@ export default function Dashboard() {
             res.data.datos.map((v: VendedorPrefa) => ({
               id: v.id,
               label: nombreCompleto(v.persona),
-            }))
+            })),
           );
         }
       })
@@ -315,6 +337,7 @@ export default function Dashboard() {
             endpoint="/dashboard/recaudacion-prefas"
             kpiLabel="Ventas realizadas"
             kpiIcon={<ShoppingCart className="h-5 w-5" />}
+            prefas={true}
           />
         </TabsContent>
       </Tabs>

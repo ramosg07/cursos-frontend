@@ -12,6 +12,7 @@ import { AgregarEditarPostulanteModal } from "./AgregarEditarPostulanteModal";
 import { BulkUploadPostulantesModal } from "./BulkUploadPostulantesModal";
 import { useAuth } from "@/contexts/AuthProvider";
 import { ComprasModal } from "./ComprasModal";
+import { Badge } from "@/components/ui/badge";
 
 export function PostulantesDatatable() {
   const [updateTable, setUpdateTable] = useState(false);
@@ -52,6 +53,15 @@ export function PostulantesDatatable() {
         <SortableHeader column={column} title="Documento" />
       ),
       meta: { mobileTitle: "Nro. Documento" },
+      cell: ({ row }) => {
+        const nroDocumento = row.original.nroDocumento;
+        return (
+          <div className="flex flex-col gap-1">
+            <span className="font-semibold">{nroDocumento}</span>
+            <Badge variant={row.original.tipo == 'DISPENSACION' ? "secondary" : "success"}>{row.original.tipo}</Badge>
+          </div>
+        );
+      },
     },
     {
       accessorKey: "nombres",
