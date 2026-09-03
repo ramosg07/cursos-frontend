@@ -81,7 +81,7 @@ export default function LectorQRPage() {
           {
             fps: 15,
             qrbox: (width, height) => {
-              const size = Math.min(width, height) * 0.7;
+              const size = Math.min(width, height) * 0.85;
               return { width: size, height: size };
             },
             aspectRatio: 1,
@@ -179,7 +179,7 @@ export default function LectorQRPage() {
 
         <CardContent className="space-y-6 flex flex-col items-center justify-center">
           {/* Zona de Cámara */}
-          <div className="relative w-full aspect-[4/3] max-w-[420px] rounded-2xl border border-border overflow-hidden shadow-inner flex items-center justify-center">
+          <div className="relative w-full aspect-square rounded-2xl border border-border overflow-hidden shadow-inner flex items-center justify-center">
             {/* Elemento de renderizado para html5-qrcode */}
             <div
               id="reader"
@@ -190,16 +190,16 @@ export default function LectorQRPage() {
             {scanning && (
               <>
                 {/* Cuadro de escaneo */}
-                <div className="absolute z-10 w-[70%] h-[70%] border-2 border-dashed border-emerald-500 rounded-lg pointer-events-none" />
+                <div className="absolute z-10 w-[85%] h-[85%] border-2 border-dashed border-emerald-500 rounded-lg pointer-events-none" />
 
                 {/* Línea Láser Animada */}
-                <div className="absolute z-10 w-[70%] h-[2px] bg-gradient-to-r from-transparent via-emerald-400 to-transparent animate-laser shadow-[0_0_8px_rgba(52,211,153,0.8)] pointer-events-none" />
+                <div className="absolute z-10 w-[85%] h-[2px] bg-gradient-to-r from-transparent via-emerald-400 to-transparent animate-laser shadow-[0_0_8px_rgba(52,211,153,0.8)] pointer-events-none" />
 
                 {/* Pulsar en las esquinas */}
-                <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-emerald-400 pointer-events-none" />
-                <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-emerald-400 pointer-events-none" />
-                <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-emerald-400 pointer-events-none" />
-                <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-emerald-400 pointer-events-none" />
+                <div className="absolute top-[7.5%] left-[7.5%] w-5 h-5 border-t-2 border-l-2 border-emerald-400 pointer-events-none" />
+                <div className="absolute top-[7.5%] right-[7.5%] w-5 h-5 border-t-2 border-r-2 border-emerald-400 pointer-events-none" />
+                <div className="absolute bottom-[7.5%] left-[7.5%] w-5 h-5 border-b-2 border-l-2 border-emerald-400 pointer-events-none" />
+                <div className="absolute bottom-[7.5%] right-[7.5%] w-5 h-5 border-b-2 border-r-2 border-emerald-400 pointer-events-none" />
               </>
             )}
 
