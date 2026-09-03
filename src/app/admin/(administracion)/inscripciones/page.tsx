@@ -77,6 +77,9 @@ export default function NuevaInscripcionPage() {
     }[]
   >([]);
 
+  // Estado de Pago
+  const [metodoPago, setMetodoPago] = useState<"EFECTIVO" | "QR">("EFECTIVO");
+
   // Estado de Procesamiento
   const [procesando, setProcesando] = useState(false);
   const [exito, setExito] = useState(false);
@@ -262,6 +265,7 @@ export default function NuevaInscripcionPage() {
           idEstudiante: estudiante.tipoPersona === 'ESTUDIANTE' ? estudiante.id : undefined,
           idDocente: estudiante.tipoPersona === 'DOCENTE' ? estudiante.id : undefined,
           idsParalelo: carrito.map((item) => item.paralelo.id),
+          metodoPago,
         },
       });
 
@@ -359,6 +363,7 @@ export default function NuevaInscripcionPage() {
     setIdCursoSeleccionado("");
     setIdParaleloSeleccionado("");
     setCursos([]);
+    setMetodoPago("EFECTIVO");
     setExito(false);
     setIdsInscripcionCreadas([]);
   };
@@ -849,13 +854,44 @@ export default function NuevaInscripcionPage() {
                       </div>
 
                       <div className="p-8 space-y-8 bg-card border-t border-primary/5 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+                        {/* Selector Método de Pago */}
+                        <div className="space-y-3">
+                          <label className="text-[14px] font-black text-muted-foreground ml-1">
+                            Método de Pago
+                          </label>
+                          <div className="grid grid-cols-2 gap-3">
+                            <button
+                              type="button"
+                              onClick={() => setMetodoPago("EFECTIVO")}
+                              className={`h-12 rounded-xl font-black text-sm flex items-center justify-center gap-2 border-2 transition-all ${
+                                metodoPago === "EFECTIVO"
+                                  ? "bg-primary text-white border-primary shadow-lg shadow-primary/20"
+                                  : "bg-muted/40 text-muted-foreground border-transparent hover:bg-muted"
+                              }`}
+                            >
+                              💵 Efectivo
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setMetodoPago("QR")}
+                              className={`h-12 rounded-xl font-black text-sm flex items-center justify-center gap-2 border-2 transition-all ${
+                                metodoPago === "QR"
+                                  ? "bg-primary text-white border-primary shadow-lg shadow-primary/20"
+                                  : "bg-muted/40 text-muted-foreground border-transparent hover:bg-muted"
+                              }`}
+                            >
+                              📲 Pago QR
+                            </button>
+                          </div>
+                        </div>
+
                         <div className="flex justify-between items-end">
                           <div className="flex flex-col gap-1">
                             <span className="text-[14px] font-black text-muted-foreground">
                               Total Liquidación
                             </span>
                             <span className="text-lg font-black text-foreground">
-                              BOLIVIANOS
+                              BOLIVIANOS ({metodoPago})
                             </span>
                           </div>
                           <span className="text-5xl font-black text-primary tracking-tighter">

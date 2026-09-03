@@ -122,6 +122,35 @@ export function ReportesDatatable() {
       meta: { mobileTitle: "Fecha" },
     },
     {
+      accessorKey: "metodoPago",
+      header: () => (
+        <div className="text-center normal-case text-sm">Método Pago</div>
+      ),
+      cell: ({ row }) => {
+        const metodo = row.original.metodoPago;
+        if (metodo === "QR") {
+          return (
+            <div className="flex justify-center">
+              <Badge className="bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30 hover:bg-blue-500/20 font-bold">
+                📲 QR
+              </Badge>
+            </div>
+          );
+        }
+        if (metodo === "EFECTIVO") {
+          return (
+            <div className="flex justify-center">
+              <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20 font-bold">
+                💵 Efectivo
+              </Badge>
+            </div>
+          );
+        }
+        return <div className="text-center">—</div>;
+      },
+      meta: { mobileTitle: "Método Pago" },
+    },
+    {
       accessorKey: "usuarioInscripcion.persona.nombres",
       header: () => (
         <div className="text-center normal-case text-sm">Registrado Por</div>
@@ -142,6 +171,17 @@ export function ReportesDatatable() {
       value: "",
       list: [{ description: "Todos", code: "all" }],
       type: "text",
+    },
+    {
+      name: "metodoPago",
+      label: "Método de Pago",
+      value: "",
+      list: [
+        { description: "Todos", code: "" },
+        { description: "💵 Efectivo", code: "EFECTIVO" },
+        { description: "📲 Pago QR", code: "QR" },
+      ],
+      type: "list",
     },
     {
       name: "idUsuarioInscripcion",

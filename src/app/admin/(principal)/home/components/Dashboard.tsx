@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
-import { Users, DollarSign, Loader2, ShoppingCart } from "lucide-react";
+import { Users, DollarSign, Loader2, ShoppingCart, QrCode, Banknote } from "lucide-react";
 import { toast } from "sonner";
 import { print } from "@/lib/print";
 import {
@@ -27,6 +27,10 @@ dayjs.extend(utc);
 interface RecaudacionData {
   total: number;
   cantidad: number;
+  porMetodoPago?: {
+    qr: { total: number; cantidad: number };
+    efectivo: { total: number; cantidad: number };
+  };
 }
 
 type VendedorPrefa = {
@@ -179,7 +183,7 @@ function RecaudacionPanel({
       </div>
 
       {/* KPIs */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card className="relative overflow-hidden border-none glass-card group p-4 pb-6">
           <div className="absolute top-20 right-15 w-80 h-80 bg-primary/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-primary/20 transition-colors" />
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
@@ -195,14 +199,54 @@ function RecaudacionPanel({
               {loading ? "..." : `${data?.total.toFixed(2) || "0.00"} Bs.`}
             </div>
             <p className="text-xs text-muted-foreground mt-1 font-medium italic">
-              Ingresos totales en el rango seleccionado
+              Ingresos totales (QR + Efectivo)
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="relative overflow-hidden border-none glass-card group p-4 pb-6">
+          <div className="absolute top-20 right-15 w-80 h-80 bg-blue-500/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-blue-500/20 transition-colors" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
+            <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+              Total Pago QR
+            </CardTitle>
+            <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
+              <QrCode className="h-5 w-5" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-black tracking-tight text-blue-600 dark:text-blue-400">
+              {loading ? "..." : `${data?.porMetodoPago?.qr?.total.toFixed(2) || "0.00"} Bs.`}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1 font-medium italic">
+              {data?.porMetodoPago?.qr?.cantidad || 0} operaciones por QR
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="relative overflow-hidden border-none glass-card group p-4 pb-6">
+          <div className="absolute top-20 right-15 w-80 h-80 bg-emerald-500/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-emerald-500/20 transition-colors" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
+            <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+              Total Efectivo
+            </CardTitle>
+            <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500">
+              <Banknote className="h-5 w-5" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-black tracking-tight text-emerald-600 dark:text-emerald-400">
+              {loading ? "..." : `${data?.porMetodoPago?.efectivo?.total.toFixed(2) || "0.00"} Bs.`}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1 font-medium italic">
+              {data?.porMetodoPago?.efectivo?.cantidad || 0} operaciones en efectivo
             </p>
           </CardContent>
         </Card>
 
         <Card className="relative overflow-hidden border-none glass-card group p-4 pb-6">
           <div className="absolute top-20 right-15 w-80 h-80 bg-primary/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-primary/20 transition-colors" />
-          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
             <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
               {kpiLabel}
             </CardTitle>
@@ -215,7 +259,7 @@ function RecaudacionPanel({
               {loading ? "..." : data?.cantidad || 0}
             </div>
             <p className="text-xs text-muted-foreground mt-1 font-medium italic">
-              Número total en el rango seleccionado
+              Número total de registros
             </p>
           </CardContent>
         </Card>
