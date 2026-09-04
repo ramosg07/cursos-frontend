@@ -27,6 +27,8 @@ dayjs.extend(utc);
 interface RecaudacionData {
   total: number;
   cantidad: number;
+  cantidadEstudiantes?: number;
+  cantidadDocentes?: number;
   porMetodoPago?: {
     qr: { total: number; cantidad: number };
     efectivo: { total: number; cantidad: number };
@@ -258,9 +260,21 @@ function RecaudacionPanel({
             <div className="text-3xl font-black tracking-tight text-accent-foreground">
               {loading ? "..." : data?.cantidad || 0}
             </div>
-            <p className="text-xs text-muted-foreground mt-1 font-medium italic">
-              Número total de registros
-            </p>
+            {!prefas && data?.cantidadEstudiantes !== undefined && (
+              <div className="flex flex-wrap items-center gap-1.5 mt-2 pt-2 border-t border-border/40 text-[11px] font-bold">
+                <span className="text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md flex items-center gap-1">
+                  🎓 {data?.cantidadEstudiantes || 0} Estudiantes
+                </span>
+                <span className="text-purple-600 dark:text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-md flex items-center gap-1">
+                  👨‍🏫 {data?.cantidadDocentes || 0} Docentes
+                </span>
+              </div>
+            )}
+            {(prefas || data?.cantidadEstudiantes === undefined) && (
+              <p className="text-xs text-muted-foreground mt-1 font-medium italic">
+                Número total de registros
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>
