@@ -44,10 +44,62 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/combobox";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+dayjs.extend(utc);
+
 import { print } from "@/lib/print";
 import { EstudianteBusqueda } from "../cursos/[id]/inscritos/types";
 import { Curso, Paralelo } from "../cursos/types";
 import { Consulta } from "./components/Consulta";
+
+const evaluarEstadoFechaCurso = (curso: Curso) => {
+  if (!curso.fechaInicio && !curso.fechaFin) {
+    return { estado: "VIGENTE", mensaje: null, rangoTexto: null };
+  }
+
+  const hoyStr = dayjs().format("YYYY-MM-DD");
+  const inicioStr = curso.fechaInicio
+    ? dayjs.utc(curso.fechaInicio).format("YYYY-MM-DD")
+    : null;
+  const finStr = curso.fechaFin
+    ? dayjs.utc(curso.fechaFin).format("YYYY-MM-DD")
+    : null;
+
+  const inicioFmt = curso.fechaInicio
+    ? dayjs.utc(curso.fechaInicio).format("DD/MM/YYYY")
+    : null;
+  const finFmt = curso.fechaFin
+    ? dayjs.utc(curso.fechaFin).format("DD/MM/YYYY")
+    : null;
+
+  let rangoTexto = "";
+  if (inicioFmt && finFmt) {
+    rangoTexto = `${inicioFmt} al ${finFmt}`;
+  } else if (inicioFmt) {
+    rangoTexto = `Desde ${inicioFmt}`;
+  } else if (finFmt) {
+    rangoTexto = `Hasta ${finFmt}`;
+  }
+
+  if (inicioStr && hoyStr < inicioStr) {
+    return {
+      estado: "NO_INICIADO",
+      mensaje: `Las inscripciones inician el ${inicioFmt}`,
+      rangoTexto,
+    };
+  }
+
+  if (finStr && hoyStr > finStr) {
+    return {
+      estado: "CONCLUIDO",
+      mensaje: `Las inscripciones finalizaron el ${finFmt}`,
+      rangoTexto,
+    };
+  }
+
+  return { estado: "VIGENTE", mensaje: null, rangoTexto };
+};
 
 export default function NuevaInscripcionPage() {
   const { sessionRequest } = useAuth();
@@ -61,7 +113,7 @@ export default function NuevaInscripcionPage() {
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [loadingCursos, setLoadingCursos] = useState(false);
   const [cursoSeleccionado, setCursoSeleccionado] = useState<Curso | null>(
-    null
+    null,
   );
   const [idCursoSeleccionado, setIdCursoSeleccionado] = useState<string>("");
   const [idParaleloSeleccionado, setIdParaleloSeleccionado] =
@@ -86,16 +138,12 @@ export default function NuevaInscripcionPage() {
 
   // IDs de inscripciones creadas (para el recibo)
   const [idsInscripcionCreadas, setIdsInscripcionCreadas] = useState<string[]>(
-    []
+    [],
   );
   const [generandoRecibo, setGenerandoRecibo] = useState(false);
   const [activeTab, setActiveTab] = useState("registro");
 
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    validarCarrito();
-  }, [estudiante, carrito.length]);
 
   const fetchCursos = useCallback(
     async (filtro: string, limite = 20) => {
@@ -115,7 +163,7 @@ export default function NuevaInscripcionPage() {
         setLoadingCursos(false);
       }
     },
-    [sessionRequest]
+    [sessionRequest],
   );
 
   const handleBusquedaCurso = useCallback(
@@ -126,7 +174,7 @@ export default function NuevaInscripcionPage() {
         return;
       }
       const hayCoincidenciaLocal = cursos.some((c) =>
-        c.nombre.toLowerCase().includes(valor.toLowerCase())
+        c.nombre.toLowerCase().includes(valor.toLowerCase()),
       );
       if (hayCoincidenciaLocal) return;
 
@@ -135,7 +183,7 @@ export default function NuevaInscripcionPage() {
         fetchCursos(valor, 20);
       }, 350);
     },
-    [cursos, fetchCursos]
+    [cursos, fetchCursos],
   );
 
   useEffect(() => {
@@ -172,7 +220,7 @@ export default function NuevaInscripcionPage() {
 
     const curso = cursoSeleccionado;
     const paralelo = curso?.paralelos.find(
-      (p) => p.id === idParaleloSeleccionado
+      (p) => p.id === idParaleloSeleccionado,
     );
 
     if (!curso || !paralelo) {
@@ -180,10 +228,19 @@ export default function NuevaInscripcionPage() {
       return;
     }
 
+    // Validar fechas del curso
+    const estadoFecha = evaluarEstadoFechaCurso(curso);
+    if (estadoFecha.estado !== "VIGENTE") {
+      toast.error(
+        `No se puede inscribir en "${curso.nombre}": ${estadoFecha.mensaje}`,
+      );
+      return;
+    }
+
     // Evitar duplicados de curso
     if (carrito.find((item) => item.curso.id === curso.id)) {
       toast.error(
-        "El estudiante ya está siendo inscrito en este curso en esta sesión"
+        "El estudiante ya está siendo inscrito en este curso en esta sesión",
       );
       return;
     }
@@ -204,8 +261,10 @@ export default function NuevaInscripcionPage() {
         url: "/inscripciones/multiple/validar",
         method: "post",
         data: {
-          idEstudiante: estudiante.tipoPersona === 'ESTUDIANTE' ? estudiante.id : undefined,
-          idDocente: estudiante.tipoPersona === 'DOCENTE' ? estudiante.id : undefined,
+          idEstudiante:
+            estudiante.tipoPersona === "ESTUDIANTE" ? estudiante.id : undefined,
+          idDocente:
+            estudiante.tipoPersona === "DOCENTE" ? estudiante.id : undefined,
           idsParalelo: carrito.map((item) => item.paralelo.id),
         },
       });
@@ -215,14 +274,14 @@ export default function NuevaInscripcionPage() {
         setCarrito((prev) =>
           prev.map((item) => {
             const errorEncontrado = errores.find(
-              (e) => e.idParalelo === item.paralelo.id
+              (e) => e.idParalelo === item.paralelo.id,
             );
             return {
               ...item,
               error: !!errorEncontrado,
               mensajeError: errorEncontrado?.mensaje,
             };
-          })
+          }),
         );
       }
     } catch (error) {
@@ -230,21 +289,25 @@ export default function NuevaInscripcionPage() {
     }
   }, [estudiante, carrito, sessionRequest]);
 
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    validarCarrito();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [estudiante, carrito.length]);
+
   const quitarDelCarrito = (index: number) => {
     const nuevoCarrito = [...carrito];
     nuevoCarrito.splice(index, 1);
     setCarrito(nuevoCarrito);
   };
 
-  const totalMonto = carrito.reduce(
-    (acc, item) => {
-      const monto = estudiante?.tipoPersona === 'DOCENTE' 
-        ? item.curso.montoDocente 
+  const totalMonto = carrito.reduce((acc, item) => {
+    const monto =
+      estudiante?.tipoPersona === "DOCENTE"
+        ? item.curso.montoDocente
         : item.curso.montoEstudiante;
-      return acc + Number(monto || 0);
-    },
-    0
-  );
+    return acc + Number(monto || 0);
+  }, 0);
 
   const handleFinalizarInscripcion = async () => {
     if (!estudiante) return;
@@ -262,8 +325,10 @@ export default function NuevaInscripcionPage() {
         url: "/inscripciones/multiple",
         method: "post",
         data: {
-          idEstudiante: estudiante.tipoPersona === 'ESTUDIANTE' ? estudiante.id : undefined,
-          idDocente: estudiante.tipoPersona === 'DOCENTE' ? estudiante.id : undefined,
+          idEstudiante:
+            estudiante.tipoPersona === "ESTUDIANTE" ? estudiante.id : undefined,
+          idDocente:
+            estudiante.tipoPersona === "DOCENTE" ? estudiante.id : undefined,
           idsParalelo: carrito.map((item) => item.paralelo.id),
           metodoPago,
         },
@@ -289,13 +354,13 @@ export default function NuevaInscripcionPage() {
         setCarrito((prev) =>
           prev.map((item) => {
             const conflict = erroresMasivos.find(
-              (e: any) => e.idParalelo === item.paralelo.id
+              (e: any) => e.idParalelo === item.paralelo.id,
             );
             if (conflict) {
               return { ...item, error: true, mensajeError: conflict.mensaje };
             }
             return { ...item, error: false, mensajeError: undefined };
-          })
+          }),
         );
       } else {
         // Fallback para errores individuales o no estructurados
@@ -313,7 +378,7 @@ export default function NuevaInscripcionPage() {
               return { ...item, error: true, mensajeError: mensajeGeneral };
             }
             return item;
-          })
+          }),
         );
       }
     } finally {
@@ -340,7 +405,7 @@ export default function NuevaInscripcionPage() {
         link.href = url;
         link.setAttribute(
           "download",
-          `recibo-inscripcion-${new Date().getTime()}.pdf`
+          `recibo-inscripcion-${new Date().getTime()}.pdf`,
         );
         document.body.appendChild(link);
         link.click();
@@ -441,7 +506,10 @@ export default function NuevaInscripcionPage() {
                     </p>
                   </div>
                   <span className="font-mono font-bold whitespace-nowrap">
-                    Bs. {estudiante?.tipoPersona === 'DOCENTE' ? item.curso.montoDocente : item.curso.montoEstudiante}
+                    Bs.{" "}
+                    {estudiante?.tipoPersona === "DOCENTE"
+                      ? item.curso.montoDocente
+                      : item.curso.montoEstudiante}
                   </span>
                 </div>
               ))}
@@ -566,10 +634,7 @@ export default function NuevaInscripcionPage() {
                             >
                               CI: {estudiante.usuario.persona.nroDocumento}
                             </Badge>
-                            <Badge
-                              variant="secondary"
-                              className="font-bold"
-                            >
+                            <Badge variant="secondary" className="font-bold">
                               {estudiante.tipoPersona}
                             </Badge>
                           </div>
@@ -613,7 +678,7 @@ export default function NuevaInscripcionPage() {
                           value={cursoSeleccionado?.nombre ?? ""}
                           onValueChange={(nombre) => {
                             const curso = cursos.find(
-                              (c) => c.nombre === nombre
+                              (c) => c.nombre === nombre,
                             );
                             if (curso) {
                               setCursoSeleccionado(curso);
@@ -653,18 +718,61 @@ export default function NuevaInscripcionPage() {
                                 <ComboboxList>
                                   {(nombre) => {
                                     const curso = cursos.find(
-                                      (c) => c.nombre === nombre
+                                      (c) => c.nombre === nombre,
                                     );
+                                    const estadoFecha = curso
+                                      ? evaluarEstadoFechaCurso(curso)
+                                      : null;
                                     return (
-                                      <ComboboxItem key={nombre} value={nombre}>
-                                        <span className="font-bold flex-1">
-                                          {nombre}
-                                        </span>
-                                        {curso && (
-                                          <span className="text-primary font-bold text-sm ml-auto">
-                                            Bs. {estudiante?.tipoPersona === 'DOCENTE' ? curso.montoDocente : curso.montoEstudiante}
+                                      <ComboboxItem
+                                        key={nombre}
+                                        value={nombre}
+                                        className="flex flex-col items-start gap-1 py-2.5"
+                                      >
+                                        <div className="flex items-center justify-between w-full">
+                                          <span className="font-bold truncate">
+                                            {nombre}
                                           </span>
-                                        )}
+                                          {curso && (
+                                            <span className="text-primary font-bold text-sm ml-2 whitespace-nowrap">
+                                              Bs.{" "}
+                                              {estudiante?.tipoPersona ===
+                                              "DOCENTE"
+                                                ? curso.montoDocente
+                                                : curso.montoEstudiante}
+                                            </span>
+                                          )}
+                                        </div>
+                                        {estadoFecha &&
+                                          (estadoFecha.rangoTexto ||
+                                            estadoFecha.estado !==
+                                              "VIGENTE") && (
+                                            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                                              {estadoFecha.rangoTexto && (
+                                                <span>
+                                                  📅 {estadoFecha.rangoTexto}
+                                                </span>
+                                              )}
+                                              {estadoFecha.estado ===
+                                                "NO_INICIADO" && (
+                                                <Badge
+                                                  variant="secondary"
+                                                  className="text-[10px] bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
+                                                >
+                                                  Próximamente
+                                                </Badge>
+                                              )}
+                                              {estadoFecha.estado ===
+                                                "CONCLUIDO" && (
+                                                <Badge
+                                                  variant="destructive"
+                                                  className="text-[10px]"
+                                                >
+                                                  Inscripción cerrada
+                                                </Badge>
+                                              )}
+                                            </div>
+                                          )}
                                       </ComboboxItem>
                                     );
                                   }}
@@ -674,6 +782,32 @@ export default function NuevaInscripcionPage() {
                           </ComboboxContent>
                         </Combobox>
                       </div>
+
+                      {/* Alerta si el curso seleccionado está fuera de fecha */}
+                      {cursoSeleccionado &&
+                        (() => {
+                          const estadoFecha =
+                            evaluarEstadoFechaCurso(cursoSeleccionado);
+                          if (estadoFecha.estado !== "VIGENTE") {
+                            return (
+                              <div className="p-4 rounded-xl bg-destructive/10 border-2 border-destructive/30 text-destructive text-sm font-bold flex items-center gap-3 animate-in fade-in duration-300">
+                                <span className="text-lg">⚠️</span>
+                                <div>
+                                  <p className="font-extrabold">
+                                    {estadoFecha.mensaje}
+                                  </p>
+                                  {estadoFecha.rangoTexto && (
+                                    <p className="text-xs font-normal opacity-90">
+                                      Fechas de inscripción:{" "}
+                                      {estadoFecha.rangoTexto}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
 
                       {/* Combobox de Paralelos */}
                       {idCursoSeleccionado && cursoSeleccionado && (
@@ -687,12 +821,12 @@ export default function NuevaInscripcionPage() {
                               .map((p) => p.nombre)}
                             value={
                               cursoSeleccionado.paralelos.find(
-                                (p) => p.id === idParaleloSeleccionado
+                                (p) => p.id === idParaleloSeleccionado,
                               )?.nombre ?? ""
                             }
                             onValueChange={(nombreParalelo) => {
                               const paralelo = cursoSeleccionado.paralelos.find(
-                                (p) => p.nombre === nombreParalelo
+                                (p) => p.nombre === nombreParalelo,
                               );
                               setIdParaleloSeleccionado(paralelo?.id ?? "");
                             }}
@@ -709,7 +843,7 @@ export default function NuevaInscripcionPage() {
                               <ComboboxList>
                                 {(nombreParalelo) => {
                                   const p = cursoSeleccionado.paralelos.find(
-                                    (p) => p.nombre === nombreParalelo
+                                    (p) => p.nombre === nombreParalelo,
                                   );
                                   return (
                                     <ComboboxItem
@@ -733,7 +867,14 @@ export default function NuevaInscripcionPage() {
 
                       <Button
                         className="w-full h-14 text-lg font-black shadow-lg shadow-primary/10 active:scale-95 transition-all"
-                        disabled={!idParaleloSeleccionado}
+                        disabled={
+                          !idParaleloSeleccionado ||
+                          Boolean(
+                            cursoSeleccionado &&
+                            evaluarEstadoFechaCurso(cursoSeleccionado)
+                              .estado !== "VIGENTE",
+                          )
+                        }
                         onClick={agregarAlCarrito}
                       >
                         Agregar a la bandeja{" "}
@@ -834,7 +975,10 @@ export default function NuevaInscripcionPage() {
                                     </div>
                                   </TableCell>
                                   <TableCell className="text-right font-mono font-black text-base py-5">
-                                    Bs. {estudiante?.tipoPersona === 'DOCENTE' ? item.curso.montoDocente : item.curso.montoEstudiante}
+                                    Bs.{" "}
+                                    {estudiante?.tipoPersona === "DOCENTE"
+                                      ? item.curso.montoDocente
+                                      : item.curso.montoEstudiante}
                                   </TableCell>
                                   <TableCell className="pr-6 py-5">
                                     <Button
