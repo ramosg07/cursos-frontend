@@ -17,9 +17,7 @@ import { useAuth } from "@/contexts/AuthProvider";
 
 export function DocentesDatatable() {
   const [updateTable, setUpdateTable] = useState(false);
-  const [selectDocente, setSelectDocente] = useState<Docente | null>(
-    null,
-  );
+  const [selectDocente, setSelectDocente] = useState<Docente | null>(null);
   const [agregarEditarModalOpen, setAgregarEditarModalOpen] =
     useState<boolean>(false);
   const [activarInactivarModalOpen, setActivarInactivarModalOpen] =
@@ -80,6 +78,14 @@ export function DocentesDatatable() {
       meta: { mobileTitle: "Nombre" },
     },
     {
+      accessorKey: "telefono",
+      header: ({ column }) => (
+        <SortableHeader column={column} title="Celular" />
+      ),
+      cell: ({ row }) => row.original.usuario?.persona.telefono ?? "—",
+      meta: { mobileTitle: "Celular" },
+    },
+    {
       accessorKey: "estado",
       header: ({ column }) => <SortableHeader column={column} title="Estado" />,
       cell: ({ row }) => (
@@ -95,35 +101,35 @@ export function DocentesDatatable() {
     },
     ...(permissions.update
       ? [
-        {
-          id: "actions",
-          header: () => (
-            <div className="text-center normal-case text-sm">Acciones</div>
-          ),
-          cell: ({ row }: any) => (
-            <div className="flex items-center gap-2">
-              {row.original.estado === "ACTIVO" && (
-                <Button
-                  title="Editar"
-                  variant="outline"
-                  size={"icon"}
-                  onClick={() => handleAgregarEditarDocente(row.original)}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-              )}
-              <Switch
-                id={"switch-docente-" + row.original.id}
-                checked={row.original.estado === "ACTIVO"}
-                onCheckedChange={() =>
-                  handleActivarInactivarDocente(row.original)
-                }
-              />
-            </div>
-          ),
-          meta: { mobileTitle: "Acciones" },
-        },
-      ]
+          {
+            id: "actions",
+            header: () => (
+              <div className="text-center normal-case text-sm">Acciones</div>
+            ),
+            cell: ({ row }: any) => (
+              <div className="flex items-center gap-2">
+                {row.original.estado === "ACTIVO" && (
+                  <Button
+                    title="Editar"
+                    variant="outline"
+                    size={"icon"}
+                    onClick={() => handleAgregarEditarDocente(row.original)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                )}
+                <Switch
+                  id={"switch-docente-" + row.original.id}
+                  checked={row.original.estado === "ACTIVO"}
+                  onCheckedChange={() =>
+                    handleActivarInactivarDocente(row.original)
+                  }
+                />
+              </div>
+            ),
+            meta: { mobileTitle: "Acciones" },
+          },
+        ]
       : []),
   ];
 
@@ -150,27 +156,27 @@ export function DocentesDatatable() {
         toolBarConfig={{
           components: permissions.create
             ? [
-              <Button
-                key={"BulkUpload"}
-                title="Carga masiva"
-                variant="outline"
-                className="flex gap-2"
-                onClick={() => setBulkUploadModalOpen(true)}
-              >
-                <Upload className="h-4 w-4" />
-                <span>Carga Masiva</span>
-              </Button>,
-              <Button
-                key={"Agregar"}
-                title="Agregar docente"
-                variant="default"
-                className="flex gap-2"
-                onClick={() => handleAgregarEditarDocente(null)}
-              >
-                <Plus className="h-4 w-4" />
-                <span>Nuevo Docente</span>
-              </Button>,
-            ]
+                <Button
+                  key={"BulkUpload"}
+                  title="Carga masiva"
+                  variant="outline"
+                  className="flex gap-2"
+                  onClick={() => setBulkUploadModalOpen(true)}
+                >
+                  <Upload className="h-4 w-4" />
+                  <span>Carga Masiva</span>
+                </Button>,
+                <Button
+                  key={"Agregar"}
+                  title="Agregar docente"
+                  variant="default"
+                  className="flex gap-2"
+                  onClick={() => handleAgregarEditarDocente(null)}
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Nuevo Docente</span>
+                </Button>,
+              ]
             : [],
         }}
         titulo={"Gestión de docentes"}

@@ -13,6 +13,7 @@ export interface Docente {
       segundoApellido?: string | null;
       nroDocumento: string;
       fechaNacimiento?: string | null;
+      telefono?: string | null;
     };
   };
 }

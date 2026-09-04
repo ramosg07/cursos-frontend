@@ -18,9 +18,6 @@ import { Estudiante } from "../types";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { MessageInterpreter } from "@/lib/messageInterpreter";
-import dayjs from "dayjs";
-import { validateDateFormat } from "@/lib/dates";
-import { DatePickerSimple } from "@/components/DatePickerSimple";
 
 const studentSchema = z.object({
   nroDocumento: z.string().min(5, "Mínimo 5 caracteres"),
@@ -29,6 +26,7 @@ const studentSchema = z.object({
   segundoApellido: z.string().optional().nullable(),
   // correoElectronico: z.string().email("Correo inválido"),
   codigoPersonal: z.string().optional().nullable(),
+  telefono: z.string().optional().nullable(),
   // fechaNacimiento: z.string().refine(
   //   (date) => {
   //     return validateDateFormat(date, "YYYY-MM-DD");
@@ -65,6 +63,7 @@ export function AgregarEditarEstudianteModal({
       segundoApellido: "",
       // correoElectronico: "",
       codigoPersonal: "",
+      telefono: "",
       // fechaNacimiento: "",
     },
   });
@@ -79,6 +78,7 @@ export function AgregarEditarEstudianteModal({
         segundoApellido: p.segundoApellido ?? "",
         // correoElectronico: estudiante.usuario?.correoElectronico,
         codigoPersonal: estudiante.codigoPersonal ?? "",
+        telefono: estudiante.usuario.persona.telefono ?? "",
         // fechaNacimiento:
         //   dayjs
         //     .utc(estudiante.usuario.persona.fechaNacimiento)
@@ -92,6 +92,7 @@ export function AgregarEditarEstudianteModal({
         segundoApellido: "",
         // correoElectronico: "",
         codigoPersonal: "",
+        telefono: "",
         // fechaNacimiento: "",
       });
     }
@@ -110,6 +111,7 @@ export function AgregarEditarEstudianteModal({
         primerApellido: values.primerApellido,
         // fechaNacimiento: values.fechaNacimiento || null,
         nroDocumento: !estudiante ? values.nroDocumento : undefined,
+        telefono: values.telefono ? values.telefono : null,
       };
       const resultado = await sessionRequest({
         url,
@@ -134,58 +136,32 @@ export function AgregarEditarEstudianteModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-125">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? "Editar Estudiante" : "Nuevo Estudiante"}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <Controller
-              name="nroDocumento"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field aria-invalid={fieldState.invalid}>
-                  <FieldLabel>Documento (CI)</FieldLabel>
-                  <Input
-                    placeholder="1234567"
-                    {...field}
-                    disabled={isEditing}
-                    aria-invalid={fieldState.invalid}
-                    onChange={(e) =>
-                      field.onChange(e.target.value.toUpperCase())
-                    }
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-            <Controller
-              name="codigoPersonal"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field aria-invalid={fieldState.invalid}>
-                  <FieldLabel>Código/Matrícula</FieldLabel>
-                  <Input
-                    placeholder="20000154784"
-                    {...field}
-                    value={field.value || ""}
-                    aria-invalid={fieldState.invalid}
-                    onChange={(e) =>
-                      field.onChange(e.target.value.toUpperCase())
-                    }
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-          </div>
-
+          <Controller
+            name="nroDocumento"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field aria-invalid={fieldState.invalid}>
+                <FieldLabel>Documento (CI)</FieldLabel>
+                <Input
+                  placeholder="1234567"
+                  {...field}
+                  disabled={isEditing}
+                  aria-invalid={fieldState.invalid}
+                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
           <Controller
             name="nombres"
             control={form.control}
@@ -196,9 +172,7 @@ export function AgregarEditarEstudianteModal({
                   placeholder="Juan"
                   {...field}
                   aria-invalid={fieldState.invalid}
-                  onChange={(e) =>
-                    field.onChange(e.target.value.toUpperCase())
-                  }
+                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
@@ -236,6 +210,50 @@ export function AgregarEditarEstudianteModal({
                   <FieldLabel>Segundo Apellido</FieldLabel>
                   <Input
                     placeholder="Gomez"
+                    {...field}
+                    value={field.value || ""}
+                    aria-invalid={fieldState.invalid}
+                    onChange={(e) =>
+                      field.onChange(e.target.value.toUpperCase())
+                    }
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Controller
+              name="codigoPersonal"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field aria-invalid={fieldState.invalid}>
+                  <FieldLabel>Código/Matrícula</FieldLabel>
+                  <Input
+                    placeholder="20000154784"
+                    {...field}
+                    value={field.value || ""}
+                    aria-invalid={fieldState.invalid}
+                    onChange={(e) =>
+                      field.onChange(e.target.value.toUpperCase())
+                    }
+                  />
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
+                </Field>
+              )}
+            />
+            <Controller
+              name="telefono"
+              control={form.control}
+              render={({ field, fieldState }) => (
+                <Field aria-invalid={fieldState.invalid}>
+                  <FieldLabel>Celular</FieldLabel>
+                  <Input
+                    placeholder="72627278"
                     {...field}
                     value={field.value || ""}
                     aria-invalid={fieldState.invalid}

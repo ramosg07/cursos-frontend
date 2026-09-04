@@ -88,6 +88,14 @@ export function EstudiantesDatatable() {
       meta: { mobileTitle: "Matrícula" },
     },
     {
+      accessorKey: "telefono",
+      header: ({ column }) => (
+        <SortableHeader column={column} title="Celular" />
+      ),
+      cell: ({ row }) => row.original.usuario?.persona.telefono ?? "—",
+      meta: { mobileTitle: "Celular" },
+    },
+    {
       accessorKey: "estado",
       header: ({ column }) => <SortableHeader column={column} title="Estado" />,
       cell: ({ row }) => (

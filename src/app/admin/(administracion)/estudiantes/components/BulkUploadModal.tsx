@@ -93,6 +93,7 @@ export function BulkUploadModal({ isOpen, onClose, onSuccess }: Props) {
       "segundoApellido",
       "correoElectronico",
       "codigoPersonal",
+      "celular",
     ];
 
     const ejemplo = [
@@ -102,6 +103,7 @@ export function BulkUploadModal({ isOpen, onClose, onSuccess }: Props) {
       "Gómez",
       "juan.perez@correo.com",
       "EMP001",
+      "78787878",
     ];
 
     const csvContent = headers.join(",") + "\n" + ejemplo.join(",");

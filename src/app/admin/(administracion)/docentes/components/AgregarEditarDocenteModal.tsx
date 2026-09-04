@@ -24,6 +24,7 @@ const teacherSchema = z.object({
   nombres: z.string().min(2, "Mínimo 2 caracteres"),
   primerApellido: z.string().min(2, "Mínimo 2 caracteres"),
   segundoApellido: z.string().optional().nullable(),
+  telefono: z.string().optional().nullable(),
 });
 
 type TeacherFormValues = z.infer<typeof teacherSchema>;
@@ -52,6 +53,7 @@ export function AgregarEditarDocenteModal({
       nombres: "",
       primerApellido: "",
       segundoApellido: "",
+      telefono: "",
     },
   });
 
@@ -63,6 +65,7 @@ export function AgregarEditarDocenteModal({
         nombres: p.nombres,
         primerApellido: p.primerApellido,
         segundoApellido: p.segundoApellido ?? "",
+        telefono: p.telefono ?? "",
       });
     } else {
       form.reset({
@@ -70,6 +73,7 @@ export function AgregarEditarDocenteModal({
         nombres: "",
         primerApellido: "",
         segundoApellido: "",
+        telefono: "",
       });
     }
   }, [docente, form]);
@@ -83,6 +87,7 @@ export function AgregarEditarDocenteModal({
         segundoApellido: values.segundoApellido || null,
         nombres: values.nombres,
         primerApellido: values.primerApellido,
+        telefono: values.telefono || null,
         nroDocumento: !docente ? values.nroDocumento : undefined,
       };
       const resultado = await sessionRequest({
@@ -126,9 +131,7 @@ export function AgregarEditarDocenteModal({
                   {...field}
                   disabled={isEditing}
                   aria-invalid={fieldState.invalid}
-                  onChange={(e) =>
-                    field.onChange(e.target.value.toUpperCase())
-                  }
+                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
@@ -147,9 +150,7 @@ export function AgregarEditarDocenteModal({
                   placeholder="Juan"
                   {...field}
                   aria-invalid={fieldState.invalid}
-                  onChange={(e) =>
-                    field.onChange(e.target.value.toUpperCase())
-                  }
+                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                 />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
@@ -201,6 +202,26 @@ export function AgregarEditarDocenteModal({
               )}
             />
           </div>
+
+          <Controller
+            name="telefono"
+            control={form.control}
+            render={({ field, fieldState }) => (
+              <Field aria-invalid={fieldState.invalid}>
+                <FieldLabel>Celular</FieldLabel>
+                <Input
+                  placeholder="72627278"
+                  {...field}
+                  value={field.value || ""}
+                  aria-invalid={fieldState.invalid}
+                  onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
 
           <DialogFooter>
             <Button
