@@ -227,6 +227,35 @@ export function InscritosDatatable({ curso }: Props) {
       meta: { mobileTitle: "Coordinador de curso" },
     },
     {
+      accessorKey: "metodoPago",
+      header: () => (
+        <div className="text-center normal-case text-sm">Método Pago</div>
+      ),
+      cell: ({ row }) => {
+        const metodo = row.original.metodoPago;
+        if (metodo === "QR") {
+          return (
+            <div className="flex justify-center">
+              <Badge className="bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30 hover:bg-blue-500/20 font-bold">
+                📲 QR
+              </Badge>
+            </div>
+          );
+        }
+        if (metodo === "EFECTIVO") {
+          return (
+            <div className="flex justify-center">
+              <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20 font-bold">
+                💵 Efectivo
+              </Badge>
+            </div>
+          );
+        }
+        return <div className="text-center">—</div>;
+      },
+      meta: { mobileTitle: "Método Pago" },
+    },
+    {
       id: "acciones",
       header: () => (
         <div className="text-center normal-case text-sm">Acciones</div>
@@ -635,7 +664,7 @@ export function InscritosDatatable({ curso }: Props) {
                 onClick={() => setAgregarInscripcionModalOpen(true)}
               >
                 <Plus className="h-4 w-4" />
-                <span>Inscribir Estudiante</span>
+                <span>Inscribir Estudiante / Docente</span>
               </Button>
             ),
           ],

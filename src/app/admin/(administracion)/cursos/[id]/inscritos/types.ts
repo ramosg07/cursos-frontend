@@ -5,6 +5,7 @@ export interface Inscripcion {
   idParalelo: string;
   fechaInscripcion: string;
   estado: string;
+  metodoPago: string;
   paralelo: {
     id: string;
     nombre: string;
