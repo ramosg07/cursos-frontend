@@ -73,13 +73,13 @@ export function Consulta({ inscribir }: Props) {
   const [loadingConsulta, setLoadingConsulta] = useState(false);
   const [busquedaRealizada, setBusquedaRealizada] = useState(false);
   const [estudianteConsulta, setEstudianteConsulta] = useState<any | null>(
-    null
+    null,
   );
   const [printingReport, setPrintingReport] = useState(false);
 
   // Estado para reimpresión por codigoRecibo
   const [imprimiendoRecibo, setImprimiendoRecibo] = useState<string | null>(
-    null
+    null,
   );
   const [dialogConfig, setDialogConfig] = useState<{
     open: boolean;
@@ -111,6 +111,9 @@ export function Consulta({ inscribir }: Props) {
           if (filas[0].docente) {
             setEstudianteConsulta(filas[0].docente);
           }
+          if (filas[0].externo) {
+            setEstudianteConsulta(filas[0].externo);
+          }
         } else {
           // Si no hay inscripciones, intentar buscar al estudiante para mostrar su info al menos
           try {
@@ -122,13 +125,13 @@ export function Consulta({ inscribir }: Props) {
               setEstudianteConsulta(resEst.data.datos);
             }
           } catch (e) {
-            print("Estudiante no encontrado en consulta", e);
+            print("Estudiante, docente o externo no encontrado en consulta", e);
           }
         }
       }
     } catch (error: any) {
       toast.error(
-        error?.response?.data?.mensaje || "Error al consultar inscripciones"
+        error?.response?.data?.mensaje || "Error al consultar inscripciones",
       );
     } finally {
       setLoadingConsulta(false);
@@ -234,10 +237,7 @@ export function Consulta({ inscribir }: Props) {
         const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement("a");
         link.href = blobUrl;
-        link.setAttribute(
-          "download",
-          `recibo-${new Date().getTime()}.pdf`
-        );
+        link.setAttribute("download", `recibo-${new Date().getTime()}.pdf`);
         document.body.appendChild(link);
         link.click();
         link.remove();
@@ -285,7 +285,7 @@ export function Consulta({ inscribir }: Props) {
 
   const totalInscripciones = inscripcionesConsulta.reduce(
     (acc, curr) => acc + Number(curr.montoPagado),
-    0
+    0,
   );
 
   return (
@@ -293,9 +293,7 @@ export function Consulta({ inscribir }: Props) {
       {/* Diálogo de confirmación de reimpresión */}
       <AlertDialog
         open={dialogConfig.open}
-        onOpenChange={(open) =>
-          setDialogConfig((prev) => ({ ...prev, open }))
-        }
+        onOpenChange={(open) => setDialogConfig((prev) => ({ ...prev, open }))}
       >
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
@@ -322,7 +320,7 @@ export function Consulta({ inscribir }: Props) {
                       <Clock className="h-4 w-4 text-amber-600" />
                       <span className="font-bold text-amber-800">
                         {new Date(
-                          dialogConfig.estatus.ultimaImpresion.fecha
+                          dialogConfig.estatus.ultimaImpresion.fecha,
                         ).toLocaleString("es-BO")}
                       </span>
                     </div>
@@ -342,7 +340,9 @@ export function Consulta({ inscribir }: Props) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="font-bold">Cancelar</AlertDialogCancel>
+            <AlertDialogCancel className="font-bold">
+              Cancelar
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmarReimpresion}
               className="bg-primary font-black"
@@ -422,9 +422,13 @@ export function Consulta({ inscribir }: Props) {
                           variant="outline"
                           className="font-bold border-primary/30"
                         >
-                          CI: {estudianteConsulta.usuario?.persona?.nroDocumento}
+                          CI:{" "}
+                          {estudianteConsulta.usuario?.persona?.nroDocumento}
                         </Badge>
-                        <Badge variant="default" className="bg-primary font-bold">
+                        <Badge
+                          variant="default"
+                          className="bg-primary font-bold"
+                        >
                           Inscripciones: {inscripcionesConsulta.length}
                         </Badge>
                         <Badge
@@ -458,10 +462,10 @@ export function Consulta({ inscribir }: Props) {
                     <UserPlus className="h-10 w-10 text-muted-foreground/30" />
                   </div>
                   <h3 className="text-2xl font-black text-muted-foreground/50">
-                    Estudiante no encontrado
+                    Estudiante / Docente / Externo no encontrado
                   </h3>
                   <p className="text-muted-foreground max-w-xs">
-                    No se encontró ningún estudiante con el CI proporcionado.
+                    No se encontró ninguna persona con el CI proporcionado.
                   </p>
                 </div>
               )}
@@ -506,7 +510,7 @@ export function Consulta({ inscribir }: Props) {
                                     year: "numeric",
                                     month: "long",
                                     day: "numeric",
-                                  }
+                                  },
                                 )}
                               </span>
                               <span>
@@ -520,31 +524,29 @@ export function Consulta({ inscribir }: Props) {
                         </div>
 
                         {esCoordinadorGeneral && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              disabled={
-                                imprimiendoRecibo === grupo.codigoRecibo ||
-                                imprimiendoRecibo ===
-                                  `historico-${grupo.inscripciones[0]?.id}`
-                              }
-                              onClick={() =>
-                                handleIniciarReimpresion(grupo)
-                              }
-                              className="h-9 px-4 font-black border-primary/30 text-primary hover:bg-primary hover:text-white transition-all"
-                            >
-                              {imprimiendoRecibo === grupo.codigoRecibo ||
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={
+                              imprimiendoRecibo === grupo.codigoRecibo ||
                               imprimiendoRecibo ===
-                                `historico-${grupo.inscripciones[0]?.id}` ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              ) : (
-                                <Printer className="mr-2 h-4 w-4" />
-                              )}
-                              {grupo.codigoRecibo.startsWith("REC-")
-                                ? "Reimprimir Recibo"
-                                : "Imprimir Recibo"}
-                            </Button>
-                          )}
+                                `historico-${grupo.inscripciones[0]?.id}`
+                            }
+                            onClick={() => handleIniciarReimpresion(grupo)}
+                            className="h-9 px-4 font-black border-primary/30 text-primary hover:bg-primary hover:text-white transition-all"
+                          >
+                            {imprimiendoRecibo === grupo.codigoRecibo ||
+                            imprimiendoRecibo ===
+                              `historico-${grupo.inscripciones[0]?.id}` ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <Printer className="mr-2 h-4 w-4" />
+                            )}
+                            {grupo.codigoRecibo.startsWith("REC-")
+                              ? "Reimprimir Recibo"
+                              : "Imprimir Recibo"}
+                          </Button>
+                        )}
                       </div>
 
                       {/* Tabla de inscripciones del recibo */}
@@ -606,7 +608,7 @@ export function Consulta({ inscribir }: Props) {
                           {grupo.inscripciones
                             .reduce(
                               (acc, curr) => acc + Number(curr.montoPagado),
-                              0
+                              0,
                             )
                             .toFixed(2)}
                         </span>

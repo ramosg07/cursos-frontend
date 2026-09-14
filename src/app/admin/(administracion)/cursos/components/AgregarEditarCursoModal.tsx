@@ -64,6 +64,7 @@ const formSchema = z.object({
     ),
   montoEstudiante: z.coerce.number().min(1, "El monto debe ser mayor a 0"),
   montoDocente: z.coerce.number().min(1, "El monto debe ser mayor a 0"),
+  montoExterno: z.coerce.number().min(0, "El monto debe ser mayor o igual a 0"),
   monto: z.coerce.number().optional(),
   coordinadores: z.array(z.string()).optional(),
   paralelos: z
@@ -127,6 +128,7 @@ export function AgregarEditarCursoModal({
           fechaFin: dayjs.utc(curso.fechaFin).format("YYYY-MM-DD") || "",
           montoEstudiante: Number(curso.montoEstudiante) || 0,
           montoDocente: Number(curso.montoDocente) || 0,
+          montoExterno: Number(curso.montoExterno) || 0,
           coordinadores: coordinadoresActivos,
           paralelos: (curso.paralelos || []).map((p) => ({
             id: p.id,
@@ -141,6 +143,7 @@ export function AgregarEditarCursoModal({
           fechaFin: "",
           montoEstudiante: 0,
           montoDocente: 0,
+          montoExterno: 0,
           monto: 0,
           coordinadores: [],
           paralelos: [{ nombre: "A", cupo: 30 }],
@@ -167,6 +170,7 @@ export function AgregarEditarCursoModal({
           fechaFin: values.fechaFin || null,
           montoEstudiante: values.montoEstudiante,
           montoDocente: values.montoDocente,
+          montoExterno: values.montoExterno,
           monto: values.monto,
           coordinadores: values.coordinadores ?? [],
           paralelos: values.paralelos ?? [],
@@ -302,7 +306,7 @@ export function AgregarEditarCursoModal({
                     );
                   }}
                 />
-                <div className="flex w-full gap-4">
+                <div className="grid grid-cols-3 w-full gap-3">
                   <Controller
                     name="montoEstudiante"
                     control={form.control}
@@ -311,11 +315,11 @@ export function AgregarEditarCursoModal({
                         aria-invalid={fieldState.invalid}
                         className="w-full"
                       >
-                        <FieldLabel>Monto Estudiante (Bs.)</FieldLabel>
+                        <FieldLabel className="text-xs">Estudiante (Bs.)</FieldLabel>
                         <Input
                           id="montoEstudiante"
                           type="number"
-                          placeholder="Monto Estudiante"
+                          placeholder="Estudiante"
                           {...field}
                           aria-invalid={fieldState.invalid}
                           disabled={coordinadorCurso}
@@ -334,11 +338,34 @@ export function AgregarEditarCursoModal({
                         aria-invalid={fieldState.invalid}
                         className="w-full"
                       >
-                        <FieldLabel>Monto Docente (Bs.)</FieldLabel>
+                        <FieldLabel className="text-xs">Docente (Bs.)</FieldLabel>
                         <Input
                           id="montoDocente"
                           type="number"
-                          placeholder="Monto Docente"
+                          placeholder="Docente"
+                          {...field}
+                          aria-invalid={fieldState.invalid}
+                          disabled={coordinadorCurso}
+                        />
+                        {fieldState.invalid && (
+                          <FieldError errors={[fieldState.error]} />
+                        )}
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    name="montoExterno"
+                    control={form.control}
+                    render={({ field, fieldState }) => (
+                      <Field
+                        aria-invalid={fieldState.invalid}
+                        className="w-full"
+                      >
+                        <FieldLabel className="text-xs">Externo (Bs.)</FieldLabel>
+                        <Input
+                          id="montoExterno"
+                          type="number"
+                          placeholder="Externo"
                           {...field}
                           aria-invalid={fieldState.invalid}
                           disabled={coordinadorCurso}

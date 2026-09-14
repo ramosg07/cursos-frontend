@@ -47,6 +47,9 @@ export function AgregarInscripcionModal({
   const [enrolling, setEnrolling] = useState(false);
   const [idParaleloSeleccionado, setIdParaleloSeleccionado] =
     useState<string>("");
+  const [metodoPago, setMetodoPago] = useState<"EFECTIVO" | "QR">(
+    "EFECTIVO",
+  );
   const [idInscripcionExitosa, setIdInscripcionExitosa] = useState<
     string | null
   >(null);
@@ -82,8 +85,14 @@ export function AgregarInscripcionModal({
         url: "/inscripciones",
         method: "post",
         data: {
-          idEstudiante: estudiante.id,
+          idEstudiante:
+            estudiante.tipoPersona === "ESTUDIANTE" ? estudiante.id : undefined,
+          idDocente:
+            estudiante.tipoPersona === "DOCENTE" ? estudiante.id : undefined,
+          idExterno:
+            estudiante.tipoPersona === "EXTERNO" ? estudiante.id : undefined,
           idParalelo: idParaleloSeleccionado,
+          metodoPago,
         },
       });
 
@@ -133,6 +142,7 @@ export function AgregarInscripcionModal({
     setNroDocumento("");
     setEstudiante(null);
     setIdParaleloSeleccionado("");
+    setMetodoPago("EFECTIVO");
     setIdInscripcionExitosa(null);
     onClose();
   };
@@ -259,6 +269,23 @@ export function AgregarInscripcionModal({
                       Este curso no tiene paralelos activos configurados.
                     </p>
                   )}
+                </Field>
+                <Field>
+                  <FieldLabel>Método de pago</FieldLabel>
+                  <Select
+                    value={metodoPago}
+                    onValueChange={(value) =>
+                      setMetodoPago(value as "EFECTIVO" | "QR")
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccione un método" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="EFECTIVO">Efectivo</SelectItem>
+                      <SelectItem value="QR">QR</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </Field>
               </div>
             )}

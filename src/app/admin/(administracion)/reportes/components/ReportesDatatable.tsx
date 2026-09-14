@@ -60,6 +60,15 @@ export function ReportesDatatable() {
       cell: ({ row }) => {
         const docente = row.original.docente;
         const estudiante = row.original.estudiante;
+        const externo = row.original.externo;
+        if (externo) {
+          return (
+            <div className="flex gap-1 justify-center">
+              <Badge variant={"default"}>Externo</Badge>
+              <p>{externo?.usuario?.persona?.nroDocumento}</p>
+            </div>
+          );
+        }
         if (estudiante) {
           return (
             <div className="flex gap-1 justify-center">
@@ -83,11 +92,16 @@ export function ReportesDatatable() {
     {
       accessorKey: "estudiante.usuario.persona.nombres",
       header: ({ column }) => (
-        <SortableHeader column={column} title="Estudiante / Docente" />
+        <SortableHeader column={column} title="Estudiante / Docente / Externo" />
       ),
       cell: ({ row }) => {
         const docente = row.original.docente;
         const estudiante = row.original.estudiante;
+        const externo = row.original.externo;
+        if (externo) {
+          const p = externo?.usuario?.persona;
+          return `${p.nombres} ${p.primerApellido} ${p.segundoApellido ?? ""}`;
+        }
         if (estudiante) {
           const p = estudiante?.usuario?.persona;
           return `${p.nombres} ${p.primerApellido} ${p.segundoApellido ?? ""}`;

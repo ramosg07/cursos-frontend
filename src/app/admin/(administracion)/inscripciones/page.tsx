@@ -187,6 +187,7 @@ export default function NuevaInscripcionPage() {
   );
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (estudiante) fetchCursos("", 10);
   }, [estudiante, fetchCursos]);
 
@@ -265,6 +266,8 @@ export default function NuevaInscripcionPage() {
             estudiante.tipoPersona === "ESTUDIANTE" ? estudiante.id : undefined,
           idDocente:
             estudiante.tipoPersona === "DOCENTE" ? estudiante.id : undefined,
+          idExterno:
+            estudiante.tipoPersona === "EXTERNO" ? estudiante.id : null,
           idsParalelo: carrito.map((item) => item.paralelo.id),
         },
       });
@@ -305,7 +308,9 @@ export default function NuevaInscripcionPage() {
     const monto =
       estudiante?.tipoPersona === "DOCENTE"
         ? item.curso.montoDocente
-        : item.curso.montoEstudiante;
+        : estudiante?.tipoPersona === "EXTERNO"
+          ? item.curso.montoExterno
+          : item.curso.montoEstudiante;
     return acc + Number(monto || 0);
   }, 0);
 
@@ -329,6 +334,8 @@ export default function NuevaInscripcionPage() {
             estudiante.tipoPersona === "ESTUDIANTE" ? estudiante.id : undefined,
           idDocente:
             estudiante.tipoPersona === "DOCENTE" ? estudiante.id : undefined,
+          idExterno:
+            estudiante.tipoPersona === "EXTERNO" ? estudiante.id : undefined,
           idsParalelo: carrito.map((item) => item.paralelo.id),
           metodoPago,
         },
@@ -509,7 +516,9 @@ export default function NuevaInscripcionPage() {
                     Bs.{" "}
                     {estudiante?.tipoPersona === "DOCENTE"
                       ? item.curso.montoDocente
-                      : item.curso.montoEstudiante}
+                      : estudiante?.tipoPersona === "ESTUDIANTE"
+                        ? item.curso.montoEstudiante
+                        : item.curso.montoExterno}
                   </span>
                 </div>
               ))}
@@ -572,10 +581,11 @@ export default function NuevaInscripcionPage() {
                     </div>
                     <div>
                       <CardTitle className="text-xl font-black">
-                        Paso 1: Estudiante / Docente
+                        Paso 1: Estudiante / Docente / Externo
                       </CardTitle>
                       <CardDescription className="text-base">
-                        Verificación de identidad y rol (Estudiante o Docente)
+                        Verificación de identidad y rol (Estudiante, Docente o
+                        Externo)
                       </CardDescription>
                     </div>
                   </div>
@@ -739,7 +749,10 @@ export default function NuevaInscripcionPage() {
                                               {estudiante?.tipoPersona ===
                                               "DOCENTE"
                                                 ? curso.montoDocente
-                                                : curso.montoEstudiante}
+                                                : estudiante?.tipoPersona ===
+                                                    "EXTERNO"
+                                                  ? curso.montoExterno
+                                                  : curso.montoEstudiante}
                                             </span>
                                           )}
                                         </div>

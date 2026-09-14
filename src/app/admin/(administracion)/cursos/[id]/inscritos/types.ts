@@ -20,6 +20,10 @@ export interface Inscripcion {
     id: string;
     usuario: Usuario;
   };
+  externo: {
+    id: string;
+    usuario: Usuario;
+  };
   usuarioInscripcion: Usuario;
   usuarioDesinscripcion: Usuario;
 }
@@ -28,7 +32,7 @@ export interface EstudianteBusqueda {
   id: string;
   codigoPersonal?: string | null;
   usuario: Usuario;
-  tipoPersona?: 'ESTUDIANTE' | 'DOCENTE';
+  tipoPersona?: 'ESTUDIANTE' | 'DOCENTE' | 'EXTERNO';
 }
 
 interface Persona {

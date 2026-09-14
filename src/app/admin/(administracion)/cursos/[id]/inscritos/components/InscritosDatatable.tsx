@@ -140,6 +140,7 @@ export function InscritosDatatable({ curso }: Props) {
       cell: ({ row }) => {
         const docente = row.original.docente;
         const estudiante = row.original.estudiante;
+        const externo = row.original.externo;
         if (estudiante) {
           return (
             <div className="flex gap-1">
@@ -153,6 +154,19 @@ export function InscritosDatatable({ curso }: Props) {
             <div className="flex gap-1">
               <Badge variant={"secondary"}>Docente</Badge>
               <p>{docente?.usuario?.persona?.nroDocumento}</p>
+            </div>
+          );
+        }
+        if (externo) {
+          return (
+            <div className="flex gap-1">
+              <Badge
+                variant={"outline"}
+                className="border-purple-400/30 text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/10 font-bold"
+              >
+                Externo
+              </Badge>
+              <p>{externo?.usuario?.persona?.nroDocumento}</p>
             </div>
           );
         }
@@ -170,11 +184,12 @@ export function InscritosDatatable({ curso }: Props) {
     {
       accessorKey: "estudiante.usuario.persona.nombres",
       header: ({ column }) => (
-        <SortableHeader column={column} title="Estudiante / Docente" />
+        <SortableHeader column={column} title="Participante" />
       ),
       cell: ({ row }) => {
         const docente = row.original.docente;
         const estudiante = row.original.estudiante;
+        const externo = row.original.externo;
         if (estudiante) {
           const p = estudiante?.usuario?.persona;
           return `${p.nombres} ${p.primerApellido} ${p.segundoApellido ?? ""}`;
@@ -183,9 +198,13 @@ export function InscritosDatatable({ curso }: Props) {
           const p = docente?.usuario?.persona;
           return `${p.nombres} ${p.primerApellido} ${p.segundoApellido ?? ""}`;
         }
+        if (externo) {
+          const p = externo?.usuario?.persona;
+          return `${p.nombres} ${p.primerApellido} ${p.segundoApellido ?? ""}`;
+        }
         return "—";
       },
-      meta: { mobileTitle: "Estudiante" },
+      meta: { mobileTitle: "Participante" },
     },
     {
       accessorKey: "paralelo.nombre",
@@ -283,7 +302,8 @@ export function InscritosDatatable({ curso }: Props) {
                   onClick={() => {
                     const est = row.original.estudiante?.usuario?.persona;
                     const doc = row.original.docente?.usuario?.persona;
-                    const p = est || doc;
+                    const ext = row.original.externo?.usuario?.persona;
+                    const p = est || doc || ext;
                     setHistorialModalInscripcion({
                       id: row.original.id,
                       nombre: p
@@ -309,11 +329,16 @@ export function InscritosDatatable({ curso }: Props) {
                       <AlertDialogDescription>
                         Esta acción marcará la inscripción de{" "}
                         <strong>
-                          {row.original.estudiante?.usuario?.persona?.nombres}{" "}
-                          {
-                            row.original.estudiante?.usuario?.persona
-                              ?.primerApellido
-                          }
+                          {(() => {
+                            const participante =
+                              row.original.estudiante ??
+                              row.original.docente ??
+                              row.original.externo;
+                            const persona = participante?.usuario?.persona;
+                            return persona
+                              ? `${persona.nombres} ${persona.primerApellido} ${persona.segundoApellido ?? ""}`.trim()
+                              : "este participante";
+                          })()}
                         </strong>{" "}
                         como inactiva. Podrá volver a inscribirlo después si es
                         necesario.
@@ -412,8 +437,8 @@ export function InscritosDatatable({ curso }: Props) {
         const csvRows = [
           headers.join(","),
           ...inscritos.map((ins) => {
-            const tipoPersona = ins.estudiante ? "ESTUDIANTE" : "DOCENTE";
-            const participante = ins.estudiante ?? ins.docente;
+            const tipoPersona = ins.estudiante ? "ESTUDIANTE" : ins.docente ? "DOCENTE" : "EXTERNO";
+            const participante = ins.estudiante ?? ins.docente ?? ins.externo;
             const p = participante?.usuario?.persona;
 
             const rowData = [

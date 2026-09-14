@@ -135,6 +135,14 @@ export function CursosDatatable() {
       meta: { mobileTitle: "Monto Docente" },
     },
     {
+      accessorKey: "montoExterno",
+      header: () => (
+        <div className="text-center normal-case text-sm">(Bs.) Externo</div>
+      ),
+      cell: ({ row }) => Number(row.original.montoExterno ?? 0).toFixed(2),
+      meta: { mobileTitle: "Monto Externo" },
+    },
+    {
       accessorKey: "estado",
       header: () => (
         <div className="text-center normal-case text-sm">Estado</div>

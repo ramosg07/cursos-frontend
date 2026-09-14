@@ -47,6 +47,9 @@ export function BulkInscripcionModal({
   } | null>(null);
   const [idParaleloSeleccionado, setIdParaleloSeleccionado] =
     useState<string>("");
+  const [metodoPago, setMetodoPago] = useState<"EFECTIVO" | "QR">(
+    "EFECTIVO",
+  );
 
   const { sessionRequest } = useAuth();
 
@@ -67,6 +70,7 @@ export function BulkInscripcionModal({
       const formData = new FormData();
       formData.append("file", file);
       formData.append("idParalelo", idParaleloSeleccionado);
+      formData.append("metodoPago", metodoPago);
 
       const response = await sessionRequest<{
         finalizado: boolean;
@@ -139,6 +143,23 @@ export function BulkInscripcionModal({
                       </SelectItem>
                     );
                   })}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Método de pago para todas las inscripciones</Label>
+            <Select
+              value={metodoPago}
+              onValueChange={(value) =>
+                setMetodoPago(value as "EFECTIVO" | "QR")
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccione un método" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="EFECTIVO">Efectivo</SelectItem>
+                <SelectItem value="QR">QR</SelectItem>
               </SelectContent>
             </Select>
           </div>

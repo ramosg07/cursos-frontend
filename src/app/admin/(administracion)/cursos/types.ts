@@ -6,6 +6,7 @@ export interface Curso {
   fechaFin?: string | null;
   montoEstudiante: number;
   montoDocente: number;
+  montoExterno: number;
   estado: string;
   cursoCoordinador: CursoCoordinador[];
   paralelos: Paralelo[];

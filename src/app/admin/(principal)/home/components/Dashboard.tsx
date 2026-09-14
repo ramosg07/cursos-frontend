@@ -5,7 +5,14 @@ import { useAuth } from "@/contexts/AuthProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
-import { Users, DollarSign, Loader2, ShoppingCart, QrCode, Banknote } from "lucide-react";
+import {
+  Users,
+  DollarSign,
+  Loader2,
+  ShoppingCart,
+  QrCode,
+  Banknote,
+} from "lucide-react";
 import { toast } from "sonner";
 import { print } from "@/lib/print";
 import {
@@ -29,6 +36,7 @@ interface RecaudacionData {
   cantidad: number;
   cantidadEstudiantes?: number;
   cantidadDocentes?: number;
+  cantidadExternos?: number;
   porMetodoPago?: {
     qr: { total: number; cantidad: number };
     efectivo: { total: number; cantidad: number };
@@ -104,6 +112,7 @@ function RecaudacionPanel({
 
   // Cargar al montar
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -218,7 +227,9 @@ function RecaudacionPanel({
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-black tracking-tight text-blue-600 dark:text-blue-400">
-              {loading ? "..." : `${data?.porMetodoPago?.qr?.total.toFixed(2) || "0.00"} Bs.`}
+              {loading
+                ? "..."
+                : `${data?.porMetodoPago?.qr?.total.toFixed(2) || "0.00"} Bs.`}
             </div>
             <p className="text-xs text-muted-foreground mt-1 font-medium italic">
               {data?.porMetodoPago?.qr?.cantidad || 0} operaciones por QR
@@ -238,10 +249,13 @@ function RecaudacionPanel({
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-black tracking-tight text-emerald-600 dark:text-emerald-400">
-              {loading ? "..." : `${data?.porMetodoPago?.efectivo?.total.toFixed(2) || "0.00"} Bs.`}
+              {loading
+                ? "..."
+                : `${data?.porMetodoPago?.efectivo?.total.toFixed(2) || "0.00"} Bs.`}
             </div>
             <p className="text-xs text-muted-foreground mt-1 font-medium italic">
-              {data?.porMetodoPago?.efectivo?.cantidad || 0} operaciones en efectivo
+              {data?.porMetodoPago?.efectivo?.cantidad || 0} operaciones en
+              efectivo
             </p>
           </CardContent>
         </Card>
@@ -267,6 +281,9 @@ function RecaudacionPanel({
                 </span>
                 <span className="text-purple-600 dark:text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-md flex items-center gap-1">
                   👨‍🏫 {data?.cantidadDocentes || 0} Docentes
+                </span>
+                <span className="text-red-600 dark:text-red-400 bg-red-500/10 px-2 py-0.5 rounded-md flex items-center gap-1">
+                  🧑‍💼 {data?.cantidadExternos || 0} Externos
                 </span>
               </div>
             )}
