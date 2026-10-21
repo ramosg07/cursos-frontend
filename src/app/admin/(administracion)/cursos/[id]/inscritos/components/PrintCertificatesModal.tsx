@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthProvider";
 import { Loader2, Printer } from "lucide-react";
 import { toast } from "sonner";
-import { print } from "@/lib/print";
 
 interface Props {
   idCurso: string;
@@ -73,7 +72,7 @@ export function PrintCertificatesModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-106.25">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Printer className="h-5 w-5" />

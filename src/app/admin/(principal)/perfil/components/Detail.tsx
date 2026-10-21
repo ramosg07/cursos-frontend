@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthProvider";
 import {
   Cake,
-  Camera,
   Contact,
   Mail,
   Phone,

@@ -44,6 +44,7 @@ export default function NuevaVentaPage() {
         </TabsContent>
         <TabsContent value="consulta" className="space-y-8 mt-0 border-0 p-0">
           <Consulta  comprar={(data: any) => {
+            console.log(data);
             setActiveTab("registro");
           }}/>
         </TabsContent>

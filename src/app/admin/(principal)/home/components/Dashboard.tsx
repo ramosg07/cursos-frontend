@@ -12,6 +12,9 @@ import {
   ShoppingCart,
   QrCode,
   Banknote,
+  GraduationCap,
+  BookUser,
+  UserRoundCog,
 } from "lucide-react";
 import { toast } from "sonner";
 import { print } from "@/lib/print";
@@ -52,6 +55,130 @@ type VendedorPrefa = {
     segundoApellido?: string;
   };
 };
+
+interface DashboardConfig {
+  id: string;
+  modoManual: boolean;
+  totalRecaudado: number;
+  totalQR: number;
+  totalEfectivo: number;
+  totalEstudiantes: number;
+  totalDocentes: number;
+  totalExternos: number;
+  totalInscritos: number;
+}
+
+// ─── Panel de modo manual (valores fijos) ─────────────────────────────────────
+
+function DashboardManualPanel({ config }: { config: DashboardConfig }) {
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-0.5">
+        <p className="font-semibold text-lg">Resumen General</p>
+        <p className="text-muted-foreground text-sm">
+          Datos configurados manualmente desde el panel de administración.
+        </p>
+      </div>
+
+      {/* KPIs */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {/* Total Recaudado */}
+        <Card className="relative overflow-hidden border-none glass-card group p-4 pb-6">
+          <div className="absolute top-20 right-15 w-80 h-80 bg-primary/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-primary/20 transition-colors" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
+            <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+              Total Recaudado
+            </CardTitle>
+            <div className="p-2 bg-primary/10 rounded-lg text-primary">
+              <DollarSign className="h-5 w-5" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-black tracking-tight text-primary">
+              {Number(config.totalRecaudado).toFixed(2)} Bs.
+            </div>
+            <p className="text-xs text-muted-foreground mt-1 font-medium italic">
+              Ingresos totales (QR + Efectivo)
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Total QR */}
+        <Card className="relative overflow-hidden border-none glass-card group p-4 pb-6">
+          <div className="absolute top-20 right-15 w-80 h-80 bg-blue-500/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-blue-500/20 transition-colors" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
+            <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+              Total Pago QR
+            </CardTitle>
+            <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
+              <QrCode className="h-5 w-5" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-black tracking-tight text-blue-600 dark:text-blue-400">
+              {Number(config.totalQR).toFixed(2)} Bs.
+            </div>
+            <p className="text-xs text-muted-foreground mt-1 font-medium italic">
+              Pagos realizados por QR
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Total Efectivo */}
+        <Card className="relative overflow-hidden border-none glass-card group p-4 pb-6">
+          <div className="absolute top-20 right-15 w-80 h-80 bg-emerald-500/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-emerald-500/20 transition-colors" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
+            <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+              Total Efectivo
+            </CardTitle>
+            <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500">
+              <Banknote className="h-5 w-5" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-black tracking-tight text-emerald-600 dark:text-emerald-400">
+              {Number(config.totalEfectivo).toFixed(2)} Bs.
+            </div>
+            <p className="text-xs text-muted-foreground mt-1 font-medium italic">
+              Pagos realizados en efectivo
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Inscritos */}
+        <Card className="relative overflow-hidden border-none glass-card group p-4 pb-6">
+          <div className="absolute top-20 right-15 w-80 h-80 bg-primary/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-primary/20 transition-colors" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
+            <CardTitle className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+              Inscripciones
+            </CardTitle>
+            <div className="p-2 bg-primary/10 rounded-lg text-primary">
+              <Users className="h-5 w-5" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-black tracking-tight text-accent-foreground">
+              {config.totalInscritos}
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5 mt-2 pt-2 border-t border-border/40 text-[11px] font-bold">
+              <span className="text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md flex items-center gap-1">
+                <GraduationCap className="h-3 w-3" /> {config.totalEstudiantes}{" "}
+                Estudiantes
+              </span>
+              <span className="text-purple-600 dark:text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-md flex items-center gap-1">
+                <BookUser className="h-3 w-3" /> {config.totalDocentes} Docentes
+              </span>
+              <span className="text-red-600 dark:text-red-400 bg-red-500/10 px-2 py-0.5 rounded-md flex items-center gap-1">
+                <UserRoundCog className="h-3 w-3" /> {config.totalExternos}{" "}
+                Externos
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
 
 // ─── Sub-componente de filtros + KPIs ─────────────────────────────────────────
 
@@ -112,7 +239,6 @@ function RecaudacionPanel({
 
   // Cargar al montar
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -311,6 +437,11 @@ export default function Dashboard() {
     Array<{ id: string; label: string }>
   >([]);
 
+  // Estado para la configuración del dashboard (modo manual)
+  const [dashboardConfig, setDashboardConfig] =
+    useState<DashboardConfig | null>(null);
+  const [configLoading, setConfigLoading] = useState(true);
+
   const user = useAuth().user;
   const rolActivo = user?.roles.find((rol) => user.idRol === rol.idRol);
   const esCoordinadorGeneral = rolActivo?.rol === "COORDINADOR GENERAL";
@@ -323,8 +454,33 @@ export default function Dashboard() {
   }) =>
     [p.nombres, p.primerApellido, p.segundoApellido].filter(Boolean).join(" ");
 
+  // ─── Cargar configuración del dashboard ─────────────────────────────────────
+  useEffect(() => {
+    sessionRequest<{ finalizado: boolean; datos: DashboardConfig }>({
+      url: "/dashboard/config",
+      method: "get",
+    })
+      .then((res) => {
+        if (res) {
+          setDashboardConfig(res.data.datos);
+        }
+      })
+      .catch((err) => {
+        print("Error fetching dashboard config", err);
+        // Si falla, se asume modo normal (no manual)
+        setDashboardConfig(null);
+      })
+      .finally(() => {
+        setConfigLoading(false);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     if (!esCoordinadorGeneral && !esAdministrador) return;
+
+    // Si está en modo manual, no necesitamos cargar coordinadores ni vendedores
+    if (dashboardConfig?.modoManual) return;
 
     // Cargar coordinadores para la pestaña de inscripciones
     sessionRequest<{
@@ -364,10 +520,21 @@ export default function Dashboard() {
       .catch((err) => print("Error fetching vendedores prefas", err));
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dashboardConfig]);
 
   if (!esCoordinadorGeneral && !esAdministrador) {
     return <></>;
+  }
+
+  if (configLoading) {
+    return (
+      <div className="flex items-center justify-center py-20 animate-fade-in">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-3 text-muted-foreground">
+          Cargando dashboard...
+        </span>
+      </div>
+    );
   }
 
   return (
@@ -381,41 +548,47 @@ export default function Dashboard() {
         </p>
       </div>
 
-      <Tabs defaultValue="inscripciones" className="w-full">
-        <TabsList className="mb-6 rounded-xl h-11">
-          <TabsTrigger value="inscripciones" className="rounded-lg px-6">
-            Inscripciones
-          </TabsTrigger>
-          <TabsTrigger value="prefas" className="rounded-lg px-6">
-            Ventas Prefas
-          </TabsTrigger>
-        </TabsList>
+      {/* ─── Modo Manual: mostrar datos fijos sin filtros ─────────────── */}
+      {dashboardConfig?.modoManual ? (
+        <DashboardManualPanel config={dashboardConfig} />
+      ) : (
+        /* ─── Modo Normal: dashboard con tabs y filtros ─────────────── */
+        <Tabs defaultValue="inscripciones" className="w-full">
+          <TabsList className="mb-6 rounded-xl h-11">
+            <TabsTrigger value="inscripciones" className="rounded-lg px-6">
+              Inscripciones
+            </TabsTrigger>
+            <TabsTrigger value="prefas" className="rounded-lg px-6">
+              Ventas Prefas
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="inscripciones">
-          <RecaudacionPanel
-            titulo="Recaudación por Inscripciones"
-            subtitulo="Ingresos generados por inscripciones a cursos, filtrados por coordinador."
-            labelUsuario="Coordinador de Curso"
-            usuarios={coordinadores}
-            endpoint="/dashboard/recaudacion"
-            kpiLabel="Inscripciones"
-            kpiIcon={<Users className="h-5 w-5" />}
-          />
-        </TabsContent>
+          <TabsContent value="inscripciones">
+            <RecaudacionPanel
+              titulo="Recaudación por Inscripciones"
+              subtitulo="Ingresos generados por inscripciones a cursos, filtrados por coordinador."
+              labelUsuario="Coordinador de Curso"
+              usuarios={coordinadores}
+              endpoint="/dashboard/recaudacion"
+              kpiLabel="Inscripciones"
+              kpiIcon={<Users className="h-5 w-5" />}
+            />
+          </TabsContent>
 
-        <TabsContent value="prefas">
-          <RecaudacionPanel
-            titulo="Recaudación por Ventas Prefas"
-            subtitulo="Ingresos generados por ventas en el módulo prefacultativo, filtrados por vendedor."
-            labelUsuario="Vendedor"
-            usuarios={vendedoresPrefas}
-            endpoint="/dashboard/recaudacion-prefas"
-            kpiLabel="Ventas realizadas"
-            kpiIcon={<ShoppingCart className="h-5 w-5" />}
-            prefas={true}
-          />
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="prefas">
+            <RecaudacionPanel
+              titulo="Recaudación por Ventas Prefas"
+              subtitulo="Ingresos generados por ventas en el módulo prefacultativo, filtrados por vendedor."
+              labelUsuario="Vendedor"
+              usuarios={vendedoresPrefas}
+              endpoint="/dashboard/recaudacion-prefas"
+              kpiLabel="Ventas realizadas"
+              kpiIcon={<ShoppingCart className="h-5 w-5" />}
+              prefas={true}
+            />
+          </TabsContent>
+        </Tabs>
+      )}
     </div>
   );
 }
