@@ -187,7 +187,6 @@ export default function NuevaInscripcionPage() {
   );
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (estudiante) fetchCursos("", 10);
   }, [estudiante, fetchCursos]);
 
@@ -293,7 +292,6 @@ export default function NuevaInscripcionPage() {
   }, [estudiante, carrito, sessionRequest]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     validarCarrito();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [estudiante, carrito.length]);

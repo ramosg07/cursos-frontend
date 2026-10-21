@@ -23,6 +23,7 @@ export function ReportesDatatable() {
     update: false,
     delete: false,
   });
+  console.log(permissions);
 
   useEffect(() => {
     const fetchPermissions = async () => {
@@ -92,7 +93,10 @@ export function ReportesDatatable() {
     {
       accessorKey: "estudiante.usuario.persona.nombres",
       header: ({ column }) => (
-        <SortableHeader column={column} title="Estudiante / Docente / Externo" />
+        <SortableHeader
+          column={column}
+          title="Estudiante / Docente / Externo"
+        />
       ),
       cell: ({ row }) => {
         const docente = row.original.docente;
@@ -205,7 +209,8 @@ export function ReportesDatatable() {
         { description: "Todos", code: "" },
         ...(coordinadoresData?.map((c) => ({
           code: c.id,
-          description: `${c.persona?.nombres} ${c.persona?.primerApellido} ${c.persona?.segundoApellido ?? ""}`.trim(),
+          description:
+            `${c.persona?.nombres} ${c.persona?.primerApellido} ${c.persona?.segundoApellido ?? ""}`.trim(),
         })) ?? []),
       ],
       type: "list",

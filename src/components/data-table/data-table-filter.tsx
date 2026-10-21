@@ -68,6 +68,7 @@ export const DataTableFilter = ({
 
   useEffect(() => {
     updateFilters(watchedValues);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchedValues]);
 
   function FilterElement(filter: FilterType) {
@@ -121,6 +122,7 @@ export const DataTableFilter = ({
             );
           });
         });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [searchQuery]);
 
       return filteredPriorities;

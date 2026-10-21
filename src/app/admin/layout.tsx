@@ -5,7 +5,6 @@ import HeaderAdmin from "@/components/HeaderAdmin";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthProvider";
 import { useLoading } from "@/contexts/LoadingProvider";
-import { cn } from "@/lib/utils";
 import { ReactNode, useEffect } from "react";
 import { print } from "@/lib/print";
 

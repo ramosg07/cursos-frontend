@@ -13,6 +13,7 @@ export const MessageInterpreter = (message: any): string => {
       "Solicitud errónea 🚨"
     );
   } catch (e) {
+    console.error(e);
     return isHTML(message) ? "Solicitud errónea 🚨" : `${message}`;
   }
 };
